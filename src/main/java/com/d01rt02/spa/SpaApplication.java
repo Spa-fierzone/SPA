@@ -1,13 +1,13 @@
-package com.d10rt01.hocho;
+package com.d01rt02.spa;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class HochoApplication {
+public class SpaApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(HochoApplication.class, args);
+        SpringApplication.run(SpaApplication.class, args);
     }
 
 }
