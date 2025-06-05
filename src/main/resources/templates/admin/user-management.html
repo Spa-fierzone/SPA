@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <style>
         body {
-            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
             min-height: 100vh;
             font-family: 'Segoe UI', sans-serif;
         }
@@ -31,7 +31,7 @@
             border-radius: 15px;
         }
 
-        .btn-primary, .btn-warning, .btn-info {
+        .btn-primary, .btn-warning, .btn-info, .btn-secondary {
             border-radius: 8px;
         }
 
@@ -52,7 +52,8 @@
         <!-- Bộ lọc -->
         <form method="get" class="row g-2 mb-4">
             <div class="col-md-3">
-                <input type="text" class="form-control" name="keyword" placeholder="Tìm theo tên..." th:value="${keyword}">
+                <input type="text" class="form-control" name="keyword" placeholder="Tìm theo tên..."
+                       th:value="${keyword}">
             </div>
             <div class="col-md-3">
                 <select class="form-select" name="status">
@@ -64,7 +65,8 @@
             <div class="col-md-3">
                 <select class="form-select" name="role">
                     <option value="">-- Vai trò --</option>
-                    <option th:each="r : ${roles}" th:value="${r.roleName}" th:text="${r.roleName}" th:selected="${role == r.roleName}"></option>
+                    <option th:each="r : ${roles}" th:value="${r.roleName}" th:text="${r.roleName}"
+                            th:selected="${role == r.roleName}"></option>
                 </select>
             </div>
             <div class="col-md-3">
@@ -94,6 +96,8 @@
                     <td>
                         <button class="btn btn-sm btn-info mb-1" data-bs-toggle="modal"
                                 th:data-bs-target="'#detailModal-' + ${u.userId}">Chi tiết</button>
+                        <button class="btn btn-sm btn-secondary mb-1" data-bs-toggle="modal"
+                                th:data-bs-target="'#roleModal-' + ${u.userId}">Phân quyền</button>
                         <form th:action="@{'/admin/users/' + ${u.userId} + '/status'}" method="post" class="d-inline">
                             <input type="hidden" name="status" th:value="${u.status == 'active' ? 'inactive' : 'active'}">
                             <button type="submit" class="btn btn-sm btn-warning"
@@ -123,8 +127,10 @@
     </div>
 </div>
 
-<!-- Modals -->
+<!-- MODALS -->
 <div th:each="u : ${users}">
+
+    <!-- Modal Chi tiết -->
     <div class="modal fade" th:id="'detailModal-' + ${u.userId}" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content p-3">
@@ -145,6 +151,36 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Phân quyền -->
+    <div class="modal fade" th:id="'roleModal-' + ${u.userId}" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-3">
+                <div class="modal-header">
+                    <h5 class="modal-title text-primary">Phân quyền - [[${u.username}]]</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{'/admin/users/' + ${u.userId} + '/roles'}" method="post">
+                    <div class="modal-body text-dark">
+                        <div class="form-check" th:each="r : ${roles}">
+                            <input class="form-check-input" type="radio" name="roleIds"
+                                   th:id="'role-' + ${u.userId} + '-' + ${r.roleId}"
+                                   th:value="${r.roleId}"
+                                   th:checked="${u.roles.contains(r)}"/>
+                            <label class="form-check-label" th:for="'role-' + ${u.userId} + '-' + ${r.roleId}">
+                                <span th:text="${r.roleName}"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 </body>

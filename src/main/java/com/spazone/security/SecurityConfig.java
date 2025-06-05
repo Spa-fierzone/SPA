@@ -73,6 +73,8 @@ public class SecurityConfig {
                                 "/auth/password-reset/**",
                                 "/auth/**",
                                 "/error",
+                                "/dashboard",
+                                "/services/**",
                                 "/css/**", "/js/**", "/images/**", "/webjars/**"
                         ).permitAll()
 
@@ -80,7 +82,7 @@ public class SecurityConfig {
                         .requestMatchers("/manager/**").hasRole("BRANCH_MANAGER")
                         .requestMatchers("/receptionist/**").hasRole("RECEPTIONIST")
                         .requestMatchers("/technician/**").hasRole("TECHNICIAN")
-                        .requestMatchers("/customer/**").hasAnyRole("CUSTOMER", "VIP")
+                        .requestMatchers("/customer/**", "/appointments/**", "/invoices/**").hasAnyRole("CUSTOMER", "VIP")
 
                         .requestMatchers("/auth/change-password", "/profile").authenticated()
                         .anyRequest().authenticated()

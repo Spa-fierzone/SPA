@@ -10,6 +10,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Set;
+
 @Controller
 @RequestMapping("/admin/users")
 public class UserController {
@@ -48,6 +50,24 @@ public class UserController {
                                RedirectAttributes redirectAttributes) {
         userService.changeUserStatus(id, status);
         redirectAttributes.addFlashAttribute("message", "Đã cập nhật trạng thái người dùng.");
+        return "redirect:/admin/users";
+    }
+
+    @GetMapping("/{id}/roles")
+    public String editUserRoles(@PathVariable Integer id, Model model) {
+        User user = userService.getUserById(id);
+        model.addAttribute("user", user);
+        model.addAttribute("allRoles", userService.getAllRoles());
+        return "admin/user-roles";
+    }
+
+    // 4. Cập nhật role cho người dùng
+    @PostMapping("/{id}/roles")
+    public String updateUserRoles(@PathVariable Integer id,
+                                  @RequestParam(value = "roleIds", required = false) Set<Integer> roleIds,
+                                  RedirectAttributes redirectAttributes) {
+        userService.updateUserRoles(id, roleIds != null ? roleIds : Set.of());
+        redirectAttributes.addFlashAttribute("message", "Cập nhật quyền người dùng thành công.");
         return "redirect:/admin/users";
     }
 }

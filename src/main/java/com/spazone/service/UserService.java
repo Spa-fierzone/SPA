@@ -6,9 +6,13 @@ import com.spazone.dto.ChangePasswordDto;
 import com.spazone.dto.RegisterDto;
 import com.spazone.dto.UpdateProfileDto;
 import com.spazone.dto.UserProfileDto;
+import com.spazone.entity.Role;
 import com.spazone.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Set;
 
 public interface UserService {
 
@@ -37,4 +41,10 @@ public interface UserService {
     void changeUserStatus(int userId, String status);
 
     User getUserById(int userId);
+
+    void updateUserRoles(Integer userId, Set<Integer> roleIds);
+
+    List<Role> getAllRoles();
+
+
 }

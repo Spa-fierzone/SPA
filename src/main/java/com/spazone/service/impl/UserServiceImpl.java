@@ -1,17 +1,15 @@
 package com.spazone.service.impl;
 
-import com.spazone.dto.ChangePasswordDto;
-import com.spazone.dto.RegisterDto;
-import com.spazone.dto.UpdateProfileDto;
-import com.spazone.dto.UserProfileDto;
+import com.spazone.dto.*;
 import com.spazone.entity.Role;
 import com.spazone.entity.User;
 import com.spazone.enums.Gender;
-import com.spazone.exception.InvalidTokenException;
 import com.spazone.exception.ResourceNotFoundException;
+import com.spazone.exception.InvalidTokenException;
 import com.spazone.exception.UserAlreadyExistsException;
 import com.spazone.repository.RoleRepository;
 import com.spazone.repository.UserRepository;
+import com.spazone.service.CloudinaryService;
 import com.spazone.service.EmailService;
 import com.spazone.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +28,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -48,6 +48,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     @Value("${app.upload.dir:${user.home}/spa-zone/uploads}")
     private String uploadDir;
@@ -180,9 +183,10 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public void updateUserProfile(String username, UpdateProfileDto updateProfileDto) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    public void updateUserProfile(String usernameOrEmail, UpdateProfileDto updateProfileDto) {
+        User user = userRepository.findByUsername(usernameOrEmail)
+                .orElseGet(() -> userRepository.findByEmail(usernameOrEmail)
+                        .orElseThrow(() -> new ResourceNotFoundException("User not found")));
 
         user.setFullName(updateProfileDto.getFullName());
         user.setPhone(updateProfileDto.getPhone());
@@ -194,18 +198,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateProfilePicture(String username, MultipartFile file) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    public void updateProfilePicture(String usernameOrEmail, MultipartFile file) {
+        User user = userRepository.findByUsername(usernameOrEmail)
+                .orElseGet(() -> userRepository.findByEmail(usernameOrEmail)
+                        .orElseThrow(() -> new ResourceNotFoundException("User not found")));
 
         try {
-            String fileName = saveProfilePicture(file, username);
-            user.setProfilePicture(fileName);
+            String imageUrl = cloudinaryService.uploadImage(file);
+            user.setProfilePicture(imageUrl);
             userRepository.save(user);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to upload profile picture", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload profile picture to Cloudinary", e);
         }
     }
+
 
     @Override
     public User findByUsername(String username) {
@@ -233,6 +239,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserById(int userId) {
         return userRepository.findById(userId).orElse(null);
+    }
+
+    @Override
+    public void updateUserRoles(Integer userId, Set<Integer> roleIds) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+
+        Set<Role> newRoles = new HashSet<>(roleRepository.findAllById(roleIds));
+        user.setRoles(newRoles);
+        userRepository.save(user);
+    }
+
+    @Override
+    public List<Role> getAllRoles() {
+        return roleRepository.findByRoleNameNot("ADMIN");
     }
 
     private String saveProfilePicture(MultipartFile file, String username) throws IOException {
