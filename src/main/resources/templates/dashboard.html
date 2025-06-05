@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            border-bottom: 2px solid #ffb3c6;
+        }
+
+        .container .card {
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(255, 107, 157, 0.2);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .container .card:hover {
+            transform: scale(1.01);
+        }
+
+        .card h5 {
+            color: #ff6b9d;
+            font-weight: 600;
+        }
+
+        .btn-outline-primary {
+            border-color: #ff8fab;
+            color: #ff6b9d;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #ff8fab;
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            border: none;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #ff8fab, #ffb3c6);
+        }
+
+        footer {
+            margin-top: auto;
+            background-color: #fff;
+        }
+
+        h2 {
+            font-weight: bold;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-white shadow-sm">
+    <div class="container">
+        <a class="navbar-brand text-danger fw-bold" href="#">SpaZone</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item me-2">
+                    <a th:href="@{/profile}" class="btn btn-outline-primary">Xem hồ sơ</a>
+                </li>
+
+                <!-- Hiển thị menu quản lý người dùng nếu là admin -->
+                <li class="nav-item me-2" sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/admin/users}" class="btn btn-outline-primary">Quản lý người dùng</a>
+                </li>
+
+                <form th:action="@{/logout}" method="post" style="display:inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn btn-outline-primary">Đăng xuất</button>
+                </form>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main content -->
+<div class="container py-5">
+    <h2 class="mb-4 text-center">Xin chào, Nguyễn Văn A 👋</h2>
+
+    <div class="row g-4">
+        <!-- Gói dịch vụ -->
+        <div class="col-md-6">
+            <div class="card p-4">
+                <h5><i class="fa-solid fa-box-open me-2"></i>Gói dịch vụ hiện tại</h5>
+                <p><strong>Tên gói:</strong> Gói Chăm sóc da cơ bản</p>
+                <p><strong>Ngày bắt đầu:</strong> 01/06/2025</p>
+                <p><strong>Ngày kết thúc:</strong> 30/06/2025</p>
+                <a href="#" class="btn btn-sm btn-outline-primary">Xem thêm</a>
+            </div>
+        </div>
+
+        <!-- Lịch sử dịch vụ -->
+        <div class="col-md-6">
+            <div class="card p-4">
+                <h5><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử dịch vụ</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between">Massage Thư Giãn <span class="badge bg-secondary">28/05/2025</span></li>
+                    <li class="list-group-item d-flex justify-content-between">Chăm sóc da mặt <span class="badge bg-secondary">25/05/2025</span></li>
+                </ul>
+                <a href="#" class="btn btn-sm btn-outline-primary mt-3">Xem tất cả</a>
+            </div>
+        </div>
+
+        <!-- Đặt lịch -->
+        <div class="col-md-6">
+            <div class="card p-4">
+                <h5><i class="fa-solid fa-calendar-check me-2"></i>Đặt lịch hẹn</h5>
+                <p>Chọn dịch vụ và thời gian phù hợp để đặt lịch hẹn tại SpaZone.</p>
+                <a href="#" class="btn btn-sm btn-success">Đặt lịch ngay</a>
+            </div>
+        </div>
+
+        <!-- Lịch hẹn sắp tới -->
+        <div class="col-md-6">
+            <div class="card p-4">
+                <h5><i class="fa-solid fa-calendar-days me-2"></i>Lịch hẹn sắp tới</h5>
+                <p><strong>Dịch vụ:</strong> Massage body</p>
+                <p><strong>Thời gian:</strong> 03/06/2025 - 10:00</p>
+                <a href="#" class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center py-3">
+    <div class="container">
+        <span class="text-muted">© 2025 SpaZone. All rights reserved.</span>
+    </div>
+</footer>
+
+</body>
+</html>

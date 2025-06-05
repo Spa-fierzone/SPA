@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý người dùng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+        }
+
+        .btn-primary, .btn-warning, .btn-info {
+            border-radius: 8px;
+        }
+
+        .modal-body p {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between mb-3">
+        <h2 class="text-dark">Quản lý người dùng</h2>
+        <a th:href="@{/dashboard}" class="btn btn-outline-dark">← Về Dashboard</a>
+    </div>
+
+    <div class="content-card">
+        <!-- Bộ lọc -->
+        <form method="get" class="row g-2 mb-4">
+            <div class="col-md-3">
+                <input type="text" class="form-control" name="keyword" placeholder="Tìm theo tên..." th:value="${keyword}">
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="status">
+                    <option value="">-- Trạng thái --</option>
+                    <option value="active" th:selected="${status == 'active'}">Active</option>
+                    <option value="inactive" th:selected="${status == 'inactive'}">Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="role">
+                    <option value="">-- Vai trò --</option>
+                    <option th:each="r : ${roles}" th:value="${r.roleName}" th:text="${r.roleName}" th:selected="${role == r.roleName}"></option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100" type="submit">Lọc</button>
+            </div>
+        </form>
+
+        <!-- Bảng -->
+        <div class="table-responsive">
+            <table class="table table-hover rounded bg-white text-dark">
+                <thead class="table-light text-center">
+                <tr>
+                    <th>ID</th><th>Username</th><th>Họ tên</th><th>Email</th><th>Trạng thái</th><th>Vai trò</th><th>Hành động</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="u : ${users}">
+                    <td th:text="${u.userId}"></td>
+                    <td th:text="${u.username}"></td>
+                    <td th:text="${u.fullName}"></td>
+                    <td th:text="${u.email}"></td>
+                    <td>
+                        <span class="badge" th:classappend="${u.status == 'active'} ? 'bg-success' : 'bg-secondary'"
+                              th:text="${u.status}"></span>
+                    </td>
+                    <td th:text="${u.roleNames}"></td>
+                    <td>
+                        <button class="btn btn-sm btn-info mb-1" data-bs-toggle="modal"
+                                th:data-bs-target="'#detailModal-' + ${u.userId}">Chi tiết</button>
+                        <form th:action="@{'/admin/users/' + ${u.userId} + '/status'}" method="post" class="d-inline">
+                            <input type="hidden" name="status" th:value="${u.status == 'active' ? 'inactive' : 'active'}">
+                            <button type="submit" class="btn btn-sm btn-warning"
+                                    th:text="${u.status == 'active' ? 'Vô hiệu hóa' : 'Kích hoạt'}"></button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <nav th:if="${totalPages > 1}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{|/admin/users?page=${currentPage - 1}|}">Trước</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link" th:href="@{|/admin/users?page=${i}|}" th:text="${i + 1}"></a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                    <a class="page-link" th:href="@{|/admin/users?page=${currentPage + 1}|}">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Modals -->
+<div th:each="u : ${users}">
+    <div class="modal fade" th:id="'detailModal-' + ${u.userId}" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-3">
+                <div class="modal-header">
+                    <h5 class="modal-title text-primary">Thông tin người dùng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-dark">
+                    <p><strong>Họ tên:</strong> <span th:text="${u.fullName}"></span></p>
+                    <p><strong>Email:</strong> <span th:text="${u.email}"></span></p>
+                    <p><strong>SĐT:</strong> <span th:text="${u.phone}"></span></p>
+                    <p><strong>Giới tính:</strong> <span th:text="${u.gender}"></span></p>
+                    <p><strong>Ngày sinh:</strong> <span th:text="${u.dateOfBirth}"></span></p>
+                    <p><strong>Địa chỉ:</strong> <span th:text="${u.address}"></span></p>
+                    <p><strong>Trạng thái:</strong> <span th:text="${u.status}"></span></p>
+                    <p><strong>Vai trò:</strong> <span th:text="${u.roleNames}"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
