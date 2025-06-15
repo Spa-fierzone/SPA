@@ -79,7 +79,7 @@ public class SecurityConfig {
                         ).permitAll()
 
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/manager/**").hasRole("BRANCH_MANAGER")
+                        .requestMatchers("/manager/**").hasRole("MANAGER")
                         .requestMatchers("/receptionist/**").hasRole("RECEPTIONIST")
                         .requestMatchers("/technician/**").hasRole("TECHNICIAN")
                         .requestMatchers("/customer/**", "/appointments/**", "/invoices/**").hasAnyRole("CUSTOMER", "VIP")

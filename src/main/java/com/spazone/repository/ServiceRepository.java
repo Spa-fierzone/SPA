@@ -12,6 +12,7 @@ public interface ServiceRepository extends JpaRepository<Service, Integer> {
 
     List<Service> findTop6ByStatusOrderByCreatedAtDesc(String status);
     List<Service> findByStatusOrderByCreatedAtDesc(String status);
+
 }
 
 

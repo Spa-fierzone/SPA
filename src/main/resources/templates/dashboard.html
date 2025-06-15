@@ -85,21 +85,34 @@
                     </a>
                 </li>
 
+                <!-- Menu cho ADMIN -->
                 <li class="nav-item dropdown me-2" sec:authorize="hasRole('ADMIN')">
                     <a class="btn btn-outline-primary dropdown-toggle" href="#" id="adminMenu" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-gear-fill me-1"></i> Quản lý
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="adminMenu">
-                        <li><a class="dropdown-item" th:href="@{/admin/users}"><i class="bi bi-people me-2"></i>Người
-                            dùng</a></li>
-                        <li><a class="dropdown-item" th:href="@{/admin/branches}"><i class="bi bi-building me-2"></i>Chi
-                            nhánh</a></li>
-                        <li><a class="dropdown-item" th:href="@{/admin/services}"><i class="bi bi-scissors me-2"></i>Dịch
-                            vụ</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/users}"><i class="bi bi-people me-2"></i>Người dùng</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/branches}"><i class="bi bi-building me-2"></i>Chi nhánh</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/services}"><i class="bi bi-scissors me-2"></i>Dịch vụ</a></li>
                     </ul>
                 </li>
 
+                <!-- Menu cho BRANCH_MANAGER -->
+                <li class="nav-item dropdown me-2" sec:authorize="hasRole('MANAGER')">
+                    <a class="btn btn-outline-primary dropdown-toggle" href="#" id="managerMenu" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-briefcase-fill me-1"></i> Quản lý chi nhánh
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="managerMenu">
+                        <li><a class="dropdown-item" th:href="@{/manager/appointments}"><i class="bi bi-calendar-check me-2"></i>Lịch hẹn</a></li>
+                        <li><a class="dropdown-item" th:href="@{/manager/staff-list}"><i class="bi bi-people me-2"></i>Nhân viên</a></li>
+                        <li><a class="dropdown-item" th:href="@{/manager/services}"><i class="bi bi-scissors me-2"></i>Dịch vụ chi nhánh</a></li>
+                        <li><a class="dropdown-item" th:href="@{/manager/reports}"><i class="bi bi-bar-chart me-2"></i>Báo cáo</a></li>
+                    </ul>
+                </li>
+
+                <!-- Menu cho CUSTOMER -->
                 <li class="nav-item me-2" sec:authorize="hasRole('CUSTOMER')">
                     <a th:href="@{/appointments/my}" class="btn btn-outline-primary">
                         <i class="bi bi-calendar-check me-1"></i> Lịch hẹn của tôi
@@ -138,8 +151,8 @@
 </nav>
 
 <!-- Main content -->
-<!-- Banner -->
-<div class="container mt-4 ">
+<!-- Banner - Chỉ hiển thị cho Customer/Anonymous users -->
+<div class="container mt-4" sec:authorize="!hasRole('ADMIN') and !hasRole('MANAGER')">
     <div class="p-5 rounded-4 text-white" style="
         background: linear-gradient(135deg, #ff6b9d, #ffb3c6);
         background-size: cover;
@@ -160,7 +173,8 @@
         </div>
     </div>
 </div>
-<div class="container  py-5" sec:authorize="hasRole('ADMIN')">
+<!-- Dashboard cho ADMIN -->
+<div class="container py-5" sec:authorize="hasRole('ADMIN')">
     <h2 class="text-center text-white mb-4">Bảng điều khiển quản trị</h2>
     <div class="row g-4">
         <div class="col-md-3">
@@ -192,32 +206,392 @@
             </div>
         </div>
     </div>
-</div>
-<div class="row mt-5" sec:authorize="hasRole('ADMIN')">
-    <div class="col-md-6">
-        <div class="card p-4 text-center">
-            <i class="bi bi-cash-stack fs-1 text-success mb-2"></i>
-            <h5>Tổng doanh thu tháng này</h5>
-            <p class="fs-4 fw-bold">85,000,000 đ</p>
+
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card p-4 text-center">
+                <i class="bi bi-cash-stack fs-1 text-success mb-2"></i>
+                <h5>Tổng doanh thu tháng này</h5>
+                <p class="fs-4 fw-bold">85,000,000 đ</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card p-4 text-center">
+                <i class="bi bi-graph-up-arrow fs-1 text-primary mb-2"></i>
+                <h5>Doanh thu tăng trưởng</h5>
+                <p class="fs-4 fw-bold">+12.5%</p>
+            </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card p-4 text-center">
-            <i class="bi bi-graph-up-arrow fs-1 text-primary mb-2"></i>
-            <h5>Doanh thu tăng trưởng</h5>
-            <p class="fs-4 fw-bold">+12.5%</p>
+
+    <div class="card mt-5 p-4">
+        <h5 class="text-center">Biểu đồ doanh thu 6 tháng gần đây</h5>
+        <canvas id="revenueChart" height="100"></canvas>
+    </div>
+</div>
+
+<!-- Dashboard cho BRANCH_MANAGER -->
+<div class="container py-5" sec:authorize="hasRole('MANAGER')">
+    <h2 class="text-center text-white mb-4">Bảng điều khiển quản lý chi nhánh</h2>
+
+    <!-- Lịch làm việc của Lễ tân -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-person-badge fs-2 text-info me-3"></i>
+                    <h5 class="mb-0">Lịch làm việc Lễ tân</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Trần Thị Lan</strong>
+                            <br><small class="text-muted">Ca sáng: 8:00 - 14:00</small>
+                        </div>
+                        <span class="badge bg-success rounded-pill">Đang làm việc</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Nguyễn Thị Hoa</strong>
+                            <br><small class="text-muted">Ca chiều: 14:00 - 20:00</small>
+                        </div>
+                        <span class="badge bg-warning rounded-pill">Sắp vào ca</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Lê Thị Mai</strong>
+                            <br><small class="text-muted">Ca tối: 20:00 - 22:00</small>
+                        </div>
+                        <span class="badge bg-secondary rounded-pill">Chưa vào ca</span>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <a th:href="@{/manager/receptionist-schedule}" class="btn btn-outline-info btn-sm">Quản lý lịch lễ tân</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lịch làm việc của Kỹ thuật viên -->
+        <div class="col-md-6">
+            <div class="card p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-tools fs-2 text-primary me-3"></i>
+                    <h5 class="mb-0">Lịch làm việc Kỹ thuật viên</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Nguyễn Văn Đức</strong>
+                            <br><small class="text-muted">Phòng 1 - Massage</small>
+                        </div>
+                        <span class="badge bg-danger rounded-pill">Đang phục vụ</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Trần Thị Linh</strong>
+                            <br><small class="text-muted">Phòng 2 - Chăm sóc da</small>
+                        </div>
+                        <span class="badge bg-success rounded-pill">Sẵn sàng</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Lê Văn Thành</strong>
+                            <br><small class="text-muted">Phòng 3 - Làm móng</small>
+                        </div>
+                        <span class="badge bg-warning rounded-pill">Nghỉ giải lao</span>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <a th:href="@{/manager/technician-schedule}" class="btn btn-outline-primary btn-sm">Quản lý lịch KTV</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phản hồi khách hàng -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-chat-heart fs-2 text-warning me-3"></i>
+                    <h5 class="mb-0">Phản hồi khách hàng</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>Nguyễn Thị An</strong>
+                                <div class="text-warning mb-1">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                </div>
+                                <small class="text-muted">"Dịch vụ massage rất tuyệt vời!"</small>
+                            </div>
+                            <small class="text-muted">2 giờ trước</small>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>Trần Văn Bình</strong>
+                                <div class="text-warning mb-1">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star"></i>
+                                </div>
+                                <small class="text-muted">"Nhân viên thân thiện, dịch vụ tốt."</small>
+                            </div>
+                            <small class="text-muted">1 ngày trước</small>
+                        </div>
+                    </div>
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>Lê Thị Cúc</strong>
+                                <div class="text-warning mb-1">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star"></i>
+                                    <i class="bi bi-star"></i>
+                                </div>
+                                <small class="text-muted">"Cần cải thiện thời gian chờ đợi."</small>
+                            </div>
+                            <small class="text-muted">2 ngày trước</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <a th:href="@{/manager/feedback}" class="btn btn-outline-warning btn-sm">Xem tất cả phản hồi</a>
+                </div>U
+            </div>
+        </div>
+
+        <!-- Danh sách nhân viên -->
+        <div class="col-md-6">
+            <div class="card p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-people-fill fs-2 text-success me-3"></i>
+                    <h5 class="mb-0">Danh sách nhân viên</h5>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-4">
+                        <div class="text-center p-2 bg-light rounded">
+                            <div class="fs-4 fw-bold text-info">3</div>
+                            <small>Lễ tân</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-center p-2 bg-light rounded">
+                            <div class="fs-4 fw-bold text-primary">5</div>
+                            <small>Kỹ thuật viên</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-center p-2 bg-light rounded">
+                            <div class="fs-4 fw-bold text-success">8</div>
+                            <small>Tổng cộng</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Trần Thị Lan</strong>
+                            <br><small class="text-muted">Lễ tân - ID: RT001</small>
+                        </div>
+                        <span class="badge bg-success rounded-pill">Hoạt động</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Nguyễn Văn Đức</strong>
+                            <br><small class="text-muted">Kỹ thuật viên - ID: KTV001</small>
+                        </div>
+                        <span class="badge bg-success rounded-pill">Hoạt động</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Lê Thị Mai</strong>
+                            <br><small class="text-muted">Lễ tân - ID: RT002</small>
+                        </div>
+                        <span class="badge bg-warning rounded-pill">Nghỉ phép</span>
+                    </div>
+                 </div>
+                <div class="text-center mt-3">
+                    <a th:href="@{/manager/staff-list}" class="btn btn-outline-success btn-sm">Quản lý nhân viên</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quản lý dịch vụ -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-12">
+            <div class="card p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-scissors fs-2 text-danger me-3"></i>
+                        <h5 class="mb-0">Quản lý dịch vụ chi nhánh</h5>
+                    </div>
+                    <a th:href="@{/manager/services/add}" class="btn btn-success btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i>Thêm dịch vụ
+                    </a>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <div class="fs-4 fw-bold text-danger">15</div>
+                            <small>Tổng dịch vụ</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <div class="fs-4 fw-bold text-success">12</div>
+                            <small>Đang hoạt động</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <div class="fs-4 fw-bold text-warning">3</div>
+                            <small>Tạm ngưng</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <div class="fs-4 fw-bold text-info">8</div>
+                            <small>Được đặt nhiều</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Tên dịch vụ</th>
+                            <th>Giá</th>
+                            <th>Thời gian</th>
+                            <th>Trạng thái</th>
+                            <th>Lượt đặt</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="https://via.placeholder.com/40x40/ff6b9d/fff?text=M"
+                                         class="rounded me-2" alt="Service">
+                                    <strong>Massage toàn thân</strong>
+                                </div>
+                            </td>
+                            <td><span class="fw-bold">350,000 đ</span></td>
+                            <td>90 phút</td>
+                            <td><span class="badge bg-success">Hoạt động</span></td>
+                            <td><span class="badge bg-primary">28</span></td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="#" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="https://via.placeholder.com/40x40/ff8fab/fff?text=F"
+                                         class="rounded me-2" alt="Service">
+                                    <strong>Chăm sóc da mặt</strong>
+                                </div>
+                            </td>
+                            <td><span class="fw-bold">450,000 đ</span></td>
+                            <td>75 phút</td>
+                            <td><span class="badge bg-success">Hoạt động</span></td>
+                            <td><span class="badge bg-primary">35</span></td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="#" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="https://via.placeholder.com/40x40/ffb3c6/fff?text=N"
+                                         class="rounded me-2" alt="Service">
+                                    <strong>Làm móng tay</strong>
+                                </div>
+                            </td>
+                            <td><span class="fw-bold">200,000 đ</span></td>
+                            <td>45 phút</td>
+                            <td><span class="badge bg-warning">Tạm ngưng</span></td>
+                            <td><span class="badge bg-secondary">5</span></td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="#" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="text-center mt-3">
+                    <a th:href="@{/manager/services}" class="btn btn-outline-danger">Xem tất cả dịch vụ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thống kê tổng quan -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card text-center p-4">
+                <i class="bi bi-calendar-check-fill fs-1 text-primary mb-2"></i>
+                <h5>Lịch hẹn hôm nay</h5>
+                <p class="fs-4 fw-bold">12</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center p-4">
+                <i class="bi bi-people-fill fs-1 text-info mb-2"></i>
+                <h5>Nhân viên đang làm</h5>
+                <p class="fs-4 fw-bold">6/8</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center p-4">
+                <i class="bi bi-star-fill fs-1 text-warning mb-2"></i>
+                <h5>Đánh giá TB</h5>
+                <p class="fs-4 fw-bold">4.3/5</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center p-4">
+                <i class="bi bi-cash-stack fs-1 text-success mb-2"></i>
+                <h5>Doanh thu hôm nay</h5>
+                <p class="fs-4 fw-bold">2,500,000 đ</p>
+            </div>
         </div>
     </div>
 </div>
-<div class="card mt-5 p-4" sec:authorize="hasRole('ADMIN')" >
-    <h5 class="text-center">Biểu đồ doanh thu 6 tháng gần đây</h5>
-    <canvas id="revenueChart" height="100"></canvas>
-</div>
 
-
-
-
-<div class="container py-5" sec:authorize="!hasRole('ADMIN')">
+<!-- Top dịch vụ cho các role khác -->
+<div class="container py-5" sec:authorize="!hasRole('ADMIN') and !hasRole('MANAGER')">
     <h2 class="mb-4 text-center">Top dịch vụ nổi bật</h2>
     <div class="row g-4">
         <div class="col-md-4" th:each="service : ${topServices}">
@@ -246,7 +620,6 @@
                                 data-bs-toggle="modal"
                                 data-bs-target="#loginModal">Đặt lịch
                         </button>
-
                     </div>
                 </div>
             </div>
@@ -290,28 +663,56 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    const ctx = document.getElementById('revenueChart');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
-            datasets: [{
-                label: 'Doanh thu (triệu)',
-                data: [20, 35, 28, 40, 55, 60],
-                borderColor: '#ff6b9d',
-                backgroundColor: 'rgba(255,107,157,0.1)',
-                tension: 0.3,
-                fill: true,
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
+    // Biểu đồ cho Admin
+    const adminChart = document.getElementById('revenueChart');
+    if (adminChart) {
+        new Chart(adminChart, {
+            type: 'line',
+            data: {
+                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
+                datasets: [{
+                    label: 'Doanh thu (triệu)',
+                    data: [20, 35, 28, 40, 55, 60],
+                    borderColor: '#ff6b9d',
+                    backgroundColor: 'rgba(255,107,157,0.1)',
+                    tension: 0.3,
+                    fill: true,
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
                 }
             }
-        }
-    });
+        });
+    }
+
+    // Biểu đồ cho Branch Manager
+    const branchChart = document.getElementById('branchRevenueChart');
+    if (branchChart) {
+        new Chart(branchChart, {
+            type: 'bar',
+            data: {
+                labels: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'],
+                datasets: [{
+                    label: 'Doanh thu (nghìn)',
+                    data: [1200, 1800, 1500, 2200, 2800, 3200, 1800],
+                    backgroundColor: 'rgba(255,107,157,0.8)',
+                    borderColor: '#ff6b9d',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
 </script>
 
 </body>
