@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="6.0" 
+         xmlns="https://jakarta.ee/xml/ns/jakartaee" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
+
+    <!-- Customer Servlets -->
+    <servlet>
+        <servlet-name>AddCustomerServlet</servlet-name>
+        <servlet-class>controller.AddCustomerServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AddCustomerServlet</servlet-name>
+        <url-pattern>/AddCustomerServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>GetCustomerListServlet</servlet-name>
+        <servlet-class>controller.GetCustomerListServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GetCustomerListServlet</servlet-name>
+        <url-pattern>/getCustomerListServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>EditCustomerServlet</servlet-name>
+        <servlet-class>controller.EditCustomerServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>EditCustomerServlet</servlet-name>
+        <url-pattern>/editCustomerServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DeleteCustomerServlet</servlet-name>
+        <servlet-class>controller.DeleteCustomerServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DeleteCustomerServlet</servlet-name>
+        <url-pattern>/deleteCustomerServlet</url-pattern>
+    </servlet-mapping>
+
+    <!-- Login, Logout, Register Servlets -->
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>controller.LoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/loginServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>controller.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/logoutServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>RegisterServlet</servlet-name>
+        <servlet-class>controller.RegisterServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RegisterServlet</servlet-name>
+        <url-pattern>/registerServlet</url-pattern>
+    </servlet-mapping>
+
+    <!-- Welcome File -->
+    <welcome-file-list>
+        <welcome-file>login.jsp</welcome-file>
+    </welcome-file-list>
+
+    <!-- Session timeout -->
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+
+</web-app>
