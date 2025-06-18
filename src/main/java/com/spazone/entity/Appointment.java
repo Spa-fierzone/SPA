@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 @Entity
 @Table(name = "appointments")
@@ -30,9 +31,15 @@ public class Appointment {
     @JoinColumn(name = "technician_id", nullable = false)
     private User technician;
 
-    private LocalDate appointmentDate;
-    private LocalTime startTime;
-    private LocalTime endTime;
+    private LocalDateTime appointmentDate;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
+    @Column(name = "checkin_time")
+    private LocalDateTime checkinTime;
+
+    @Column(name = "checkout_time")
+    private LocalDateTime checkoutTime;
 
     private String status;
     @Column(length = 4000)
@@ -57,6 +64,9 @@ public class Appointment {
 
     private String reminderMethod;
 
+    @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL)
+    private List<TreatmentRecord> treatmentRecords;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -70,7 +80,7 @@ public class Appointment {
     public Appointment() {
     }
 
-    public Appointment(Integer appointmentId, User customer, Branch branch, Service service, User technician, LocalDate appointmentDate, LocalTime startTime, LocalTime endTime, String status, String notes, String cancellationReason, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean reminderSent, LocalDateTime reminderSentAt, LocalDateTime checkInTime, LocalDateTime checkOutTime, User preferredTechnician, String specialRequests, String reminderMethod) {
+    public Appointment(Integer appointmentId, User customer, Branch branch, Service service, User technician, LocalDateTime appointmentDate, LocalDateTime startTime, LocalDateTime endTime, String status, String notes, String cancellationReason, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean reminderSent, LocalDateTime reminderSentAt, LocalDateTime checkInTime, LocalDateTime checkOutTime, User preferredTechnician, String specialRequests, String reminderMethod) {
         this.appointmentId = appointmentId;
         this.customer = customer;
         this.branch = branch;
@@ -93,6 +103,30 @@ public class Appointment {
         this.reminderMethod = reminderMethod;
     }
 
+    public LocalDateTime getCheckinTime() {
+        return checkinTime;
+    }
+
+    public LocalDateTime getCheckoutTime() {
+        return checkoutTime;
+    }
+
+    public List<TreatmentRecord> getTreatmentRecords() {
+        return treatmentRecords;
+    }
+
+    public void setCheckinTime(LocalDateTime checkinTime) {
+        this.checkinTime = checkinTime;
+    }
+
+    public void setCheckoutTime(LocalDateTime checkoutTime) {
+        this.checkoutTime = checkoutTime;
+    }
+
+    public void setTreatmentRecords(List<TreatmentRecord> treatmentRecords) {
+        this.treatmentRecords = treatmentRecords;
+    }
+
     public Integer getAppointmentId() {
         return appointmentId;
     }
@@ -113,15 +147,15 @@ public class Appointment {
         return technician;
     }
 
-    public LocalDate getAppointmentDate() {
+    public LocalDateTime getAppointmentDate() {
         return appointmentDate;
     }
 
-    public LocalTime getStartTime() {
+    public LocalDateTime getStartTime() {
         return startTime;
     }
 
-    public LocalTime getEndTime() {
+    public LocalDateTime getEndTime() {
         return endTime;
     }
 
@@ -193,15 +227,15 @@ public class Appointment {
         this.technician = technician;
     }
 
-    public void setAppointmentDate(LocalDate appointmentDate) {
+    public void setAppointmentDate(LocalDateTime appointmentDate) {
         this.appointmentDate = appointmentDate;
     }
 
-    public void setStartTime(LocalTime startTime) {
+    public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public void setEndTime(LocalTime endTime) {
+    public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
     }
 

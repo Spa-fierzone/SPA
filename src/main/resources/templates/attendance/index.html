@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chấm Công Hôm Nay</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar {
+            border-bottom: 2px solid #ffb3c6;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            border: none;
+        }
+        .btn-success:hover {
+            background: linear-gradient(135deg, #ff8fab, #ffb3c6);
+        }
+        footer {
+            margin-top: auto;
+            background-color: #fff;
+        }
+        h2, h4 {
+            font-weight: bold;
+            color: #fff;
+        }
+        .list-group-item {
+            background-color: #fff3f6;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+        <a class="navbar-brand text-danger fw-bold" th:href="@{/dashboard}">SpaZone</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarContent" aria-controls="navbarContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item me-2">
+                    <a href="/attendance/history" class="btn btn-outline-info">
+                        <i class="fas fa-history me-1"></i> Lịch sử công
+                    </a>
+                </li>
+                <li class="nav-item me-2">
+                    <a href="/" class="btn btn-outline-secondary">
+                        <i class="fas fa-home me-1"></i> Trang chủ
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container py-4">
+    <h2 class="mb-4">Xin chào, <span th:text="${user.fullName}"></span></h2>
+    <p class="text-white">Hôm nay là: <span th:text="${#temporals.format(currentTime, 'dd-MM-yyyy HH:mm')}"></span></p>
+
+    <div th:if="${todayAttendance == null || todayAttendance.checkOutTime == null}">
+        <form th:action="@{/attendance/checkin}" method="post" class="mb-3">
+            <div class="mb-2">
+                <label class="form-label">Chi nhánh:</label>
+                <select name="branchId" class="form-select">
+                    <option th:each="branch : ${branches}" th:value="${branch.branchId}" th:text="${branch.name}"></option>
+                </select>
+            </div>
+            <div class="mb-2">
+                <label class="form-label">Ghi chú:</label>
+                <input type="text" name="notes" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-sign-in-alt me-1"></i> Check In
+            </button>
+        </form>
+
+        <form th:action="@{/attendance/checkout}" method="post" class="mb-3" th:if="${todayAttendance != null and todayAttendance.checkInTime != null}">
+            <div class="mb-2">
+                <label class="form-label">Ghi chú Checkout:</label>
+                <input type="text" name="notes" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-sign-out-alt me-1"></i> Check Out
+            </button>
+        </form>
+
+        <form th:action="@{/attendance/break/start}" method="post" th:if="${todayAttendance != null and todayAttendance.breakStart == null}" class="mb-2">
+            <button type="submit" class="btn btn-warning">
+                <i class="fas fa-coffee me-1"></i> Bắt đầu nghỉ
+            </button>
+        </form>
+
+        <form th:action="@{/attendance/break/end}" method="post" th:if="${todayAttendance != null and todayAttendance.breakStart != null and todayAttendance.breakEnd == null}" class="mb-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-play-circle me-1"></i> Kết thúc nghỉ
+            </button>
+        </form>
+    </div>
+
+    <div th:if="${todayAttendance != null}" class="mt-4">
+        <h4>Thông tin chấm công hôm nay</h4>
+        <ul class="list-group">
+            <li class="list-group-item">Check-in: <span th:text="${todayAttendance.checkInTime}"></span></li>
+            <li class="list-group-item">Check-out: <span th:text="${todayAttendance.checkOutTime}"></span></li>
+            <li class="list-group-item">Nghỉ: <span th:text="${todayAttendance.breakStart}"></span> - <span th:text="${todayAttendance.breakEnd}"></span></li>
+            <li class="list-group-item">Trạng thái: <span th:text="${todayAttendance.status}"></span></li>
+        </ul>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success mt-3" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger mt-3" th:text="${error}"></div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center py-4 bg-white mt-5 border-top">
+    <span class="text-muted">© 2025 SpaZone. All rights reserved.</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
