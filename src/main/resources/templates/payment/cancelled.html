@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán đã hủy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #6c757d 0%, #adb5bd 50%, #ced4da 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cancelled-card {
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(108, 117, 125, 0.3);
+            max-width: 600px;
+            width: 100%;
+            background: white;
+        }
+        .cancelled-icon {
+            font-size: 4rem;
+            color: #6c757d;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .btn-home {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-home:hover {
+            background: linear-gradient(135deg, #20c997, #17a2b8);
+            color: white;
+            transform: translateY(-2px);
+        }
+        .btn-retry {
+            background: linear-gradient(135deg, #007bff, #6610f2);
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-retry:hover {
+            background: linear-gradient(135deg, #6610f2, #6f42c1);
+            color: white;
+            transform: translateY(-2px);
+        }
+        .cancel-info {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-left: 4px solid #6c757d;
+        }
+        .invoice-info {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card cancelled-card p-5 text-center">
+        <!-- Cancelled Icon -->
+        <i class="bi bi-x-circle cancelled-icon mb-4"></i>
+
+        <!-- Cancelled Title -->
+        <h2 class="text-secondary mb-3">Thanh toán đã bị hủy</h2>
+        <p class="lead mb-4">Bạn đã hủy giao dịch thanh toán.</p>
+
+        <!-- Message from Controller -->
+        <div th:if="${message}" class="alert alert-secondary text-center mb-4">
+            <i class="bi bi-info-circle me-2"></i>
+            <span th:text="${message}">Giao dịch đã được hủy!</span>
+        </div>
+
+        <!-- Invoice Information -->
+        <div th:if="${invoice != null}" class="alert invoice-info text-start mb-4">
+            <h5><i class="bi bi-receipt me-2"></i>Thông tin hóa đơn chưa thanh toán</h5>
+            <p><strong>Mã hóa đơn:</strong> <span th:text="${invoice.invoiceNumber}"></span></p>
+            <p><strong>Số tiền:</strong> <span th:text="${#numbers.formatDecimal(invoice.finalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span></p>
+            <p><strong>Trạng thái:</strong> <span class="badge bg-warning">Chưa thanh toán</span></p>
+        </div>
+
+        <!-- Cancellation Info -->
+        <div class="alert cancel-info text-start mb-4">
+            <h5><i class="bi bi-info-circle me-2"></i>Thông tin hủy giao dịch</h5>
+            <p><strong>Thời gian hủy:</strong> <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm:ss')}"></span></p>
+            <p><strong>Lý do:</strong> Người dùng hủy giao dịch</p>
+            <hr>
+            <p class="mb-0">
+                <strong>Lưu ý:</strong>
+                <br>• Không có khoản phí nào được tính
+                <br>• Hóa đơn vẫn ở trạng thái chưa thanh toán
+                <br>• Bạn có thể thực hiện thanh toán lại bất cứ lúc nào
+            </p>
+        </div>
+
+        <!-- Alternative Payment Methods -->
+        <div class="alert alert-light text-start mb-4">
+            <h5><i class="bi bi-credit-card me-2"></i>Phương thức thanh toán khác</h5>
+            <p class="mb-2">Bạn có thể sử dụng các phương thức thanh toán sau:</p>
+            <ul class="list-unstyled mb-0">
+                <li><i class="bi bi-phone me-2 text-primary"></i>Thanh toán qua ví điện tử</li>
+                <li><i class="bi bi-bank me-2 text-success"></i>Chuyển khoản ngân hàng</li>
+                <li><i class="bi bi-cash me-2 text-warning"></i>Thanh toán trực tiếp tại spa</li>
+                <li><i class="bi bi-qr-code me-2 text-info"></i>Quét mã QR thanh toán</li>
+            </ul>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-4">
+            <a th:href="@{/dashboard}" class="btn btn-home btn-lg me-3">
+                <i class="bi bi-house me-2"></i>
+                Về trang chủ
+            </a>
+            <a th:if="${invoice != null}"
+               th:href="@{'/payment/payos/' + ${invoice.invoiceId}}"
+               class="btn btn-retry btn-lg me-3">
+                <i class="bi bi-arrow-repeat me-2"></i>
+                Thanh toán lại
+            </a>
+            <a th:if="${invoice != null}"
+               th:href="@{'/invoice/detail/' + ${invoice.invoiceId}}"
+               class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-receipt me-2"></i>
+                Xem hóa đơn
+            </a>
+        </div>
+
+        <!-- Support Info -->
+        <div class="mt-4 text-muted">
+            <small>
+                <i class="bi bi-headset me-1"></i>
+                Cần hỗ trợ? Liên hệ: 1900-xxxx-xxx hoặc support@spazone.com
+            </small>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Log cancellation for analytics
+    console.log('Payment Cancelled:', {
+        timestamp: new Date().toISOString(),
+        invoiceId: document.querySelector('[th\\:text*="invoice.invoiceId"]')?.textContent || 'unknown',
+        userAgent: navigator.userAgent
+    });
+
+    // Auto redirect to dashboard after 15 seconds
+    let redirectTimer = setTimeout(() => {
+        const shouldRedirect = confirm('Bạn có muốn quay về trang chủ không?');
+        if (shouldRedirect) {
+            window.location.href = '/dashboard';
+        }
+    }, 15000);
+
+    // Clear timer if user interacts with page
+    document.addEventListener('click', () => {
+        clearTimeout(redirectTimer);
+    });
+
+    // Smooth scroll to top on load
+    window.addEventListener('load', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+</script>
+</body>
+</html>

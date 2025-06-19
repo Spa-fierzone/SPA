@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Tính Lương Tháng</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            border-bottom: 2px solid #ffb3c6;
+        }
+
+        h2, h3, h4, h5 {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .salary-card {
+            background: linear-gradient(135deg, #ff6b9d, #ffb3c6);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            color: white;
+        }
+
+        .filter-section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #ff6b9d;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .table th {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            color: white;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .table tbody tr:hover {
+            background-color: #fff0f5;
+            transition: all 0.2s ease;
+        }
+
+        .amount-display {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .btn-outline-primary {
+            border-color: #ff8fab;
+            color: #ff6b9d;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #ff8fab;
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            border: none;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #ff8fab, #ffb3c6);
+        }
+
+        footer {
+            margin-top: auto;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+        <a class="navbar-brand text-danger fw-bold" th:href="@{/dashboard}">SpaZone</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarContent" aria-controls="navbarContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item me-2" sec:authorize="isAuthenticated()">
+                    <a th:href="@{/profile}" class="btn btn-outline-primary">
+                        <i class="bi bi-person-circle me-1"></i> Hồ sơ
+                    </a>
+                </li>
+                <li class="nav-item dropdown me-2" sec:authorize="hasRole('ADMIN')">
+                    <a class="btn btn-outline-primary dropdown-toggle" href="#" id="adminMenu" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear-fill me-1"></i> Quản lý
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="adminMenu">
+                        <li><a class="dropdown-item" th:href="@{/admin/users}">Người dùng</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/branches}">Chi nhánh</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/services}">Dịch vụ</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+                        </button>
+                    </form>
+                </li>
+                <li class="nav-item me-2" sec:authorize="isAnonymous()">
+                    <a th:href="@{/auth/login}" class="btn btn-outline-primary">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAnonymous()">
+                    <a th:href="@{/auth/register}" class="btn btn-outline-success">
+                        <i class="bi bi-person-plus me-1"></i> Đăng ký
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main content -->
+<div class="container py-4">
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="salary-card">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="mb-1"><i class="fas fa-calculator me-2"></i>Tính Lương Nhân Viên</h2>
+                    <p class="mb-0 opacity-75">Quản lý và tính toán lương tháng cho nhân viên</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <h4 class="mb-0" th:text="${monthName + ' ' + selectedYear}">Tháng 12 2024</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div class="alert alert-success alert-custom alert-dismissible fade show" role="alert"
+             th:if="${success}" th:text="${success}">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div class="alert alert-warning alert-custom alert-dismissible fade show" role="alert"
+             th:if="${warning}" th:text="${warning}">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div class="alert alert-danger alert-custom alert-dismissible fade show" role="alert"
+             th:if="${error}" th:text="${error}">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <form method="get" action="/salary/calculate" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold"><i class="fas fa-calendar me-1"></i>Tháng</label>
+                    <select name="month" class="form-select" th:value="${selectedMonth}">
+                        <option value="1" th:selected="${selectedMonth == 1}">Tháng 1</option>
+                        <option value="2" th:selected="${selectedMonth == 2}">Tháng 2</option>
+                        <option value="3" th:selected="${selectedMonth == 3}">Tháng 3</option>
+                        <option value="4" th:selected="${selectedMonth == 4}">Tháng 4</option>
+                        <option value="5" th:selected="${selectedMonth == 5}">Tháng 5</option>
+                        <option value="6" th:selected="${selectedMonth == 6}">Tháng 6</option>
+                        <option value="7" th:selected="${selectedMonth == 7}">Tháng 7</option>
+                        <option value="8" th:selected="${selectedMonth == 8}">Tháng 8</option>
+                        <option value="9" th:selected="${selectedMonth == 9}">Tháng 9</option>
+                        <option value="10" th:selected="${selectedMonth == 10}">Tháng 10</option>
+                        <option value="11" th:selected="${selectedMonth == 11}">Tháng 11</option>
+                        <option value="12" th:selected="${selectedMonth == 12}">Tháng 12</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold"><i class="fas fa-calendar-alt me-1"></i>Năm</label>
+                    <input type="number" name="year" class="form-select" th:value="${selectedYear}"
+                           min="2020" max="2030" placeholder="Năm">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold"><i class="fas fa-building me-1"></i>Chi Nhánh</label>
+                    <select name="branchId" class="form-select">
+                        <option value="">-- Tất cả chi nhánh --</option>
+                        <option th:each="branch : ${branches}"
+                                th:value="${branch.branchId}"
+                                th:text="${branch.name}"
+                                th:selected="${selectedBranchId == branch.branchId}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary btn-action w-100">
+                        <i class="fas fa-search me-1"></i>Tìm kiếm
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4" th:if="${calculations}">
+            <div class="col-md-3">
+                <div class="stats-card border-start border-primary border-4">
+                    <h5 class="text-primary mb-1">Tổng nhân viên</h5>
+                    <h3 class="mb-0" th:text="${#lists.size(calculations)}">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card border-start border-success border-4">
+                    <h5 class="text-success mb-1">Đã có lương</h5>
+                    <h3 class="mb-0" th:text="${#aggregates.sum(calculations.![hasSalaryRecord ? 1 : 0])}">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card border-start border-warning border-4">
+                    <h5 class="text-warning mb-1">Chưa có lương</h5>
+                    <h3 class="mb-0" th:text="${#aggregates.sum(calculations.![hasSalaryRecord ? 0 : 1])}">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card border-start border-info border-4">
+                    <h5 class="text-info mb-1">Tổng lương</h5>
+                    <h3 class="mb-0 amount-display" th:text="${#numbers.formatDecimal(#aggregates.sum(calculations.![netSalary]), 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VNĐ</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Table -->
+        <div class="table-container">
+            <form id="salaryForm" method="post" action="/salary/save">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" name="month" th:value="${selectedMonth}">
+                <input type="hidden" name="year" th:value="${selectedYear}">
+                <input type="hidden" name="branchId" th:value="${selectedBranchId}">
+
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                        <tr>
+                            <th style="width: 50px;">
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="selectAll" class="form-check-input">
+                                </div>
+                            </th>
+                            <th>Nhân viên</th>
+                            <th>Chi nhánh</th>
+                            <th>Chức vụ</th>
+                            <th>Lương cơ bản</th>
+                            <th>Lương thực tế</th>
+                            <th>Giờ làm thêm</th>
+                            <th>Trạng thái</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="calc : ${calculations}">
+                            <td>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox"
+                                           name="userIds"
+                                           th:value="${calc.user.userId}"
+                                           th:disabled="${calc.hasSalaryRecord}"
+                                           class="form-check-input row-checkbox">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                         style="width: 35px; height: 35px; font-size: 14px;"
+                                         th:text="${#strings.substring(calc.user.fullName, 0, 1)}">A</div>
+                                    <div>
+                                        <div class="fw-bold" th:text="${calc.user.fullName}">Tên nhân viên</div>
+                                        <small class="text-muted" th:text="${calc.user.email}">email@example.com</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td th:text="${calc.user.branch?.name}">Chi nhánh</td>
+                            <td th:text="${calc.user.roleNames}">Chức vụ</td>
+                            <td class="amount-display" th:text="${#numbers.formatDecimal(calc.baseSalary ?: 0, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VNĐ</td>
+                            <td class="amount-display" th:text="${#numbers.formatDecimal(calc.netSalary ?: 0, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VNĐ</td>
+                            <td class="amount-display text-info" th:text="${#numbers.formatDecimal(calc.overtimePay ?: 0, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VNĐ</td>
+                            <td>
+                            <span th:if="${calc.hasSalaryRecord}" class="badge badge-status bg-success">
+                                <i class="fas fa-check me-1"></i>Đã lưu
+                            </span>
+                                <span th:unless="${calc.hasSalaryRecord}" class="badge badge-status bg-warning">
+                                <i class="fas fa-clock me-1"></i>Chưa lưu
+                            </span>
+                            </td>
+                            <td>
+                                <a th:href="@{/salary/admin/user/{userId}/set-base-salary(userId=${calc.user.userId})}" class="btn btn-sm btn-secondary">
+                                    Cập nhật lương cơ bản
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="p-3 bg-light border-top">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Chọn nhân viên để lưu bản ghi lương. Chỉ lưu được những bản ghi chưa có.
+                            </small>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button type="button" class="btn btn-outline-secondary btn-action me-2" onclick="selectNewRecords()">
+                                <i class="fas fa-check-square me-1"></i>Chọn bản ghi mới
+                            </button>
+                            <button type="submit" class="btn btn-success btn-action" onclick="return confirmSave()">
+                                <i class="fas fa-save me-1"></i>Lưu bản ghi đã chọn
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center py-3 mt-auto">
+    <div class="container">
+        <span class="text-muted">© 2025 SpaZone. All rights reserved.</span>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Select all functionality
+    document.getElementById('selectAll').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.row-checkbox:not(:disabled)');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+
+    // Select only new records (not saved yet)
+    function selectNewRecords() {
+        const checkboxes = document.querySelectorAll('.row-checkbox:not(:disabled)');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+    }
+
+    // Confirm before saving
+    function confirmSave() {
+        const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+        if (selectedCheckboxes.length === 0) {
+            alert('Vui lòng chọn ít nhất một nhân viên để lưu!');
+            return false;
+        }
+
+        return confirm(`Bạn có chắc chắn muốn lưu ${selectedCheckboxes.length} bản ghi lương?`);
+    }
+
+    // Update select all checkbox state
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('row-checkbox')) {
+            const allCheckboxes = document.querySelectorAll('.row-checkbox:not(:disabled)');
+            const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+            const selectAllCheckbox = document.getElementById('selectAll');
+
+            if (checkedCheckboxes.length === 0) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = false;
+            } else if (checkedCheckboxes.length === allCheckboxes.length) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = true;
+            } else {
+                selectAllCheckbox.indeterminate = true;
+            }
+        }
+    });
+</script>
+</body>
+</html>

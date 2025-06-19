@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Xem Chi Tiết Điều Trị</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            min-height: 100vh;
+        }
+        .card {
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        h2 {
+            color: #fff;
+            font-weight: bold;
+        }
+        .img-preview {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        label {
+            font-weight: bold;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="container py-5">
+    <h2 class="text-center mb-4">Chi Tiết Điều Trị</h2>
+    <div class="card p-4">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label>Ngày điều trị:</label>
+                <p th:text="${#temporals.format(treatment.treatmentDate, 'dd/MM/yyyy HH:mm')}">--</p>
+            </div>
+            <div class="col-md-6">
+                <label>Kỹ thuật viên:</label>
+                <p th:text="${treatment.technician.fullName}">--</p>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label>Ghi chú trước điều trị:</label>
+            <p th:text="${treatment.preTreatmentNotes}">--</p>
+        </div>
+
+        <div class="mb-3">
+            <label>Ghi chú sau điều trị:</label>
+            <p th:text="${treatment.postTreatmentNotes}">--</p>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label>Ảnh trước điều trị:</label><br>
+                <img th:src="${treatment.beforeImageUrl}" class="img-preview" alt="Trước điều trị">
+            </div>
+            <div class="col-md-6">
+                <label>Ảnh sau điều trị:</label><br>
+                <img th:src="${treatment.afterImageUrl}" class="img-preview" alt="Sau điều trị">
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label>Tiến độ điều trị:</label>
+            <p th:text="${treatment.treatmentProgress + '%'}">0%</p>
+        </div>
+
+        <div class="mb-3">
+            <label>Phản hồi từ khách hàng:</label>
+            <p th:text="${treatment.customerFeedback}">--</p>
+        </div>
+
+        <div class="mb-3">
+            <label>Ghi chú tái khám:</label>
+            <p th:text="${treatment.followUpNotes}">--</p>
+        </div>
+
+        <div class="mb-3">
+            <label>Đề xuất lịch hẹn tiếp theo:</label>
+            <p th:text="${#temporals.format(treatment.nextAppointmentRecommendation, 'dd/MM/yyyy')}">--</p>
+        </div>
+
+        <div class="text-center">
+            <a th:href="@{/technician/treatments}" class="btn btn-outline-primary">Quay lại danh sách</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tổng kết chấm công</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar {
+            border-bottom: 2px solid #ffb3c6;
+        }
+        footer {
+            margin-top: auto;
+            background-color: #fff;
+        }
+        h2 {
+            font-weight: bold;
+            color: #fff;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+        <a class="navbar-brand text-danger fw-bold" th:href="@{/dashboard}">SpaZone</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarContent" aria-controls="navbarContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item me-2">
+                    <a href="/attendance/history" class="btn btn-outline-info">
+                        <i class="fas fa-history me-1"></i> Lịch sử công
+                    </a>
+                </li>
+                <li class="nav-item me-2">
+                    <a href="/" class="btn btn-outline-secondary">
+                        <i class="fas fa-home me-1"></i> Trang chủ
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container py-4">
+    <h2 class="mb-4">Tổng kết chấm công tháng <span th:text="${month}"></span>/<span th:text="${year}"></span></h2>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card text-center p-4">
+                <i class="fas fa-calendar-check fa-2x text-success mb-2"></i>
+                <h5>Ngày làm việc</h5>
+                <p class="fs-4 fw-bold" th:text="${workingDays}">0</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center p-4">
+                <i class="fas fa-user-times fa-2x text-danger mb-2"></i>
+                <h5>Ngày vắng</h5>
+                <p class="fs-4 fw-bold" th:text="${absentDays}">0</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center p-4">
+                <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                <h5>Ngày đi trễ</h5>
+                <p class="fs-4 fw-bold" th:text="${lateDays}">0</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card text-center p-4">
+                <i class="fas fa-hourglass-half fa-2x text-info mb-2"></i>
+                <h5>Tổng giờ làm</h5>
+                <p class="fs-4 fw-bold" th:text="${totalHours}">0</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card text-center p-4">
+                <i class="fas fa-business-time fa-2x text-primary mb-2"></i>
+                <h5>Giờ tăng ca</h5>
+                <p class="fs-4 fw-bold" th:text="${overtimeHours}">0</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center py-4 bg-white mt-5 border-top">
+    <span class="text-muted">© 2025 SpaZone. All rights reserved.</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

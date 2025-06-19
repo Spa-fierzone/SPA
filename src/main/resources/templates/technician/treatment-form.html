@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ghi nhận điều trị</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            min-height: 100vh;
+        }
+        .card {
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h2 {
+            font-weight: bold;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container py-5">
+    <h2 class="text-center mb-4">Ghi nhận điều trị</h2>
+    <div class="card p-4">
+        <form th:action="@{/technician/treatments/save}" th:object="${treatment}" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:field="*{appointment}" />
+            <input type="hidden" th:field="*{technician}" />
+
+            <div class="mb-3">
+                <label class="form-label">Ghi chú trước điều trị</label>
+                <textarea class="form-control" th:field="*{preTreatmentNotes}" rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ảnh trước điều trị</label>
+                <input class="form-control" type="file" name="beforeImageFile">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ghi chú sau điều trị</label>
+                <textarea class="form-control" th:field="*{postTreatmentNotes}" rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ảnh sau điều trị</label>
+                <input class="form-control" type="file" name="afterImageFile">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ngày điều trị</label>
+                <input class="form-control" type="datetime-local" th:field="*{treatmentDate}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Phản hồi của khách</label>
+                <textarea class="form-control" th:field="*{customerFeedback}" rows="2"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ghi chú hẹn tái khám</label>
+                <textarea class="form-control" th:field="*{followUpNotes}" rows="2"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Tiến độ điều trị (%)</label>
+                <input class="form-control" type="number" min="0" max="100" th:field="*{treatmentProgress}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Đề xuất lịch hẹn tiếp theo</label>
+                <input class="form-control" type="date" th:field="*{nextAppointmentRecommendation}">
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-success px-4">Lưu điều trị</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
