@@ -1,0 +1,41 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Attendance Logs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="bg-white shadow-md rounded-lg p-6 max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <a href="${pageContext.request.contextPath}/customerList.jsp" class="text-blue-600 hover:underline">
+                ← Back to Customers
+            </a>
+            <h2 class="text-3xl font-bold text-yellow-600">Attendance Logs</h2>
+        </div>
+
+        <table class="w-full border border-gray-300">
+            <thead class="bg-yellow-600 text-white">
+                <tr>
+                    <th class="px-4 py-2">No.</th>
+                    <th class="px-4 py-2">Customer Name</th>
+                    <th class="px-4 py-2">Date</th>
+                    <th class="px-4 py-2">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <c:forEach items="${attendanceList}" var="att" varStatus="status">
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-4 py-2">${status.index + 1}</td>
+                        <td class="px-4 py-2">${att.customerName}</td>
+                        <td class="px-4 py-2">${att.date}</td>
+                        <td class="px-4 py-2">${att.status}</td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
