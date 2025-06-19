@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Điểm danh hôm nay</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .navbar {
+      border-bottom: 2px solid #ffb3c6;
+    }
+    footer {
+      margin-top: auto;
+      background-color: #fff;
+    }
+    h2 {
+      font-weight: bold;
+      color: #fff;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+  <div class="container">
+    <a class="navbar-brand text-danger fw-bold" th:href="@{/dashboard}">SpaZone</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarContent" aria-controls="navbarContent"
+            aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item me-2">
+          <a href="/attendance/report" class="btn btn-outline-info">
+            <i class="fas fa-chart-line me-1"></i> Báo cáo công
+          </a>
+        </li>
+        <li class="nav-item me-2">
+          <a href="/" class="btn btn-outline-secondary">
+            <i class="fas fa-home me-1"></i> Trang chủ
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container py-4">
+  <h2 class="mb-4">Chấm công hôm nay - <span th:text="${currentDate}"></span></h2>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped">
+      <thead class="table-primary text-center">
+      <tr>
+        <th>Nhân viên</th>
+        <th>Chi nhánh</th>
+        <th>Check-in</th>
+        <th>Check-out</th>
+        <th>Trạng thái</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="att : ${attendances}">
+        <td th:text="${att.user.fullName}"></td>
+        <td th:text="${att.branch.name}"></td>
+        <td th:text="${att.checkInTime}"></td>
+        <td th:text="${att.checkOutTime}"></td>
+        <td th:text="${att.status}"></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center py-4 bg-white mt-5 border-top">
+  <span class="text-muted">© 2025 SpaZone. All rights reserved.</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

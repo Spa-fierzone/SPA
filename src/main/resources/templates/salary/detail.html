@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Chi tiết lương - SpaZone</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            border-bottom: 2px solid #ffb3c6;
+        }
+
+        .card {
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(255, 107, 157, 0.2);
+            border: none;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ff8fab, #ffb3c6);
+        }
+
+        .btn-outline-primary {
+            border-color: #ff8fab;
+            color: #ff6b9d;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #ff8fab;
+            color: white;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .progress-custom {
+            height: 20px;
+            border-radius: 10px;
+        }
+
+        .text-pink {
+            color: #ff6b9d;
+        }
+
+        .bg-pink {
+            background-color: #ff6b9d;
+        }
+
+        .avatar-lg {
+            width: 80px;
+            height: 80px;
+            font-size: 2rem;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline:before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dee2e6;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -23px;
+            top: 8px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ff6b9d;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px #dee2e6;
+        }
+
+        .salary-summary {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            border-radius: 15px;
+            padding: 2rem;
+            color: white;
+        }
+
+        .breakdown-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        @media print {
+            body { background: white !important; }
+            .navbar, .btn-group { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+        <a class="navbar-brand text-danger fw-bold" th:href="@{/dashboard}">SpaZone</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarContent" aria-controls="navbarContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item me-2">
+                    <a href="/" class="btn btn-outline-primary">
+                        <i class="bi bi-house me-1"></i> Trang chủ
+                    </a>
+                </li>
+                <li class="nav-item me-2">
+                    <a th:href="@{/salary/records}" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4 pb-5">
+    <!-- Header Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h4 class="mb-0">
+                        <i class="bi bi-person-circle me-2"></i>
+                        Chi tiết lương nhân viên
+                    </h4>
+                    <small class="opacity-75" th:text="'Tháng ' + ${monthName} + '/' + ${calculation.year}"></small>
+                </div>
+                <div class="col-auto">
+                    <div class="btn-group">
+                        <button class="btn btn-light" onclick="window.print()">
+                            <i class="bi bi-printer me-1"></i> In
+                        </button>
+                        <button class="btn btn-light" onclick="exportToPDF()">
+                            <i class="bi bi-file-pdf me-1"></i> Xuất PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Employee Info -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-badge me-2"></i>
+                        Thông tin nhân viên
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="avatar-lg bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3">
+                        <span th:text="${#strings.substring(calculation.user.fullName, 0, 1)}">N</span>
+                    </div>
+                    <h5 class="fw-bold" th:text="${calculation.user.fullName}">Nguyễn Văn A</h5>
+                    <p class="text-muted mb-2" th:text="${calculation.user.email}">nvana@spazone.com</p>
+                    <p class="text-muted mb-2" th:text="${calculation.user.phone ?: 'Chưa cập nhật'}">0901234567</p>
+
+                    <hr>
+
+                    <div class="row text-start">
+                        <div class="col-6">
+                            <small class="text-muted">Mã NV:</small>
+                            <div class="fw-bold" th:text="'NV' + ${#strings.padWithZeros(calculation.user.userId, 4)}">NV0001</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Chi nhánh:</small>
+                            <div class="fw-bold" th:text="${calculation.user.branch?.name ?: 'N/A'}">CN Hà Nội</div>
+                        </div>
+                        <div class="col-6 mt-2">
+                            <small class="text-muted">Chức vụ:</small>
+                            <div class="fw-bold" th:text="${calculation.user.role?.name ?: 'N/A'}">Nhân viên</div>
+                        </div>
+                        <div class="col-6 mt-2">
+                            <small class="text-muted">Trạng thái:</small>
+                            <span class="badge bg-success">Hoạt động</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Summary -->
+        <div class="col-md-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-check me-2"></i>
+                        Tổng kết chấm công
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <i class="bi bi-calendar3 stat-icon text-primary"></i>
+                                <h4 class="fw-bold text-pink" th:text="${calculation.scheduledDays}">22</h4>
+                                <small class="text-muted">Ngày dự kiến</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <i class="bi bi-check-circle stat-icon text-success"></i>
+                                <h4 class="fw-bold text-success" th:text="${calculation.workingDays}">20</h4>
+                                <small class="text-muted">Ngày làm việc</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <i class="bi bi-x-circle stat-icon text-danger"></i>
+                                <h4 class="fw-bold text-danger" th:text="${calculation.absentDays}">2</h4>
+                                <small class="text-muted">Ngày vắng</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <i class="bi bi-clock stat-icon text-warning"></i>
+                                <h4 class="fw-bold text-warning" th:text="${calculation.lateDays}">1</h4>
+                                <small class="text-muted">Ngày đi muộn</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-2">Tỷ lệ tham dự</h6>
+                            <div class="progress progress-custom mb-2">
+                                <div class="progress-bar bg-pink"
+                                     th:style="'width: ' + ${calculation.attendanceRate} + '%'"
+                                     th:text="${calculation.attendanceRateFormatted}"
+                                     style="width: 90.9%">90.9%
+                                </div>
+                            </div>
+                            <small class="text-muted">Mục tiêu: 95%</small>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Tổng giờ làm:</small>
+                                    <div class="fw-bold" th:text="${calculation.totalHours} + ' giờ'">160 giờ</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Giờ tăng ca:</small>
+                                    <div class="fw-bold text-info" th:text="${calculation.overtimeHours} + ' giờ'">8 giờ</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Salary Breakdown -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-cash-coin me-2"></i>
+                        Chi tiết lương
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="breakdown-item">
+                        <div class="d-flex justify-content-between">
+                            <span>Lương cơ bản:</span>
+                            <span class="fw-bold" th:text="${#numbers.formatCurrency(calculation.baseSalary)}">8,000,000₫</span>
+                        </div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="d-flex justify-content-between">
+                            <span>Phụ cấp:</span>
+                            <span class="fw-bold text-success" th:text="${#numbers.formatCurrency(calculation.allowances)}">500,000₫</span>
+                        </div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="d-flex justify-content-between">
+                            <span>Tiền tăng ca:</span>
+                            <span class="fw-bold text-info" th:text="${#numbers.formatCurrency(calculation.overtimePay)}">400,000₫</span>
+                        </div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="d-flex justify-content-between">
+                            <span>Thưởng:</span>
+                            <span class="fw-bold text-warning" th:text="${#numbers.formatCurrency(calculation.bonus)}">1,000,000₫</span>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="breakdown-item">
+                        <div class="d-flex justify-content-between">
+                            <span>Trừ vắng mặt:</span>
+                            <span class="fw-bold text-danger" th:text="'-' + ${#numbers.formatCurrency(calculation.deductions)}">-727,273₫</span>
+                        </div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="d-flex justify-content-between">
+                            <span>Phạt đi muộn:</span>
+                            <span class="fw-bold text-danger" th:text="'-' + ${#numbers.formatCurrency(calculation.lateFine)}">-50,000₫</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="salary-summary">
+                <div class="text-center">
+                    <h3 class="mb-0">Tổng lương thực nhận</h3>
+                    <h1 class="display-4 fw-bold mt-2" th:text="${#numbers.formatCurrency(calculation.netSalary)}">9,122,727₫</h1>
+                    <p class="mb-0 opacity-75">Sau khi trừ các khoản</p>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="row">
+                    <div class="col-6">
+                        <small class="opacity-75">Tổng thu nhập:</small>
+                        <div class="fw-bold h5" th:text="${#numbers.formatCurrency(calculation.grossSalary)}">9,900,000₫</div>
+                    </div>
+                    <div class="col-6">
+                        <small class="opacity-75">Tổng khấu trừ:</small>
+                        <div class="fw-bold h5" th:text="${#numbers.formatCurrency(calculation.totalDeductions)}">777,273₫</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Chart -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bar-chart me-2"></i>
+                        Biểu đồ chấm công
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="attendanceChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Timeline -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        Lịch sử chấm công trong tháng
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item" th:each="record : ${attendanceRecords}">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body p-3">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2">
+                                            <strong th:text="${#temporals.format(record.date, 'dd/MM')}">15/06</strong>
+                                            <br>
+                                            <small class="text-muted" th:text="${#temporals.format(record.date, 'EEEE', 'vi')}">Thứ Hai</small>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <span class="badge"
+                                                  th:classappend="${record.status == 'PRESENT'} ? 'bg-success' :
+                                                                 ${record.status == 'ABSENT'} ? 'bg-danger' :
+                                                                 ${record.status == 'LATE'} ? 'bg-warning' : 'bg-secondary'"
+                                                  th:text="${record.status == 'PRESENT'} ? 'Có mặt' :
+                                                           ${record.status == 'ABSENT'} ? 'Vắng mặt' :
+                                                           ${record.status == 'LATE'} ? 'Đi muộn' : 'Không xác định'">Có mặt</span>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <small class="text-muted">Giờ vào:</small>
+                                            <div th:text="${record.checkIn != null} ? ${#temporals.format(record.checkIn, 'HH:mm')} : '-'">08:00</div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <small class="text-muted">Giờ ra:</small>
+                                            <div th:text="${record.checkOut != null} ? ${#temporals.format(record.checkOut, 'HH:mm')} : '-'">17:30</div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <small class="text-muted">Tổng giờ:</small>
+                                            <div class="fw-bold" th:text="${record.totalHours} + 'h'">8h</div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div th:if="${record.note}" class="text-info" title="Có ghi chú">
+                                                <i class="bi bi-chat-square-text"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Attendance Chart
+    const ctx = document.getElementById('attendanceChart').getContext('2d');
+    const attendanceChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Có mặt', 'Vắng mặt', 'Đi muộn'],
+            datasets: [{
+                data: [[${calculation.workingDays}], [${calculation.absentDays}], [${calculation.lateDays}]],
+                backgroundColor: [
+                    '#28a745',
+                    '#dc3545',
+                    '#ffc107'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Export to PDF function
+    function exportToPDF() {
+        window.print();
+    }
+
+    // Print styles
+    const style = document.createElement('style');
+    style.textContent = `
+    @media print {
+        .btn-group, .navbar { display: none !important; }
+        body { background: white !important; }
+        .card { box-shadow: none !important; }
+    }
+`;
+    document.head.appendChild(style);
+</script>
+
+</body>
+</html>
