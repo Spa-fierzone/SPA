@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng Ký Tài Khoản</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+        }
+
+        .card {
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(255, 107, 157, 0.3);
+            z-index: 10;
+        }
+
+        .card-header h3 {
+            color: #ff6b9d;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            color: white;
+            font-weight: 600;
+            border: none;
+        }
+
+        .btn-gradient:hover {
+            background: linear-gradient(135deg, #e55a87, #ff7ba3);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #ff6b9d;
+        }
+
+        .form-check-label {
+            font-weight: 500;
+        }
+
+        .card-footer a {
+            color: #ff6b9d;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .card-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Floating Shapes -->
+<div class="floating-shapes">
+    <div class="shape" style="width:100px; height:100px; top:10%; left:5%;"></div>
+    <div class="shape" style="width:80px; height:80px; top:80%; right:10%;"></div>
+    <div class="shape" style="width:120px; height:120px; top:30%; right:20%;"></div>
+    <div class="shape" style="width:70px; height:70px; bottom:10%; left:30%;"></div>
+</div>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card p-4">
+                <div class="card-header text-center mb-3">
+                    <h3><i class="fas fa-user-plus"></i> Đăng Ký</h3>
+                    <p class="text-muted">Tạo tài khoản mới để bắt đầu</p>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+                <form th:action="@{/auth/register}" method="post" th:object="${registerDto}">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Tên đăng nhập</label>
+                            <input type="text" th:field="*{username}" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" th:field="*{email}" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Mật khẩu</label>
+                            <div class="input-group">
+                                <input type="password" th:field="*{password}" class="form-control" id="password"
+                                       required>
+                                <button type="button" class="btn btn-outline-secondary toggle-password"
+                                        data-target="password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Xác nhận mật khẩu</label>
+                            <div class="input-group">
+                                <input type="password" id="confirmPassword" class="form-control" required>
+                                <button type="button" class="btn btn-outline-secondary toggle-password"
+                                        data-target="confirmPassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div id="confirmError" class="text-danger small mt-1 d-none">Mật khẩu xác nhận không khớp
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Họ và tên</label>
+                            <input type="text" th:field="*{fullName}" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="text" th:field="*{phone}" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ngày sinh</label>
+                            <input type="date" th:field="*{dateOfBirth}" class="form-control">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Giới tính</label>
+                            <div class="form-check form-check-inline ms-2">
+                                <input class="form-check-input" type="radio" th:field="*{gender}" value="male"
+                                       id="male">
+                                <label class="form-check-label" for="male">Nam</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" th:field="*{gender}" value="female"
+                                       id="female">
+                                <label class="form-check-label" for="female">Nữ</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" th:field="*{gender}" value="other"
+                                       id="other">
+                                <label class="form-check-label" for="other">Khác</label>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Địa chỉ</label>
+                            <input type="text" th:field="*{address}" class="form-control">
+                        </div>
+                        <div class="col-md-12 mt-3 d-grid">
+                            <button type="submit" class="btn btn-gradient">
+                                <i class="fas fa-user-plus"></i> Đăng Ký
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="card-footer text-center mt-4">
+                    <p>Đã có tài khoản? <a th:href="@{/auth/login}">Đăng nhập ngay</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Toggle mật khẩu
+        document.querySelectorAll(".toggle-password").forEach(button => {
+            button.addEventListener("click", () => {
+                const target = document.getElementById(button.dataset.target);
+                const icon = button.querySelector("i");
+
+                if (target.type === "password") {
+                    target.type = "text";
+                    icon.classList.remove("fa-eye");
+                    icon.classList.add("fa-eye-slash");
+                } else {
+                    target.type = "password";
+                    icon.classList.remove("fa-eye-slash");
+                    icon.classList.add("fa-eye");
+                }
+            });
+        });
+
+        // Kiểm tra confirm password
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function (e) {
+            const password = document.getElementById("password").value;
+            const confirm = document.getElementById("confirmPassword").value;
+            const error = document.getElementById("confirmError");
+
+            if (password !== confirm) {
+                e.preventDefault();
+                error.classList.remove("d-none");
+            } else {
+                error.classList.add("d-none");
+            }
+        });
+    });
+</script>
+</html>

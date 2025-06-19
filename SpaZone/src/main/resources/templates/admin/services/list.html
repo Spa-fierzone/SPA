@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Dịch vụ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+        }
+
+        .btn-primary, .btn-warning, .btn-info, .btn-secondary {
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between mb-3">
+        <h2 class="text-dark">Quản lý Dịch vụ</h2>
+        <a th:href="@{/dashboard}" class="btn btn-outline-dark">← Về Dashboard</a>
+    </div>
+
+    <div class="content-card">
+        <!-- Bộ lọc tìm kiếm -->
+        <form method="get" class="row g-2 mb-4">
+            <div class="col-md-6">
+                <input type="text" class="form-control" name="keyword" placeholder="Tìm theo tên dịch vụ..."
+                       th:value="${keyword}">
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100" type="submit">Tìm kiếm</button>
+            </div>
+        </form>
+
+        <!-- Bảng -->
+        <div class="table-responsive">
+            <table class="table table-hover rounded bg-white text-dark">
+                <thead class="table-light text-center">
+                <tr>
+                    <th>Hình ảnh</th>
+                    <th>Tên</th>
+                    <th>Mô tả</th>
+                    <th>Thời gian</th>
+                    <th>Giá</th>
+                    <th>Trạng thái</th>
+                    <th>Danh mục</th>
+                    <th>Hành động</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="service : ${services}">
+                    <td><img th:src="${service.imageUrl}" alt="Hình ảnh" width="100"></td>
+                    <td th:text="${service.name}"></td>
+                    <td th:text="${service.description}"></td>
+                    <td th:text="${service.duration + ' phút'}"></td>
+                    <td th:text="${#numbers.formatDecimal(service.price, 0, 'COMMA', 2, 'POINT')}"></td>
+                    <td th:text="${service.status}"></td>
+                    <td th:text="${service.category.name}"></td>
+                    <td>
+                        <a th:href="@{'/admin/services/edit/' + ${service.serviceId}}" class="btn btn-sm btn-warning">Chỉnh sửa</a>
+                        <a th:href="@{'/admin/services/delete/' + ${service.serviceId}}" class="btn btn-sm btn-danger"
+                           onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <nav th:if="${totalPages > 1}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{|/admin/services?page=${currentPage - 1}${keyword != null and keyword != '' ? '&keyword=' + keyword : ''}|}">Trước</a>
+                </li>
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link"
+                       th:href="@{|/admin/services?page=${i}${keyword != null and keyword != '' ? '&keyword=' + keyword : ''}|}"
+                       th:text="${i + 1}"></a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{|/admin/services?page=${currentPage + 1}${keyword != null and keyword != '' ? '&keyword=' + keyword : ''}|}">Sau</a>
+                </li>
+            </ul>
+        </nav>
+
+    </div>
+</div>
+
+</body>
+</html>
