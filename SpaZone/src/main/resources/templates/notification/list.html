@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông báo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <style>
+        .badge.bg-primary {
+            height: fit-content;
+        }
+        .notification-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #dc3545;
+        }
+        .notification-item {
+            transition: background-color 0.2s ease-in-out;
+        }
+        .notification-item:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-danger" href="/">SpaZone</a>
+        <span class="navbar-text">Thông báo của bạn</span>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <h3 class="mb-3">Thông báo mới</h3>
+
+    <div th:if="${notifications != null and !notifications.isEmpty()}">
+        <ul class="list-group">
+            <li class="list-group-item notification-item" th:each="noti : ${notifications}">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <div class="notification-title" th:text="${noti.title}">Tiêu đề</div>
+                        <p class="mb-1" th:text="${noti.content}">Nội dung</p>
+                        <small class="text-muted" th:text="${#temporals.format(noti.createdAt, 'dd/MM/yyyy HH:mm')}">Ngày giờ</small>
+                    </div>
+                    <span class="badge bg-primary text-white ms-3 align-self-start" th:if="${!noti.isRead}">Mới</span>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <p class="text-center text-muted" th:if="${notifications == null or notifications.isEmpty()}">
+        Bạn không có thông báo nào.
+    </p>
+</div>
+</body>
+</html>

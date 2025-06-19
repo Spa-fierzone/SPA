@@ -85,21 +85,29 @@
                     </a>
                 </li>
 
+                <!-- 🔔 Thông báo -->
+                <li class="nav-item dropdown me-2" sec:authorize="isAuthenticated()">
+                    <a class="btn btn-outline-primary dropdown-toggle position-relative" href="#" id="notificationDropdown"
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-bell"></i> Thông báo
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown">
+                        <li><a class="dropdown-item" th:href="@{/notifications}">
+                            <i class="bi bi-list-check me-1"></i> Xem tất cả thông báo
+                        </a></li>
+                    </ul>
+                </li>
+
                 <li class="nav-item dropdown me-2" sec:authorize="hasRole('ADMIN')">
                     <a class="btn btn-outline-primary dropdown-toggle" href="#" id="adminMenu" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-gear-fill me-1"></i> Quản lý
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="adminMenu">
-                        <li><a class="dropdown-item" th:href="@{/admin/users}"><i class="bi bi-people me-2"></i>Người
-                            dùng</a></li>
-                        <li><a class="dropdown-item" th:href="@{/admin/branches}"><i class="bi bi-building me-2"></i>Chi
-                            nhánh</a></li>
-                        <li><a class="dropdown-item" th:href="@{/admin/services}"><i class="bi bi-scissors me-2"></i>Dịch
-                            vụ</a></li>
-                        <li><a class="dropdown-item" th:href="@{/salary/calculate}"><i class="bi bi-scissors me-2"></i>Quản
-                            Lí Lương</a></li>
-
+                        <li><a class="dropdown-item" th:href="@{/admin/users}"><i class="bi bi-people me-2"></i>Người dùng</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/branches}"><i class="bi bi-building me-2"></i>Chi nhánh</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/services}"><i class="bi bi-scissors me-2"></i>Dịch vụ</a></li>
+                        <li><a class="dropdown-item" th:href="@{/salary/calculate}"><i class="bi bi-currency-dollar me-2"></i>Quản Lí Lương</a></li>
                     </ul>
                 </li>
 
@@ -116,7 +124,7 @@
 
                 <li class="nav-item me-2" sec:authorize="hasAnyRole('TECHNICIAN', 'MANAGER')">
                     <a th:href="@{/attendance}" class="btn btn-outline-primary">
-                        <i class="bi bi-receipt me-1"></i> Chấm công
+                        <i class="bi bi-check2-square me-1"></i> Chấm công
                     </a>
                 </li>
 
@@ -142,6 +150,7 @@
                 </li>
 
             </ul>
+
         </div>
     </div>
 </nav>

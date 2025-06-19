@@ -4,6 +4,7 @@ import com.spazone.entity.Appointment;
 import com.spazone.entity.User;
 import com.spazone.repository.AppointmentRepository;
 import com.spazone.service.AppointmentService;
+import com.spazone.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,9 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Autowired
     private AppointmentRepository appointmentRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @Override
     public void create(Appointment appointment) {
         LocalTime startTime = appointment.getStartTime();
@@ -27,7 +31,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         int duration = appointment.getService().getDuration();
         LocalTime endTime = startTime.plusMinutes(duration);
-
         appointment.setEndTime(endTime);
 
         if (appointment.getStatus() == null) {
@@ -35,6 +38,16 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         appointmentRepository.save(appointment);
+
+        // ✅ Gửi thông báo đặt lịch
+        notificationService.notify(
+                appointment.getCustomer(),
+                "Đặt lịch thành công",
+                "Bạn đã đặt lịch dịch vụ '" + appointment.getService().getName() +
+                        "' vào ngày " + appointment.getAppointmentDate() +
+                        " lúc " + appointment.getStartTime(),
+                "appointment"
+        );
     }
 
     @Override
@@ -42,7 +55,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentRepository.findByCustomer(customer);
     }
 
-    // ✅ Thêm chức năng huỷ lịch hẹn
     @Override
     public void cancelAppointment(Integer appointmentId, String reason) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
@@ -58,5 +70,15 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setUpdatedAt(LocalDateTime.now());
 
         appointmentRepository.save(appointment);
+
+        // ✅ Gửi thông báo huỷ lịch
+        notificationService.notify(
+                appointment.getCustomer(),
+                "Huỷ lịch hẹn",
+                "Lịch hẹn dịch vụ '" + appointment.getService().getName() +
+                        "' vào ngày " + appointment.getAppointmentDate() +
+                        " đã bị huỷ. Lý do: " + reason,
+                "cancel"
+        );
     }
 }
