@@ -275,7 +275,15 @@
     <div class="text-center mt-5">
         <a th:href="@{/services}" class="btn btn-outline-primary">Xem thêm dịch vụ</a>
     </div>
-</div>
+    <div class="container text-center my-4" sec:authorize="isAuthenticated()">
+        <a th:href="@{/feedback/create}" class="btn btn-light border border-danger text-danger me-2">
+            <i class="bi bi-chat-dots me-1"></i> Gửi đánh giá của bạn cho SpaZone
+        </a>
+
+        <a th:href="@{/feedback/all}" class="btn btn-outline-secondary">
+            <i class="bi bi-star-half me-1"></i> Xem đánh giá khách hàng
+        </a>
+    </div>
 
 <!-- Footer -->
 <footer class="text-center py-3">
