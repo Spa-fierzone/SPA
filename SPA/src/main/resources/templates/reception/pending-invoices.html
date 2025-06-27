@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hóa đơn chưa thanh toán - SpaZone</title>
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        body {
+            background: linear-gradient(120deg, #fff0f6 0%, #ffe4ec 60%, #fdfbfb 100%);
+            min-height: 100vh;
+            font-family: 'Poppins', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            animation: gradientBG 18s ease-in-out infinite alternate;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        /* Floating Bubbles */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,182,193,0.13);
+            animation: float 8s infinite ease-in-out;
+            z-index: 0;
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0);}
+            50% { transform: translateY(-32px);}
+        }
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255,255,255,0.7);
+            border-radius: 22px;
+            box-shadow: 0 8px 32px 0 rgba(31,38,135,0.10);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,182,193,0.18);
+            padding: 2rem;
+            animation: floatCard 4s infinite ease-in-out;
+        }
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0);}
+            50% { transform: translateY(-8px);}
+        }
+        h2 {
+            color: #ff6b9d;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            background: rgba(255,255,255,0.5);
+            padding: 0.6rem 1.5rem;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(255,182,193,0.12);
+            display: inline-block;
+        }
+        .table-container {
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(255,182,193,0.08);
+        }
+        table {
+            background: rgba(255,255,255,0.4);
+            backdrop-filter: blur(5px);
+        }
+        thead tr {
+            background: linear-gradient(90deg, #ffb6c1, #ffe4ec) !important;
+            color: #fff;
+        }
+        th {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        tbody tr {
+            transition: transform 0.3s, background 0.3s;
+            background: rgba(255,255,255,0.6);
+        }
+        tbody tr:hover {
+            transform: translateY(-2px);
+            background: rgba(255,255,255,0.9) !important;
+            box-shadow: 0 4px 12px rgba(255,182,193,0.15);
+        }
+        /* Button Effects */
+        .btn-pay {
+            background: linear-gradient(90deg, #ff8fab, #ffb3c6);
+            color: white;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(255,182,193,0.15);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.2s;
+            z-index: 1;
+        }
+        .btn-pay:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+        .btn-pay:hover:before {
+            left: 100%;
+        }
+        .btn-pay:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(255,139,171,0.25);
+        }
+        .form-control.form-control-sm {
+            background-color: #fff0f6 !important;
+            border: 1.5px solid #ffb6c1;
+            color: #6c3a5c;
+            border-radius: 10px;
+            font-size: 0.98rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control.form-control-sm:focus {
+            background-color: #ffe4ec !important;
+            border-color: #ff8fab;
+            box-shadow: 0 0 8px rgba(255, 139, 171, 0.3);
+            color: #6c3a5c;
+        }
+        .form-control.form-control-sm:valid {
+            border-color: #28a745 !important;
+            animation: pulseValid 0.5s;
+        }
+        .form-control.form-control-sm:invalid {
+            border-color: #dc3545 !important;
+            animation: shake 0.5s;
+        }
+        @keyframes pulseValid {
+            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        .form-label {
+            color: #c77d8c;
+            font-weight: 600;
+        }
+        .alert {
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(255,182,193,0.07);
+        }
+        footer {
+            margin-top: auto;
+            background-color: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            border-top: 1.5px solid rgba(255,182,193,0.18);
+            padding: 1.2rem 0;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .glass-card { padding: 1.5rem; }
+            h2 { font-size: 1.4rem; padding: 0.4rem 1rem; }
+            .btn-pay { padding: 0.4rem 0.8rem; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+<!-- Floating Bubbles -->
+<div id="bubbles"></div>
+
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/dashboard}">
+            <i class="fas fa-spa me-2"></i>SpaZone
+        </a>
+        <div class="ms-auto">
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container py-5">
+    <h2 class="mb-4">
+        <i class="fas fa-file-invoice-dollar me-2"></i>Hóa đơn chưa thanh toán
+    </h2>
+    <div class="glass-card">
+        <div class="table-container">
+            <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                    <th><i class="fas fa-user me-1"></i> Khách hàng</th>
+                    <th><i class="fas fa-spa me-1"></i> Dịch vụ</th>
+                    <th><i class="fas fa-clock me-1"></i> Thời gian</th>
+                    <th><i class="fas fa-map-marker-alt me-1"></i> Chi nhánh</th>
+                    <th><i class="fas fa-money-bill-wave me-1"></i> Tổng tiền</th>
+                    <th><i class="fas fa-cogs me-1"></i> Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="appt : ${appointments}" class="appointment-row">
+                    <td th:text="${appt.customer.fullName}">Tên KH</td>
+                    <td th:text="${appt.service.name}">Tên DV</td>
+                    <td th:text="${#temporals.format(appt.appointmentDate, 'dd/MM/yyyy HH:mm')}">Thời gian</td>
+                    <td th:text="${appt.branch.name}">Chi nhánh</td>
+                    <td th:text="${appt.service.price + ' đ'}">Tổng</td>
+                    <td>
+                        <form th:action="@{/reception/invoices/create}" method="post" class="d-flex gap-2 align-items-center">
+                            <input type="hidden" name="appointmentId" th:value="${appt.appointmentId}"/>
+                            <input type="text" name="notes" class="form-control form-control-sm" placeholder="Ghi chú..."/>
+                            <button type="submit" class="btn btn-sm btn-pay ripple-btn">
+                                <i class="bi bi-cash"></i> Xác nhận thanh toán
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <p th:if="${appointments.size() == 0}" class="text-center text-muted">Không có hóa đơn chưa thanh toán.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <span class="text-muted">© 2025 SpaZone. All rights reserved.</span>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Floating Bubbles
+    function createBubbles() {
+        const container = document.createElement('div');
+        container.id = 'bubbles';
+        document.body.appendChild(container);
+        for (let i = 0; i < 10; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 35 + 20;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.top = `${Math.random() * 100}%`;
+            bubble.style.animationDelay = `${Math.random() * 8}s`;
+            container.appendChild(bubble);
+        }
+    }
+    createBubbles();
+
+    // Slide-in animation for rows
+    document.querySelectorAll('.appointment-row').forEach((row, index) => {
+        row.style.opacity = '0';
+        row.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            row.style.transition = 'opacity 0.5s, transform 0.5s';
+            row.style.opacity = '1';
+            row.style.transform = 'translateY(0)';
+        }, 120 * index);
+    });
+
+    // Ripple effect for buttons
+    document.querySelectorAll('.ripple-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            ripple.style.left = `${e.offsetX}px`;
+            ripple.style.top = `${e.offsetY}px`;
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+</script>
+<style>
+    /* Ripple effect for buttons */
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        transform: scale(0);
+        animation: ripple 0.6s linear;
+        background: rgba(255,255,255,0.5);
+        pointer-events: none;
+        width: 100px;
+        height: 100px;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    @keyframes ripple {
+        to {
+            transform: translate(-50%, -50%) scale(2.5);
+            opacity: 0;
+        }
+    }
+</style>
+</body>
+</html>

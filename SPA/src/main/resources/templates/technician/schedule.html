@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch trình dịch vụ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        body {
+            background: linear-gradient(120deg, #fff0f6 0%, #ffe4ec 60%, #fdfbfb 100%);
+            min-height: 100vh;
+            font-family: 'Poppins', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            animation: gradientShift 16s infinite alternate;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        /* Floating Bubbles */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,182,193,0.13);
+            animation: float 8s infinite ease-in-out;
+            z-index: 0;
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0);}
+            50% { transform: translateY(-32px);}
+        }
+        .navbar {
+            background: rgba(255,255,255,0.85) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #ffb3c6;
+            box-shadow: 0 2px 8px rgba(255,182,193,0.08);
+        }
+        .navbar-brand {
+            color: #ff6b9d !important;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        h2 {
+            font-weight: bold;
+            color: #ff6b9d;
+            letter-spacing: 1px;
+            background: rgba(255,255,255,0.5);
+            padding: 0.6rem 1.5rem;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(255,182,193,0.12);
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+        .glass-card, .card {
+            border-radius: 22px;
+            box-shadow: 0 16px 32px rgba(255, 107, 157, 0.13);
+            border: none;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(10px);
+            animation: floatCard 4s infinite ease-in-out;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: scale(1.025) translateY(-4px);
+            box-shadow: 0 20px 48px rgba(255,182,193,0.22);
+        }
+        .card-header {
+            background: linear-gradient(90deg, #ffb6c1, #ffe4ec);
+            color: #ff6b9d;
+            border-radius: 22px 22px 0 0 !important;
+            border: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .card-title {
+            color: #ff6b9d;
+            font-weight: 700;
+            font-size: 1.18rem;
+        }
+        .btn-gradient, .btn-success {
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+            color: #fff !important;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.2s;
+            padding: 0.5rem 1.3rem;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-gradient:before, .btn-success:before {
+            content: '';
+            position: absolute;
+            left: -60%;
+            top: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(120deg,rgba(255,255,255,0.3),rgba(255,255,255,0));
+            transform: skewX(-25deg);
+            transition: left 0.5s;
+        }
+        .btn-gradient:hover, .btn-success:hover {
+            box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+            transform: translateY(-2px) scale(1.03);
+            color: #fff;
+        }
+        .btn-gradient:hover:before, .btn-success:hover:before {
+            left: 120%;
+        }
+        .btn-outline-primary {
+            border-color: #ff8fab;
+            color: #ff6b9d;
+            border-radius: 14px;
+            font-weight: 600;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-outline-primary:hover {
+            background-color: #ff8fab;
+            color: white;
+        }
+        .fw-bold { font-weight: 700 !important; }
+        .text-success.fw-bold { color: #28a745 !important; }
+        .text-secondary { color: #b48a9b !important; }
+        footer {
+            margin-top: auto;
+            background-color: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            border-top: 1.5px solid rgba(255,182,193,0.18);
+            padding: 1.2rem 0;
+            text-align: center;
+        }
+        @media (max-width: 576px) {
+            .glass-card, .card { padding: 1.2rem 0.5rem 1.2rem 0.5rem;}
+            h2 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+<!-- Floating Bubbles -->
+<div id="bubbles"></div>
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/dashboard}">
+            <i class="fas fa-spa me-2"></i>SpaZone
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarContent" aria-controls="navbarContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <!-- Nếu đã đăng nhập -->
+                <li class="nav-item me-2" sec:authorize="isAuthenticated()">
+                    <a th:href="@{/profile}" class="btn btn-outline-primary">
+                        <i class="bi bi-person-circle me-1"></i> Hồ sơ
+                    </a>
+                </li>
+                <li class="nav-item dropdown me-2" sec:authorize="hasRole('ADMIN')">
+                    <a class="btn btn-outline-primary dropdown-toggle" href="#" id="adminMenu" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear-fill me-1"></i> Quản lý
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="adminMenu">
+                        <li><a class="dropdown-item" th:href="@{/admin/users}"><i class="bi bi-people me-2"></i>Người dùng</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/branches}"><i class="bi bi-building me-2"></i>Chi nhánh</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/services}"><i class="bi bi-scissors me-2"></i>Dịch vụ</a></li>
+                        <li><a class="dropdown-item" th:href="@{/salary/calculate}"><i class="bi bi-cash me-2"></i>Quản Lí Lương</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item me-2" sec:authorize="hasRole('CUSTOMER')">
+                    <a th:href="@{/appointments/my}" class="btn btn-outline-primary">
+                        <i class="bi bi-calendar-check me-1"></i> Lịch hẹn của tôi
+                    </a>
+                </li>
+                <li class="nav-item me-2" sec:authorize="hasRole('CUSTOMER')">
+                    <a th:href="@{/invoices/my}" class="btn btn-outline-primary">
+                        <i class="bi bi-receipt me-1"></i> Hóa đơn của tôi
+                    </a>
+                </li>
+                <li class="nav-item me-2" sec:authorize="hasAnyRole('TECHNICIAN', 'MANAGER')">
+                    <a th:href="@{/attendance}" class="btn btn-outline-primary">
+                        <i class="bi bi-receipt me-1"></i> Chấm công
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+                        </button>
+                    </form>
+                </li>
+                <!-- Nếu chưa đăng nhập -->
+                <li class="nav-item me-2" sec:authorize="isAnonymous()">
+                    <a th:href="@{/auth/login}" class="btn btn-outline-primary">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAnonymous()">
+                    <a th:href="@{/auth/register}" class="btn btn-outline-success">
+                        <i class="bi bi-person-plus me-1"></i> Đăng ký
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- Main content -->
+<div class="container py-5">
+    <h2 class="text-center">Lịch trình dịch vụ của bạn</h2>
+    <div class="row g-4">
+        <div class="col-md-4" th:each="schedule : ${schedules}">
+            <div class="glass-card h-100 d-flex flex-column">
+                <div class="card-header">
+                    <i class="fa fa-spa me-1"></i>
+                    <span th:text="${schedule.schedule.service.name}">Dịch vụ</span>
+                </div>
+                <div class="card-body">
+                    <p><i class="fa fa-building me-1"></i><strong>Chi nhánh:</strong> <span th:text="${schedule.schedule.branch.name}">Chi nhánh</span></p>
+                    <p><i class="fa fa-clock me-1"></i><strong>Giờ bắt đầu:</strong> <span th:text="${#temporals.format(schedule.schedule.startTime, 'HH:mm')}"></span></p>
+                    <p><i class="fa fa-clock me-1"></i><strong>Giờ kết thúc:</strong> <span th:text="${#temporals.format(schedule.schedule.endTime, 'HH:mm')}">Giờ kết thúc</span></p>
+                    <p>
+                        <i class="fa fa-info-circle me-1"></i>
+                        <strong>Trạng thái:</strong>
+                        <span th:class="${schedule.schedule.active ? 'text-success fw-bold' : 'text-secondary'}"
+                              th:text="${schedule.schedule.active ? 'Đang hoạt động' : 'Không hoạt động'}">Trạng thái</span>
+                    </p>
+                    <a th:if="${schedule.treatmentRecord != null}"
+                       th:href="@{/technician/treatments/view/{id}(id=${schedule.treatmentRecord.recordId})}"
+                       class="btn btn-outline-primary w-100 mb-2">
+                        <i class="bi bi-eye me-1"></i> Xem điều trị
+                    </a>
+                    <a th:if="${schedule.treatmentRecord == null and schedule.appointment != null}"
+                       th:href="@{/technician/treatments/new/{id}(id=${schedule.appointment.appointmentId})}"
+                       class="btn btn-gradient w-100">
+                        <i class="bi bi-journal-plus me-1"></i> Ghi nhận điều trị
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Footer -->
+<footer class="text-center py-3">
+    <div class="container">
+        <span class="text-muted">© 2025 SpaZone. All rights reserved.</span>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Floating Bubbles
+    function createBubbles() {
+        const container = document.createElement('div');
+        container.id = 'bubbles';
+        document.body.appendChild(container);
+        for (let i = 0; i < 10; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 35 + 20;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.top = `${Math.random() * 100}%`;
+            bubble.style.animationDelay = `${Math.random() * 8}s`;
+            container.appendChild(bubble);
+        }
+    }
+    createBubbles();
+</script>
+</body>
+</html>
