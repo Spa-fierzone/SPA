@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>OTP Verification</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            background: linear-gradient(120deg, #fff0f6 0%, #ffe4ec 100%);
+            font-family: 'Poppins', Arial, sans-serif;
+            color: #6c3a5c;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 430px;
+            margin: 40px auto;
+            background: rgba(255,255,255,0.93);
+            border-radius: 18px;
+            box-shadow: 0 6px 24px 0 rgba(255,182,193,0.18);
+            padding: 2.5rem 2rem 2rem 2rem;
+            border: 1px solid #ffe4ec;
+        }
+        .brand {
+            text-align: center;
+            margin-bottom: 1.2rem;
+        }
+        .brand-icon {
+            font-size: 2.2rem;
+            color: #ff8fab;
+            margin-bottom: 0.3rem;
+            display: block;
+        }
+        .brand-name {
+            color: #ff6b9d;
+            font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+        }
+        h2 {
+            color: #ff6b9d;
+            font-size: 1.2rem;
+            margin-bottom: 1.2rem;
+            font-weight: 700;
+            text-align: center;
+        }
+        .otp-code {
+            display: inline-block;
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+            color: #fff;
+            font-size: 2rem;
+            letter-spacing: 0.25em;
+            font-weight: 700;
+            border-radius: 12px;
+            padding: 0.7rem 1.8rem;
+            margin: 1.2rem 0;
+            box-shadow: 0 2px 8px rgba(255,182,193,0.10);
+        }
+        .footer {
+            text-align: center;
+            color: #b48a9b;
+            font-size: 0.95rem;
+            margin-top: 2rem;
+        }
+        @media (max-width: 600px) {
+            .email-container { padding: 1.2rem 0.5rem 1.2rem 0.5rem; }
+            .otp-code { font-size: 1.3rem; padding: 0.6rem 1rem;}
+        }
+    </style>
+    <!-- Font Awesome CDN cho icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+<div class="email-container">
+    <div class="brand">
+        <span class="brand-icon"><i class="fas fa-spa"></i></span>
+        <span class="brand-name">SpaZone</span>
+    </div>
+    <h2>OTP Verification</h2>
+    <p>Hello,</p>
+    <p>Your OTP verification code is:</p>
+    <div class="otp-code">
+        <span th:text="${otpCode}">123456</span>
+    </div>
+    <p>This code will expire in 10 minutes.</p>
+    <div class="footer">
+        &ndash; SpaZone Team
+    </div>
+</div>
+</body>
+</html>

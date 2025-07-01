@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết hóa đơn</title>
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(120deg, #fff0f6 0%, #ffe4ec 60%, #fdfbfb 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Poppins', Arial, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+        /* Floating Bubbles */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,182,193,0.13);
+            animation: float 8s infinite ease-in-out;
+            z-index: 0;
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0);}
+            50% { transform: translateY(-32px);}
+        }
+        /* Glassmorphism Card */
+        .glass-card, .card {
+            border-radius: 22px;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 10px 32px 0 rgba(255,182,193,0.10);
+            border: 1px solid rgba(255,182,193,0.16);
+        }
+        .navbar {
+            border-bottom: 2px solid #ffb3c6;
+            background: rgba(255,255,255,0.85) !important;
+            backdrop-filter: blur(7px);
+        }
+        h2, .glass-card h2 {
+            font-weight: bold;
+            color: #ff6b9d;
+            letter-spacing: 1px;
+        }
+        .btn-gradient, .btn-success {
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+            color: #fff !important;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.2s;
+        }
+        .btn-gradient:before, .btn-success:before {
+            content: '';
+            position: absolute;
+            left: -60%;
+            top: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(120deg,rgba(255,255,255,0.3),rgba(255,255,255,0));
+            transform: skewX(-25deg);
+            transition: left 0.5s;
+        }
+        .btn-gradient:hover, .btn-success:hover {
+            box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .btn-gradient:hover:before, .btn-success:hover:before {
+            left: 120%;
+        }
+        .btn-outline-secondary {
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #ffda44);
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #5bc0de);
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .payment-status {
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: bold;
+            display: inline-block;
+            letter-spacing: 0.5px;
+            font-size: 1rem;
+        }
+        .status-paid {
+            background-color: #d4edda;
+            color: #319e6b;
+            border: 1px solid #c3e6cb;
+        }
+        .status-unpaid {
+            background-color: #f8d7da;
+            color: #e55a87;
+            border: 1px solid #f5c6cb;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #e55a87;
+            border: 1px solid #f5c6cb;
+        }
+        .payment-methods {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .payment-method-btn {
+            flex: 1;
+            min-width: 200px;
+        }
+        .qr-code-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .qr-code-container img {
+            max-width: 200px;
+            border: 2px solid #ffe4ec;
+            border-radius: 10px;
+        }
+        .alert {
+            border-radius: 15px;
+            box-shadow: 0 2px 12px rgba(255,182,193,0.07);
+        }
+        .transaction-info {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(255,182,193,0.07);
+        }
+        .loading-spinner {
+            display: none;
+        }
+        .loading .loading-spinner {
+            display: inline-block;
+        }
+        .loading .btn-text {
+            display: none;
+        }
+        footer {
+            margin-top: auto;
+            background-color: #fff;
+            border-top: 1.5px solid #ffe4ec;
+        }
+        @media (max-width: 576px) {
+            .glass-card, .card { padding: 1.2rem 0.5rem 1.2rem 0.5rem;}
+            .qr-code-container img { max-width: 100px; }
+        }
+    </style>
+</head>
+<body>
+<!-- Floating Bubbles -->
+<div id="bubbles"></div>
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" style="color:#ff6b9d;" th:href="@{/dashboard}">
+            <i class="bi bi-flower1 me-2"></i>SpaZone
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarContent" aria-controls="navbarContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item me-2" sec:authorize="isAuthenticated()">
+                    <a th:href="@{/profile}" class="btn btn-outline-primary">
+                        <i class="bi bi-person-circle me-1"></i> Hồ sơ
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+                        </button>
+                    </form>
+                </li>
+                <li class="nav-item me-2" sec:authorize="isAnonymous()">
+                    <a th:href="@{/auth/login}" class="btn btn-outline-primary">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAnonymous()">
+                    <a th:href="@{/auth/register}" class="btn btn-outline-success">
+                        <i class="bi bi-person-plus me-1"></i> Đăng ký
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main content -->
+<div class="container py-5">
+    <!-- Alert Messages -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${success == false}" class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="glass-card p-4">
+        <h2 class="mb-4">
+            <i class="bi bi-receipt me-2"></i>
+            Chi tiết hóa đơn
+        </h2>
+        <!-- Invoice Information -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p><strong>Mã hóa đơn:</strong> <span th:text="${invoice.invoiceNumber}"></span></p>
+                <p><strong>Dịch vụ:</strong> <span th:text="${invoice.appointment.service.name}"></span></p>
+                <p><strong>Chi nhánh:</strong> <span th:text="${invoice.branch.name}"></span></p>
+                <p><strong>Ngày hẹn:</strong> <span th:text="${#temporals.format(invoice.appointment.appointmentDate, 'dd/MM/yyyy')}"></span></p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Giảm giá:</strong> <span th:text="${#numbers.formatDecimal(invoice.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span></p>
+                <p><strong>Thuế:</strong> <span th:text="${#numbers.formatDecimal(invoice.taxAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span></p>
+                <p><strong>Thành tiền:</strong> <span class="h5 text-primary fw-bold" th:text="${#numbers.formatDecimal(invoice.finalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span></p>
+                <p><strong>Trạng thái thanh toán:</strong>
+                    <span th:class="${'payment-status status-' + invoice.paymentStatus}"
+                          th:text="${invoice.paymentStatus == 'paid' ? 'Đã thanh toán' :
+                                  (invoice.paymentStatus == 'pending' ? 'Đang xử lý' :
+                                  (invoice.paymentStatus == 'cancelled' ? 'Đã hủy' : 'Chưa thanh toán'))}"></span>
+                </p>
+                <p th:if="${invoice.paymentDate != null}">
+                    <strong>Ngày thanh toán:</strong>
+                    <span th:text="${#temporals.format(invoice.paymentDate, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                </p>
+                <p th:if="${invoice.paymentMethod != null}">
+                    <strong>Phương thức:</strong>
+                    <span th:text="${invoice.paymentMethod}"></span>
+                </p>
+            </div>
+        </div>
+        <!-- Transaction Information -->
+        <div th:if="${transaction != null}" class="transaction-info">
+            <h5><i class="bi bi-credit-card me-2"></i>Thông tin giao dịch</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Mã giao dịch:</strong> <span th:text="${transaction.transactionReference}"></span></p>
+                    <p><strong>Số tiền:</strong> <span th:text="${#numbers.formatDecimal(transaction.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Trạng thái:</strong>
+                        <span th:class="${'payment-status status-' + transaction.status}"
+                              th:text="${transaction.status == 'success' ? 'Thành công' :
+                                      (transaction.status == 'pending' ? 'Đang xử lý' :
+                                      (transaction.status == 'cancelled' ? 'Đã hủy' : 'Thất bại'))}"></span>
+                    </p>
+                    <p><strong>Thời gian:</strong> <span th:text="${#temporals.format(transaction.paymentDate, 'dd/MM/yyyy HH:mm:ss')}"></span></p>
+                </div>
+            </div>
+        </div>
+        <!-- Payment Actions -->
+        <div class="payment-actions mt-4">
+            <!-- Unpaid Invoice - Show Payment Options -->
+            <div th:if="${invoice.paymentStatus == 'unpaid'}">
+                <h5 class="mb-3">
+                    <i class="bi bi-credit-card me-2"></i>
+                    Chọn phương thức thanh toán
+                </h5>
+                <div class="payment-methods">
+                    <button id="payosBtn" class="btn btn-gradient payment-method-btn"
+                            th:data-invoice-id="${invoice.invoiceId}">
+                        <span class="loading-spinner spinner-border spinner-border-sm me-2" role="status"></span>
+                        <span class="btn-text">
+                            <i class="bi bi-credit-card me-2"></i>
+                            Thanh toán qua PayOS
+                        </span>
+                    </button>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Chọn phương thức thanh toán phù hợp với bạn. Giao dịch được bảo mật và an toàn.
+                    </small>
+                </div>
+            </div>
+            <!-- Pending Payment - Show Status Check -->
+            <div th:if="${invoice.paymentStatus == 'pending'}">
+                <div class="alert alert-info">
+                    <i class="bi bi-clock-history me-2"></i>
+                    <strong>Thanh toán đang được xử lý</strong>
+                    <p class="mb-2">Giao dịch của bạn đang được xử lý. Vui lòng chờ trong giây lát.</p>
+                    <button id="checkStatusBtn" class="btn btn-info btn-sm"
+                            th:data-invoice-id="${invoice.invoiceId}">
+                        <i class="bi bi-arrow-clockwise me-1"></i>
+                        Kiểm tra trạng thái
+                    </button>
+                </div>
+            </div>
+            <!-- Paid Invoice - Show Success Message -->
+            <div th:if="${invoice.paymentStatus == 'paid'}">
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <strong>Thanh toán thành công!</strong>
+                    <p class="mb-0">Hóa đơn đã được thanh toán thành công. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
+                </div>
+            </div>
+            <!-- Cancelled Payment -->
+            <div th:if="${invoice.paymentStatus == 'cancelled'}">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Thanh toán đã bị hủy</strong>
+                    <p class="mb-2">Giao dịch thanh toán đã bị hủy. Bạn có thể thử thanh toán lại.</p>
+                    <button id="retryPaymentBtn" class="btn btn-warning btn-sm"
+                            th:data-invoice-id="${invoice.invoiceId}">
+                        <i class="bi bi-arrow-repeat me-1"></i>
+                        Thanh toán lại
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- QR Code Display (if available) -->
+        <div id="qrCodeContainer" class="qr-code-container" style="display: none;">
+            <h5>Quét mã QR để thanh toán</h5>
+            <img id="qrCodeImage" src="" alt="QR Code" />
+            <p class="mt-2 text-muted">Sử dụng ứng dụng ngân hàng để quét mã QR</p>
+        </div>
+        <!-- Back Button -->
+        <div class="mt-4">
+            <a th:href="@{/dashboard}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>
+                Quay lại
+            </a>
+        </div>
+    </div>
+</div>
+<footer class="text-center py-3 bg-white mt-auto">
+    <div class="container">
+        <span class="text-muted">© 2025 SpaZone. All rights reserved.</span>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Floating Bubbles
+    function createBubbles() {
+        const container = document.getElementById('bubbles');
+        for (let i = 0; i < 10; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 30 + 25;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.top = `${Math.random() * 100}%`;
+            bubble.style.animationDelay = `${Math.random() * 8}s`;
+            container.appendChild(bubble);
+        }
+    }
+    createBubbles();
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const payosBtn = document.getElementById('payosBtn');
+        const checkStatusBtn = document.getElementById('checkStatusBtn');
+        const retryPaymentBtn = document.getElementById('retryPaymentBtn');
+
+        // PayOS Payment Handler
+        if (payosBtn) {
+            payosBtn.addEventListener('click', function() {
+                const invoiceId = this.dataset.invoiceId;
+                const btn = this;
+                btn.classList.add('loading');
+                btn.disabled = true;
+                window.location.href = `/payment/payos/${invoiceId}`;
+            });
+        }
+        // Check Payment Status
+        if (checkStatusBtn) {
+            checkStatusBtn.addEventListener('click', function() {
+                const invoiceId = this.dataset.invoiceId;
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1 spinner"></i> Đang kiểm tra...';
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            });
+        }
+        // Retry Payment
+        if (retryPaymentBtn) {
+            retryPaymentBtn.addEventListener('click', function() {
+                const invoiceId = this.dataset.invoiceId;
+                window.location.href = `/payment/payos/${invoiceId}`;
+            });
+        }
+        // Auto-refresh for pending payments
+        const paymentStatus = document.querySelector('.payment-status');
+        if (paymentStatus && paymentStatus.classList.contains('status-pending')) {
+            setTimeout(() => {
+                if (document.visibilityState === 'visible') {
+                    window.location.reload();
+                }
+            }, 30000);
+        }
+        // Display QR Code if available
+        const qrCode = '[[${qrCode}]]';
+        if (qrCode && qrCode !== '') {
+            const qrContainer = document.getElementById('qrCodeContainer');
+            const qrImage = document.getElementById('qrCodeImage');
+            qrImage.src = qrCode;
+            qrContainer.style.display = 'block';
+        }
+    });
+    // Add CSS animation for spinner
+    const style = document.createElement('style');
+    style.textContent = `
+    .spinner {
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    `;
+    document.head.appendChild(style);
+</script>
+</body>
+</html>
