@@ -3,19 +3,147 @@
 <head>
     <meta charset="UTF-8" />
     <title>Email Verification Failed</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet"/>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <style>
+        body {
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(120deg, #fff0f6 0%, #ffe4ec 60%, #fdfbfb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Floating Bubbles */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,182,193,0.13);
+            animation: float 8s infinite ease-in-out;
+            z-index: 0;
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0);}
+            50% { transform: translateY(-32px);}
+        }
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255,255,255,0.7);
+            border-radius: 22px;
+            box-shadow: 0 8px 32px 0 rgba(31,38,135,0.10);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,182,193,0.16);
+            padding: 2.5rem 2rem 2rem 2rem;
+            position: relative;
+            z-index: 1;
+            animation: floatCard 4s infinite ease-in-out;
+        }
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0);}
+            50% { transform: translateY(-8px);}
+        }
+        .fail-icon {
+            color: #e55a87;
+            font-size: 3.2rem;
+            margin-bottom: 0.7rem;
+            animation: pop 0.7s cubic-bezier(.68,-0.55,.27,1.55);
+        }
+        @keyframes pop {
+            0% { transform: scale(0.7);}
+            60% { transform: scale(1.2);}
+            100% { transform: scale(1);}
+        }
+        h2 {
+            color: #e55a87;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 1.45rem;
+        }
+        .alert-danger {
+            background: rgba(229,90,135,0.10);
+            color: #e55a87;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 1.2rem;
+        }
+        .btn-gradient {
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.2s;
+        }
+        .btn-gradient:before {
+            content: '';
+            position: absolute;
+            left: -60%;
+            top: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(120deg,rgba(255,255,255,0.3),rgba(255,255,255,0));
+            transform: skewX(-25deg);
+            transition: left 0.5s;
+        }
+        .btn-gradient:hover {
+            box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .btn-gradient:hover:before {
+            left: 120%;
+        }
+        @media (max-width: 576px) {
+            .glass-card { padding: 1.5rem 0.5rem 1.5rem 0.5rem;}
+        }
+    </style>
 </head>
 <body>
-<div class="container mt-5" style="max-width: 480px;">
-    <h2 class="mb-4 text-center text-danger">Email Verification Failed</h2>
-
-    <div class="alert alert-danger" th:text="${error}"></div>
-
-    <p class="text-center">
-        <a th:href="@{/auth/register}" class="btn btn-primary">Register again</a>
-    </p>
+<!-- Floating Bubbles -->
+<div id="bubbles"></div>
+<div class="container" style="max-width: 430px;">
+    <div class="glass-card text-center">
+        <div class="fail-icon">
+            <i class="fas fa-times-circle"></i>
+        </div>
+        <h2>Email Verification Failed</h2>
+        <div class="alert alert-danger" th:text="${error}"></div>
+        <a th:href="@{/auth/register}" class="btn btn-gradient w-100 mt-3 py-2">
+            <i class="fas fa-user-plus me-2"></i>Register again
+        </a>
+    </div>
 </div>
-
+<!-- Bubble Script -->
+<script>
+    // Floating Bubbles
+    function createBubbles() {
+        const container = document.getElementById('bubbles');
+        for (let i = 0; i < 8; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 30 + 25;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.top = `${Math.random() * 100}%`;
+            bubble.style.animationDelay = `${Math.random() * 8}s`;
+            container.appendChild(bubble);
+        }
+    }
+    createBubbles();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

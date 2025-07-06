@@ -1,14 +1,9 @@
 package com.spazone.controller;
 
-import com.spazone.entity.Appointment;
-import com.spazone.entity.Invoice;
-import com.spazone.entity.Service;
-import com.spazone.entity.User;
+import com.spazone.entity.*;
+import com.spazone.repository.AppointmentRepository;
 import com.spazone.repository.UserRepository;
-import com.spazone.service.AppointmentService;
-import com.spazone.service.BranchService;
-import com.spazone.service.InvoiceService;
-import com.spazone.service.UserService;
+import com.spazone.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -16,7 +11,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/appointments")
@@ -37,6 +35,15 @@ public class AppointmentController {
     @Autowired
     private InvoiceService invoiceService;
 
+    @Autowired
+    private SpaServiceService spaServiceService;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
+
+    @Autowired
+    private RoomService roomService;
+
     private boolean isAuthenticatedUser(Authentication authentication) {
         return authentication != null &&
                 authentication.isAuthenticated() &&
@@ -50,29 +57,152 @@ public class AppointmentController {
         Service service = new Service();
         service.setServiceId(serviceId);
         appointment.setService(service);
-
         model.addAttribute("appointment", appointment);
         model.addAttribute("branches", branchService.findAllActive());
         model.addAttribute("technicians", userRepository.findUsersByRole("TECHNICIAN"));
+        // Add availableRooms if branch, date, and time are provided (for initial load, can be empty)
+        model.addAttribute("availableRooms", java.util.Collections.emptyList());
+        return "appointment/form";
+    }
+
+    @GetMapping("/book")
+    public String showBookingFormMulti(@RequestParam(value = "serviceIds", required = false) List<Integer> serviceIds,
+                                       @RequestParam(value = "branchId", required = false) Integer branchId,
+                                       @RequestParam(value = "datePart", required = false) String datePart,
+                                       @RequestParam(value = "timePart", required = false) String timePart,
+                                       Model model) {
+        model.addAttribute("branches", branchService.findAllActive());
+        model.addAttribute("technicians", userRepository.findUsersByRole("TECHNICIAN"));
+        model.addAttribute("services", spaServiceService.findAllActive());
+        model.addAttribute("selectedServiceIds", serviceIds);
+        // Use findAvailableRooms if enough info is provided
+        if (branchId != null && datePart != null && timePart != null) {
+            Branch branch = branchService.getById(branchId);
+            LocalDateTime startTime = LocalDateTime.parse(datePart + "T" + timePart);
+            // For demo, assume 1 hour duration if not known
+            LocalDateTime endTime = startTime.plusHours(1);
+            List<Room> availableRooms = roomService.findAvailableRooms(branch, startTime, endTime);
+            model.addAttribute("availableRooms", availableRooms);
+        } else {
+            model.addAttribute("availableRooms", java.util.Collections.emptyList());
+        }
         return "appointment/form";
     }
 
     @PostMapping("/book")
-    public String submitBooking(@ModelAttribute Appointment appointment,
-                                Authentication authentication ,
+    public String submitBooking(@RequestParam("serviceId") Integer serviceId,
+                                @RequestParam("branchId") Integer branchId,
+                                @RequestParam("technicianId") Integer technicianId,
+                                @RequestParam("datePart") String datePart,
+                                @RequestParam("timePart") String timePart,
+                                @RequestParam(value = "notes", required = false) String notes,
+                                Authentication authentication,
                                 RedirectAttributes redirectAttributes) {
         if (!isAuthenticatedUser(authentication)) {
             return "redirect:/auth/login";
         }
-        String username = authentication.getName();
-        User customer = userService.findByEmail(username);
-        appointment.setCustomer(customer);
-        appointmentService.create(appointment);
+        try {
+            LocalDateTime startTime = LocalDateTime.parse(datePart + "T" + timePart);
+            LocalDateTime maxAllowed = LocalDateTime.now().plusMonths(3);
+            if (startTime.isAfter(maxAllowed)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Bạn chỉ có thể đặt lịch trong vòng 3 tháng tới.");
+                return "redirect:/appointments/book";
+            }
+            Branch branch = branchService.getById(branchId);
+            User customer = userService.findByEmail(authentication.getName());
+            Service service = spaServiceService.getServiceById(serviceId);
+            int duration = service.getDuration();
+            LocalDateTime endTime = startTime.plusMinutes(duration);
+            User technician;
+            if (technicianId == null || technicianId == 0) {
+                List<User> availableTechnicians = userService.findTechniciansByBranch(branchId);
+                List<User> freeTechnicians = availableTechnicians.stream()
+                        .filter(t -> appointmentRepository.findConflictingAppointments(t.getUserId(), startTime, endTime).isEmpty())
+                        .collect(Collectors.toList());
+                if (freeTechnicians.isEmpty()) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Không có kỹ thuật viên nào rảnh tại thời gian đã chọn cho dịch vụ: " + service.getName());
+                    return "redirect:/appointments/book";
+                }
+                Collections.shuffle(freeTechnicians);
+                technician = freeTechnicians.get(0);
+            } else {
+                technician = userService.getUserById(technicianId);
+            }
+            Appointment appointment = new Appointment();
+            appointment.setService(service);
+            appointment.setBranch(branch);
+            appointment.setTechnician(technician);
+            appointment.setCustomer(customer);
+            appointment.setStartTime(startTime);
+            appointment.setAppointmentDate(startTime);
+            appointment.setNotes(notes);
+            appointmentService.create(appointment);
+            return "redirect:/appointments/my";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể đặt lịch: " + e.getMessage());
+            return "redirect:/appointments/book";
+        }
+    }
 
-        // ✅ Tạo hóa đơn sau khi đặt lịch
-        Invoice invoice = invoiceService.generateInvoiceForAppointment(appointment);
-
-        return "redirect:/invoices/" + invoice.getInvoiceId();
+    @PostMapping("/book-multi")
+    public String submitBookingMulti(@RequestParam("serviceIds") List<Integer> serviceIds,
+                                     @RequestParam("branchId") Integer branchId,
+                                     @RequestParam("technicianId") Integer technicianId,
+                                     @RequestParam("datePart") String datePart,
+                                     @RequestParam("timePart") String timePart,
+                                     @RequestParam(value = "notes", required = false) String notes,
+                                     Authentication authentication,
+                                     RedirectAttributes redirectAttributes) {
+        if (!isAuthenticatedUser(authentication)) {
+            return "redirect:/auth/login";
+        }
+        try {
+            LocalDateTime startTime = LocalDateTime.parse(datePart + "T" + timePart);
+            LocalDateTime maxAllowed = LocalDateTime.now().plusMonths(3);
+            if (startTime.isAfter(maxAllowed)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Bạn chỉ có thể đặt lịch trong vòng 3 tháng tới.");
+                return "redirect:/appointments/book";
+            }
+            Branch branch = branchService.getById(branchId);
+            User customer = userService.findByEmail(authentication.getName());
+            List<Appointment> createdAppointments = new java.util.ArrayList<>();
+            for (Integer serviceId : serviceIds) {
+                Service service = spaServiceService.getServiceById(serviceId);
+                int duration = service.getDuration();
+                LocalDateTime endTime = startTime.plusMinutes(duration);
+                User technician;
+                if (technicianId == null || technicianId == 0) {
+                    List<User> availableTechnicians = userService.findTechniciansByBranch(branchId);
+                    List<User> freeTechnicians = availableTechnicians.stream()
+                            .filter(t -> appointmentRepository.findConflictingAppointments(t.getUserId(), startTime, endTime).isEmpty())
+                            .collect(Collectors.toList());
+                    if (freeTechnicians.isEmpty()) {
+                        redirectAttributes.addFlashAttribute("errorMessage", "Không có kỹ thuật viên nào rảnh tại thời gian đã chọn cho dịch vụ: " + service.getName());
+                        return "redirect:/appointments/book";
+                    }
+                    Collections.shuffle(freeTechnicians);
+                    technician = freeTechnicians.get(0);
+                } else {
+                    technician = userService.getUserById(technicianId);
+                }
+                Appointment appointment = new Appointment();
+                appointment.setService(service);
+                appointment.setBranch(branch);
+                appointment.setTechnician(technician);
+                appointment.setCustomer(customer);
+                appointment.setStartTime(startTime);
+                appointment.setAppointmentDate(startTime);
+                appointment.setNotes(notes);
+                appointmentService.create(appointment);
+                createdAppointments.add(appointment);
+            }
+            // Generate a single invoice for all appointments
+            Invoice invoice = invoiceService.createInvoiceForAppointments(createdAppointments, "PAYOS", notes);
+            return "redirect:/payment/payos/" + invoice.getInvoiceId();
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể đặt lịch: " + e.getMessage());
+            return "redirect:/appointments/book";
+        }
     }
 
     @GetMapping("/my")
@@ -87,5 +217,74 @@ public class AppointmentController {
         model.addAttribute("appointments", appointments);
         return "appointment/list";
     }
-}
 
+    @GetMapping("/{id}/treatment-records")
+    public String viewTreatmentRecords(@PathVariable("id") Integer appointmentId, Model model) {
+        Appointment appointment = appointmentService.findByIdWithTreatmentRecords(appointmentId);
+        if (appointment == null) {
+            return "redirect:/appointments?error=AppointmentNotFound";
+        }
+
+        model.addAttribute("appointment", appointment);
+        model.addAttribute("treatmentRecords", appointment.getTreatmentRecords());
+        return "appointment/treatment-records";
+    }
+
+    @GetMapping("/book-multi")
+    public String showMultiBookingForm(Model model) {
+        model.addAttribute("branches", branchService.findAllActive());
+        model.addAttribute("technicians", userRepository.findUsersByRole("TECHNICIAN"));
+        model.addAttribute("services", spaServiceService.findAllActive());
+        return "appointment/form-multi";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String showEditAppointmentForm(@PathVariable("id") Integer id, Model model) {
+        Appointment appointment = appointmentService.findById(id);
+        if (appointment == null) {
+            return "redirect:/reception/appointments?error=AppointmentNotFound";
+        }
+        List<Room> availableRooms = roomService.findAvailableRooms(
+            appointment.getBranch(),
+            appointment.getStartTime(),
+            appointment.getEndTime()
+        );
+        boolean canCheckout = appointment.getCheckinTime() != null && appointment.getCheckoutTime() == null;
+        model.addAttribute("appointment", appointment);
+        model.addAttribute("availableRooms", availableRooms);
+        model.addAttribute("branches", branchService.findAllActive());
+        model.addAttribute("technicians", userRepository.findUsersByRole("TECHNICIAN"));
+        model.addAttribute("customers", userRepository.findUsersByRole("CUSTOMER"));
+        model.addAttribute("services", spaServiceService.findAllActive());
+        model.addAttribute("canCheckout", canCheckout);
+        return "reception/appointment-create";
+    }
+
+    @PostMapping("/edit/{id}")
+    public String updateAppointment(@PathVariable("id") Integer id,
+                                    @RequestParam(value = "roomId", required = false) Integer roomId,
+                                    @RequestParam(value = "checkoutTime", required = false) String checkoutTimeStr,
+                                    RedirectAttributes redirectAttributes) {
+        Appointment appointment = appointmentService.findById(id);
+        if (appointment == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy lịch hẹn.");
+            return "redirect:/reception/appointments";
+        }
+        if (roomId != null) {
+            Room room = roomService.findById(roomId);
+            appointment.setRoom(room);
+        }
+        if (checkoutTimeStr != null && !checkoutTimeStr.isEmpty()) {
+            try {
+                LocalDateTime checkoutTime = LocalDateTime.parse(checkoutTimeStr);
+                appointment.setCheckoutTime(checkoutTime);
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Định dạng thời gian checkout không hợp lệ.");
+                return "redirect:/appointments/edit/" + id;
+            }
+        }
+        appointmentService.update(appointment);
+        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật lịch hẹn thành công.");
+        return "redirect:/reception/appointments";
+    }
+}

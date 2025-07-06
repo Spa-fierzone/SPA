@@ -9,14 +9,44 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.spazone.entity.Membership;
+import com.spazone.entity.MembershipOrder;
+import com.spazone.entity.CustomerMembership;
+import com.spazone.entity.FavoriteService;
+import com.spazone.entity.Appointment;
+import com.spazone.entity.ServiceRating;
+import com.spazone.repository.MembershipOrderRepository;
+import com.spazone.repository.CustomerMembershipRepository;
+import com.spazone.repository.FavoriteServiceRepository;
+import com.spazone.repository.AppointmentRepository;
+import com.spazone.repository.ServiceRatingRepository;
+
+import java.util.List;
+import java.util.Optional;
+
 @Controller
 @RequestMapping("/profile")
 public class ProfileController {
 
     private final UserService userService;
+    private final MembershipOrderRepository membershipOrderRepository;
+    private final CustomerMembershipRepository customerMembershipRepository;
+    private final FavoriteServiceRepository favoriteServiceRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final ServiceRatingRepository serviceRatingRepository;
 
-    public ProfileController(UserService userService) {
+    public ProfileController(UserService userService,
+                            MembershipOrderRepository membershipOrderRepository,
+                            CustomerMembershipRepository customerMembershipRepository,
+                            FavoriteServiceRepository favoriteServiceRepository,
+                            AppointmentRepository appointmentRepository,
+                            ServiceRatingRepository serviceRatingRepository) {
         this.userService = userService;
+        this.membershipOrderRepository = membershipOrderRepository;
+        this.customerMembershipRepository = customerMembershipRepository;
+        this.favoriteServiceRepository = favoriteServiceRepository;
+        this.appointmentRepository = appointmentRepository;
+        this.serviceRatingRepository = serviceRatingRepository;
     }
 
     private boolean isAuthenticatedUser(Authentication authentication) {
@@ -32,10 +62,21 @@ public class ProfileController {
             return "redirect:/auth/login";
         }
         String username = authentication.getName();
-
         try {
             UserProfileDto profile = userService.getUserProfile(username);
             model.addAttribute("profile", profile);
+            // Membership status
+            Optional<CustomerMembership> membershipOpt = customerMembershipRepository.findByCustomerEmail(username);
+            membershipOpt.ifPresent(membership -> model.addAttribute("membership", membership));
+            // Treatment plans (appointments)
+            List<Appointment> appointments = appointmentRepository.findByCustomerEmail(username);
+            model.addAttribute("appointments", appointments);
+            // Favorite services
+            List<FavoriteService> favorites = favoriteServiceRepository.findByCustomerEmail(username);
+            model.addAttribute("favoriteServices", favorites);
+            // Service ratings
+            List<ServiceRating> ratings = serviceRatingRepository.findByCustomerEmail(username);
+            model.addAttribute("serviceRatings", ratings);
             return "profile/view";
         } catch (Exception e) {
             model.addAttribute("error", "Unable to load profile: " + e.getMessage());

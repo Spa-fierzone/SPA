@@ -4,102 +4,277 @@
     <meta charset="UTF-8">
     <title>Tính Lương Tháng</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Poppins font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <style>
+        :root {
+            --primary-pink: #ff6b9d;
+            --light-pink: #ff8fab;
+            --pastel-pink: #ffb6c1;
+            --pastel-light: #ffe4ec;
+            --pastel-bg: #fff0f6;
+        }
         body {
-            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
+            background: linear-gradient(120deg, var(--pastel-bg) 0%, var(--pastel-light) 60%, #fdfbfb 100%);
             min-height: 100vh;
+            font-family: 'Poppins', Arial, sans-serif;
             display: flex;
             flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            animation: gradientShift 15s infinite alternate;
         }
-
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        /* Floating Bubbles */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,182,193,0.13);
+            animation: float 8s infinite ease-in-out;
+            z-index: 0;
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0);}
+            50% { transform: translateY(-32px);}
+        }
+        /* Glassmorphism Navbar */
         .navbar {
-            border-bottom: 2px solid #ffb3c6;
+            background: rgba(255,255,255,0.85) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1.5px solid rgba(255,182,193,0.18);
+            box-shadow: 0 2px 8px rgba(255,182,193,0.08);
         }
-
-        h2, h3, h4, h5 {
-            color: #fff;
-            font-weight: bold;
+        .navbar-brand {
+            color: var(--primary-pink) !important;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
-
+        /* Glassmorphism Card */
         .salary-card {
-            background: linear-gradient(135deg, #ff6b9d, #ffb3c6);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            color: white;
+            background: rgba(255,255,255,0.7);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(31,38,135,0.10);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,182,193,0.18);
+            color: var(--primary-pink);
+            animation: floatCard 4s infinite ease-in-out;
         }
-
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0);}
+            50% { transform: translateY(-8px);}
+        }
+        .salary-card h2, .salary-card h4, .salary-card p {
+            color: var(--primary-pink);
+        }
         .filter-section {
-            background: #fff;
-            border-radius: 10px;
+            background: rgba(255,255,255,0.85);
+            border-radius: 16px;
             padding: 1.5rem;
             margin-bottom: 2rem;
-            border-left: 4px solid #ff6b9d;
+            border-left: 4px solid var(--primary-pink);
+            box-shadow: 0 2px 10px rgba(255,182,193,0.08);
+            backdrop-filter: blur(8px);
+            animation: slideIn 0.9s cubic-bezier(.68,-0.55,.27,1.55);
         }
-
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(40px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .stats-card {
+            background: rgba(255,255,255,0.7);
+            border-radius: 18px;
+            padding: 1.2rem 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(255,182,193,0.10);
+            animation: floatCard 4s infinite ease-in-out;
+        }
         .table-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.7);
+            border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(255,182,193,0.10);
             overflow: hidden;
+            backdrop-filter: blur(8px);
+            animation: floatCard 4s infinite ease-in-out;
         }
-
         .table th {
-            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            background: linear-gradient(90deg, var(--primary-pink), var(--light-pink));
             color: white;
             font-weight: 600;
             text-align: center;
         }
-
-        .table tbody tr:hover {
-            background-color: #fff0f5;
-            transition: all 0.2s ease;
+        .table tbody tr {
+            transition: transform 0.3s, background 0.3s;
+            background: rgba(255,255,255,0.6);
         }
-
+        .table tbody tr:hover {
+            transform: translateY(-2px);
+            background: rgba(255,255,255,0.9) !important;
+            box-shadow: 0 4px 12px rgba(255,182,193,0.15);
+        }
         .amount-display {
             font-family: 'Courier New', monospace;
             font-weight: bold;
         }
-
         .btn-outline-primary {
-            border-color: #ff8fab;
-            color: #ff6b9d;
+            border-color: var(--light-pink);
+            color: var(--primary-pink);
+            border-radius: 12px;
+            font-weight: 600;
         }
-
         .btn-outline-primary:hover {
-            background-color: #ff8fab;
+            background-color: var(--light-pink);
             color: white;
         }
-
-        .btn-success {
-            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+        .btn-success, .btn-action {
+            background: linear-gradient(90deg, var(--primary-pink), var(--light-pink));
             border: none;
+            border-radius: 14px;
+            font-weight: 600;
+            color: #fff !important;
+            box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.2s;
         }
-
-        .btn-success:hover {
-            background: linear-gradient(135deg, #ff8fab, #ffb3c6);
+        .btn-success:before, .btn-action:before {
+            content: '';
+            position: absolute;
+            left: -60%;
+            top: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(120deg,rgba(255,255,255,0.3),rgba(255,255,255,0));
+            transform: skewX(-25deg);
+            transition: left 0.5s;
         }
-
+        .btn-success:hover, .btn-action:hover {
+            box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .btn-success:hover:before, .btn-action:hover:before {
+            left: 120%;
+        }
+        .btn-outline-secondary {
+            border-radius: 14px;
+            font-weight: 600;
+        }
+        .form-select, .form-control {
+            background-color: #fff0f6 !important;
+            border: 1.5px solid #ffb6c1;
+            color: #6c3a5c;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-select:focus, .form-control:focus {
+            background-color: #ffe4ec !important;
+            border-color: #ff8fab;
+            box-shadow: 0 0 8px rgba(255, 139, 171, 0.3);
+            color: #6c3a5c;
+        }
+        .form-select:valid, .form-control:valid {
+            border-color: #28a745 !important;
+            animation: pulseValid 0.5s;
+        }
+        .form-select:invalid, .form-control:invalid {
+            border-color: #dc3545 !important;
+            animation: shake 0.5s;
+        }
+        @keyframes pulseValid {
+            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        .form-label {
+            color: #c77d8c;
+            font-weight: 600;
+        }
+        .badge-status {
+            font-size: 1rem;
+            padding: 0.5em 1em;
+            border-radius: 18px;
+            box-shadow: 0 2px 8px rgba(255,182,193,0.12);
+            font-weight: 600;
+        }
+        .avatar-circle {
+            background: linear-gradient(135deg, #ffb6c1 0%, #ffe4ec 100%);
+            border: 2px solid #ff8fab;
+            box-shadow: 0 2px 8px rgba(255,182,193,0.13);
+            font-weight: 700;
+        }
+        .checkbox-wrapper input[type="checkbox"] {
+            accent-color: #ff8fab;
+            transform: scale(1.2);
+        }
+        .alert-custom {
+            font-weight: 500;
+            font-size: 1.05rem;
+        }
         footer {
             margin-top: auto;
-            background-color: #fff;
+            background-color: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            border-top: 1.5px solid rgba(255,182,193,0.18);
+        }
+        /* Loading Spinner */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0; top: 0; width: 100vw; height: 100vh;
+            background: rgba(255,255,255,0.55);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+        .loading-overlay.active { display: flex; }
+        .spinner {
+            width: 54px; height: 54px;
+            border: 6px solid #ffe4ec;
+            border-top: 6px solid #ff6b9d;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg);}
+            100% { transform: rotate(360deg);}
+        }
+        @media (max-width: 768px) {
+            .salary-card, .glass-card, .filter-section { padding: 1.2rem; }
+            .stats-card { padding: 0.8rem 0.5rem; }
+            h2, h3, h4, h5 { font-size: 1.2rem; }
         }
     </style>
 </head>
 <body>
-
+<!-- Floating Bubbles -->
+<div id="bubbles"></div>
+<!-- Loading Spinner -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+</div>
 <!-- Header -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm">
     <div class="container">
-        <a class="navbar-brand text-danger fw-bold" th:href="@{/dashboard}">SpaZone</a>
+        <a class="navbar-brand fw-bold" th:href="@{/dashboard}">
+            <i class="fas fa-spa me-2"></i>SpaZone
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarContent" aria-controls="navbarContent"
                 aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse" id="navbarContent">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item me-2" sec:authorize="isAuthenticated()">
@@ -140,12 +315,11 @@
         </div>
     </div>
 </nav>
-
 <!-- Main content -->
 <div class="container py-4">
     <div class="container-fluid py-4">
         <!-- Header -->
-        <div class="salary-card">
+        <div class="salary-card mb-4">
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <h2 class="mb-1"><i class="fas fa-calculator me-2"></i>Tính Lương Nhân Viên</h2>
@@ -156,7 +330,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Alert Messages -->
         <div class="alert alert-success alert-custom alert-dismissible fade show" role="alert"
              th:if="${success}" th:text="${success}">
@@ -170,10 +343,9 @@
              th:if="${error}" th:text="${error}">
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-
         <!-- Filter Section -->
         <div class="filter-section">
-            <form method="get" action="/salary/calculate" class="row g-3">
+            <form method="get" action="/salary/calculate" class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label class="form-label fw-bold"><i class="fas fa-calendar me-1"></i>Tháng</label>
                     <select name="month" class="form-select" th:value="${selectedMonth}">
@@ -191,13 +363,11 @@
                         <option value="12" th:selected="${selectedMonth == 12}">Tháng 12</option>
                     </select>
                 </div>
-
                 <div class="col-md-3">
                     <label class="form-label fw-bold"><i class="fas fa-calendar-alt me-1"></i>Năm</label>
                     <input type="number" name="year" class="form-select" th:value="${selectedYear}"
                            min="2020" max="2030" placeholder="Năm">
                 </div>
-
                 <div class="col-md-4">
                     <label class="form-label fw-bold"><i class="fas fa-building me-1"></i>Chi Nhánh</label>
                     <select name="branchId" class="form-select">
@@ -209,43 +379,40 @@
                         </option>
                     </select>
                 </div>
-
                 <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary btn-action w-100">
+                    <button type="submit" class="btn btn-primary btn-action w-100 ripple-btn">
                         <i class="fas fa-search me-1"></i>Tìm kiếm
                     </button>
                 </div>
             </form>
         </div>
-
         <!-- Statistics Cards -->
         <div class="row mb-4" th:if="${calculations}">
             <div class="col-md-3">
                 <div class="stats-card border-start border-primary border-4">
-                    <h5 class="text-primary mb-1">Tổng nhân viên</h5>
+                    <h5 class="text-primary mb-1"><i class="fas fa-users me-1"></i> Tổng nhân viên</h5>
                     <h3 class="mb-0" th:text="${#lists.size(calculations)}">0</h3>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stats-card border-start border-success border-4">
-                    <h5 class="text-success mb-1">Đã có lương</h5>
+                    <h5 class="text-success mb-1"><i class="fas fa-check-circle me-1"></i> Đã có lương</h5>
                     <h3 class="mb-0" th:text="${#aggregates.sum(calculations.![hasSalaryRecord ? 1 : 0])}">0</h3>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stats-card border-start border-warning border-4">
-                    <h5 class="text-warning mb-1">Chưa có lương</h5>
+                    <h5 class="text-warning mb-1"><i class="fas fa-clock me-1"></i> Chưa có lương</h5>
                     <h3 class="mb-0" th:text="${#aggregates.sum(calculations.![hasSalaryRecord ? 0 : 1])}">0</h3>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stats-card border-start border-info border-4">
-                    <h5 class="text-info mb-1">Tổng lương</h5>
+                    <h5 class="text-info mb-1"><i class="fas fa-coins me-1"></i> Tổng lương</h5>
                     <h3 class="mb-0 amount-display" th:text="${#numbers.formatDecimal(#aggregates.sum(calculations.![netSalary]), 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VNĐ</h3>
                 </div>
             </div>
         </div>
-
         <!-- Main Table -->
         <div class="table-container">
             <form id="salaryForm" method="post" action="/salary/save">
@@ -253,7 +420,6 @@
                 <input type="hidden" name="month" th:value="${selectedMonth}">
                 <input type="hidden" name="year" th:value="${selectedYear}">
                 <input type="hidden" name="branchId" th:value="${selectedBranchId}">
-
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
                         <thead>
@@ -263,18 +429,18 @@
                                     <input type="checkbox" id="selectAll" class="form-check-input">
                                 </div>
                             </th>
-                            <th>Nhân viên</th>
-                            <th>Chi nhánh</th>
-                            <th>Chức vụ</th>
-                            <th>Lương cơ bản</th>
-                            <th>Lương thực tế</th>
-                            <th>Giờ làm thêm</th>
-                            <th>Trạng thái</th>
-                            <th>Action</th>
+                            <th><i class="fas fa-user me-1"></i> Nhân viên</th>
+                            <th><i class="fas fa-map-marker-alt me-1"></i> Chi nhánh</th>
+                            <th><i class="fas fa-user-tie me-1"></i> Chức vụ</th>
+                            <th><i class="fas fa-money-bill-wave me-1"></i> Lương cơ bản</th>
+                            <th><i class="fas fa-wallet me-1"></i> Lương thực tế</th>
+                            <th><i class="fas fa-clock me-1"></i> Giờ làm thêm</th>
+                            <th><i class="fas fa-info-circle me-1"></i> Trạng thái</th>
+                            <th><i class="fas fa-cogs me-1"></i> Action</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="calc : ${calculations}">
+                        <tr th:each="calc : ${calculations}" class="salary-row">
                             <td>
                                 <div class="checkbox-wrapper">
                                     <input type="checkbox"
@@ -309,15 +475,14 @@
                             </span>
                             </td>
                             <td>
-                                <a th:href="@{/salary/admin/user/{userId}/set-base-salary(userId=${calc.user.userId})}" class="btn btn-sm btn-secondary">
-                                    Cập nhật lương cơ bản
+                                <a th:href="@{/salary/admin/user/{userId}/set-base-salary(userId=${calc.user.userId})}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit me-1"></i> Cập nhật
                                 </a>
                             </td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
-
                 <!-- Action Buttons -->
                 <div class="p-3 bg-light border-top">
                     <div class="row align-items-center">
@@ -328,10 +493,10 @@
                             </small>
                         </div>
                         <div class="col-md-6 text-end">
-                            <button type="button" class="btn btn-outline-secondary btn-action me-2" onclick="selectNewRecords()">
+                            <button type="button" class="btn btn-outline-secondary btn-action me-2 ripple-btn" onclick="selectNewRecords()">
                                 <i class="fas fa-check-square me-1"></i>Chọn bản ghi mới
                             </button>
-                            <button type="submit" class="btn btn-success btn-action" onclick="return confirmSave()">
+                            <button type="submit" class="btn btn-success btn-action ripple-btn" onclick="return confirmSave()">
                                 <i class="fas fa-save me-1"></i>Lưu bản ghi đã chọn
                             </button>
                         </div>
@@ -341,16 +506,56 @@
         </div>
     </div>
 </div>
-
 <!-- Footer -->
 <footer class="text-center py-3 mt-auto">
     <div class="container">
         <span class="text-muted">© 2025 SpaZone. All rights reserved.</span>
     </div>
 </footer>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // Floating Bubbles
+    function createBubbles() {
+        const container = document.createElement('div');
+        container.id = 'bubbles';
+        document.body.appendChild(container);
+        for (let i = 0; i < 12; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 40 + 20;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.top = `${Math.random() * 100}%`;
+            bubble.style.animationDelay = `${Math.random() * 8}s`;
+            container.appendChild(bubble);
+        }
+    }
+    createBubbles();
+
+    // Slide-in animation for salary rows
+    document.querySelectorAll('.salary-row').forEach((row, index) => {
+        row.style.opacity = '0';
+        row.style.transform = 'translateY(24px)';
+        setTimeout(() => {
+            row.style.transition = 'opacity 0.6s, transform 0.6s';
+            row.style.opacity = '1';
+            row.style.transform = 'translateY(0)';
+        }, 100 * index);
+    });
+
+    // Ripple effect for buttons
+    document.querySelectorAll('.ripple-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            ripple.style.left = `${e.offsetX}px`;
+            ripple.style.top = `${e.offsetY}px`;
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+
     // Select all functionality
     document.getElementById('selectAll').addEventListener('change', function() {
         const checkboxes = document.querySelectorAll('.row-checkbox:not(:disabled)');
@@ -360,7 +565,7 @@
     });
 
     // Select only new records (not saved yet)
-    function selectNewRecords() {
+    window.selectNewRecords = function() {
         const checkboxes = document.querySelectorAll('.row-checkbox:not(:disabled)');
         checkboxes.forEach(checkbox => {
             checkbox.checked = true;
@@ -368,13 +573,14 @@
     }
 
     // Confirm before saving
-    function confirmSave() {
+    window.confirmSave = function() {
         const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
         if (selectedCheckboxes.length === 0) {
             alert('Vui lòng chọn ít nhất một nhân viên để lưu!');
             return false;
         }
-
+        // Loading state
+        document.getElementById('loadingOverlay').classList.add('active');
         return confirm(`Bạn có chắc chắn muốn lưu ${selectedCheckboxes.length} bản ghi lương?`);
     }
 
@@ -384,7 +590,6 @@
             const allCheckboxes = document.querySelectorAll('.row-checkbox:not(:disabled)');
             const checkedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
             const selectAllCheckbox = document.getElementById('selectAll');
-
             if (checkedCheckboxes.length === 0) {
                 selectAllCheckbox.indeterminate = false;
                 selectAllCheckbox.checked = false;
@@ -397,5 +602,27 @@
         }
     });
 </script>
+<style>
+    /* Ripple effect for buttons */
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        transform: scale(0);
+        animation: ripple 0.6s linear;
+        background: rgba(255,255,255,0.5);
+        pointer-events: none;
+        width: 100px;
+        height: 100px;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    @keyframes ripple {
+        to {
+            transform: translate(-50%, -50%) scale(2.5);
+            opacity: 0;
+        }
+    }
+</style>
 </body>
 </html>

@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -135,6 +136,38 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<SalaryRecord> salaryRecords;
+
+    // One-to-Many relationship with WorkSchedule
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<WorkSchedule> workSchedules;
+
+    public List<Attendance> getAttendances() {
+        return attendances;
+    }
+
+    public void setAttendances(List<Attendance> attendances) {
+        this.attendances = attendances;
+    }
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Attendance> attendances;
+
+
+    @Column(name = "base_salary", precision = 10, scale = 2)  // Adding base salary
+    private BigDecimal baseSalary;
+
+    public BigDecimal getBaseSalary() {
+        return baseSalary;
+    }
+
+    public void setBaseSalary(BigDecimal baseSalary) {
+        this.baseSalary = baseSalary;
+    }
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -144,6 +177,18 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "branch_id") // Tên cột foreign key trong bảng users
+    private Branch branch;
+
+    public Branch getBranch() {
+        return branch;
+    }
+
+    public void setBranch(Branch branch) {
+        this.branch = branch;
     }
 
     public User() {
@@ -487,5 +532,21 @@ public class User {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public List<SalaryRecord> getSalaryRecords() {
+        return salaryRecords;
+    }
+
+    public List<WorkSchedule> getWorkSchedules() {
+        return workSchedules;
+    }
+
+    public void setSalaryRecords(List<SalaryRecord> salaryRecords) {
+        this.salaryRecords = salaryRecords;
+    }
+
+    public void setWorkSchedules(List<WorkSchedule> workSchedules) {
+        this.workSchedules = workSchedules;
     }
 }

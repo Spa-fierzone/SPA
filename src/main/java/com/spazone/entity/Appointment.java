@@ -67,6 +67,10 @@ public class Appointment {
     @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL)
     private List<TreatmentRecord> treatmentRecords;
 
+    @ManyToOne
+    @JoinColumn(name = "room_id")
+    private Room room;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -80,7 +84,7 @@ public class Appointment {
     public Appointment() {
     }
 
-    public Appointment(Integer appointmentId, User customer, Branch branch, Service service, User technician, LocalDateTime appointmentDate, LocalDateTime startTime, LocalDateTime endTime, String status, String notes, String cancellationReason, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean reminderSent, LocalDateTime reminderSentAt, LocalDateTime checkInTime, LocalDateTime checkOutTime, User preferredTechnician, String specialRequests, String reminderMethod) {
+    public Appointment(Integer appointmentId, User customer, Branch branch, Service service, User technician, LocalDateTime appointmentDate, LocalDateTime startTime, LocalDateTime endTime, String status, String notes, String cancellationReason, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean reminderSent, LocalDateTime reminderSentAt, LocalDateTime checkInTime, LocalDateTime checkOutTime, User preferredTechnician, String specialRequests, String reminderMethod, Room room) {
         this.appointmentId = appointmentId;
         this.customer = customer;
         this.branch = branch;
@@ -101,6 +105,7 @@ public class Appointment {
         this.preferredTechnician = preferredTechnician;
         this.specialRequests = specialRequests;
         this.reminderMethod = reminderMethod;
+        this.room = room;
     }
 
     public LocalDateTime getCheckinTime() {
@@ -207,6 +212,10 @@ public class Appointment {
         return reminderMethod;
     }
 
+    public Room getRoom() {
+        return room;
+    }
+
     public void setAppointmentId(Integer appointmentId) {
         this.appointmentId = appointmentId;
     }
@@ -286,5 +295,8 @@ public class Appointment {
     public void setReminderMethod(String reminderMethod) {
         this.reminderMethod = reminderMethod;
     }
-}
 
+    public void setRoom(Room room) {
+        this.room = room;
+    }
+}

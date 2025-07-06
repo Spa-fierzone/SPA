@@ -33,6 +33,9 @@ public class Service {
     @JoinColumn(name = "category_id")
     private ServiceCategory category;
 
+    @Transient
+    private boolean favorite;
+
     @PreUpdate
     public void updateTimestamp() {
         updatedAt = LocalDateTime.now();
@@ -94,6 +97,10 @@ public class Service {
         return category;
     }
 
+    public boolean isFavorite() {
+        return favorite;
+    }
+
     public void setServiceId(Integer serviceId) {
         this.serviceId = serviceId;
     }
@@ -133,5 +140,8 @@ public class Service {
     public void setCategory(ServiceCategory category) {
         this.category = category;
     }
-}
 
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
+    }
+}

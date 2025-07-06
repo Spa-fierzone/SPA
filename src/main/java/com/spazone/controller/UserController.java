@@ -1,8 +1,9 @@
 package com.spazone.controller;
 
+import com.spazone.dto.CreateUserDto;
 import com.spazone.entity.User;
-import com.spazone.repository.RoleRepository;
 import com.spazone.service.UserService;
+import com.spazone.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -39,8 +40,8 @@ public class UserController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);
         model.addAttribute("role", role);
-        model.addAttribute("roles", roleRepository.findAll());
-
+        model.addAttribute("roles", roleRepository.findByRoleNameNot("ADMIN"));
+        model.addAttribute("userDto", new CreateUserDto());
         return "admin/user-management";
     }
 
@@ -50,6 +51,16 @@ public class UserController {
                                RedirectAttributes redirectAttributes) {
         userService.changeUserStatus(id, status);
         redirectAttributes.addFlashAttribute("message", "Đã cập nhật trạng thái người dùng.");
+        return "redirect:/admin/users";
+    }
+
+
+    // Xử lý form tạo user
+    @PostMapping("/create")
+    public String createUser(@ModelAttribute("userDto") CreateUserDto userDto,
+                             RedirectAttributes redirectAttributes) {
+        userService.createUserWithRoleAndSalary(userDto);
+        redirectAttributes.addFlashAttribute("message", "Tạo người dùng thành công!");
         return "redirect:/admin/users";
     }
 

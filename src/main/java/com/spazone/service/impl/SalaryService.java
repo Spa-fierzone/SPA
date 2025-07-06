@@ -83,8 +83,21 @@ public class SalaryService {
 
         BigDecimal baseSalary = user.getBaseSalary() != null ? user.getBaseSalary() : DEFAULT_BASE_SALARY;
         dto.setBaseSalary(baseSalary);
-        Role mainRole = user.getRoles().stream().findFirst().orElse(null);
 
+        int daysInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
+        BigDecimal hourlyRate = baseSalary
+                .divide(BigDecimal.valueOf(daysInMonth), 2, RoundingMode.HALF_UP)
+                .divide(BigDecimal.valueOf(8), 2, RoundingMode.HALF_UP);
+
+        dto.setHourlyRate(hourlyRate);
+
+        BigDecimal actualSalary = hourlyRate.multiply(BigDecimal.valueOf(totalHours));
+        dto.setActualSalary(actualSalary);
+
+        BigDecimal overtimePay = hourlyRate.multiply(OVERTIME_RATE).multiply(BigDecimal.valueOf(overtimeHours));
+        dto.setOvertimePay(overtimePay);
+
+        Role mainRole = user.getRoles().stream().findFirst().orElse(null);
         SalarySetting.Role settingRole = SalarySetting.Role.valueOf(mainRole.getRoleName());
         SalarySetting setting = salarySettingRepository.findByRole(settingRole).orElse(null);
 
@@ -112,14 +125,7 @@ public class SalaryService {
             }
         }
 
-        BigDecimal dailySalary = baseSalary.divide(BigDecimal.valueOf(STANDARD_WORKING_DAYS), 2, RoundingMode.HALF_UP);
-        BigDecimal actualSalary = dailySalary.multiply(BigDecimal.valueOf(workingDays));
-        dto.setActualSalary(actualSalary);
-
-        BigDecimal hourlyRate = baseSalary.divide(BigDecimal.valueOf(STANDARD_WORKING_DAYS * STANDARD_WORKING_HOURS), 2, RoundingMode.HALF_UP);
-        BigDecimal overtimePay = hourlyRate.multiply(OVERTIME_RATE).multiply(BigDecimal.valueOf(overtimeHours));
-        dto.setOvertimePay(overtimePay);
-
+        BigDecimal dailySalary = hourlyRate.multiply(BigDecimal.valueOf(8)); // lương theo ngày
         BigDecimal lateDeduction = dailySalary.multiply(BigDecimal.valueOf(0.1)).multiply(BigDecimal.valueOf(lateDays));
         BigDecimal absentDeduction = dailySalary.multiply(BigDecimal.valueOf(absentDays));
         BigDecimal totalDeductions = lateDeduction.add(absentDeduction);
@@ -135,6 +141,7 @@ public class SalaryService {
 
         return dto;
     }
+
 
     public void saveSalaryRecord(SalaryCalculationDto calculation, Integer branchId) {
         SalaryRecord record = new SalaryRecord();

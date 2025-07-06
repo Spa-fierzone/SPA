@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title>My Membership - SpaZone</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        html, body { height: 100%; }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(120deg, #fdfbfb 0%, #ffe4ec 40%, #fff0f6 100%);
+            background-size: 400% 400%;
+            animation: gradientMove 18s ease-in-out infinite;
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        @keyframes gradientMove {
+            0%,100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        /* Floating Bubbles */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 55%, rgba(255,182,193,0.25), rgba(255,182,193,0.08) 40%, rgba(255,105,180,0.13) 60%, rgba(255,20,147,0.07));
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0) scale(1); opacity: 0.7;}
+            50% { transform: translateY(-40px) scale(1.12); opacity: 0.9;}
+        }
+        /* Glassmorphism Navbar */
+        .navbar {
+            background: rgba(255,255,255,0.2) !important;
+            backdrop-filter: blur(18px);
+            border-bottom: 1.5px solid rgba(255,182,193,0.18);
+            box-shadow: 0 8px 32px rgba(255,105,180,0.08);
+            z-index: 1000;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: #ff69b4 !important;
+            text-shadow: 0 2px 4px rgba(255, 105, 180, 0.14);
+            letter-spacing: 1px;
+        }
+        /* Card Glassmorphism */
+        .card, .glass-card {
+            background: rgba(255,255,255,0.22);
+            backdrop-filter: blur(16px);
+            border-radius: 22px;
+            box-shadow: 0 18px 40px rgba(255, 105, 180, 0.13);
+            border: 1px solid rgba(255,255,255,0.21);
+            transition: all 0.3s cubic-bezier(.4,1.3,.5,1);
+            position: relative;
+            z-index: 10;
+        }
+        .card:hover, .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(255, 105, 180, 0.18);
+            background: rgba(255,255,255,0.33);
+        }
+        /* Premium membership card */
+        .membership-status-card {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(255,182,193,0.25) 100%);
+            border: 2px solid rgba(255,215,0,0.3);
+        }
+        .membership-status-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 4s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        /* Headings */
+        h1, h2, h3, h4, h5 {
+            font-weight: 700;
+            color: #ff6b9d;
+            text-shadow: 0 4px 8px rgba(255, 105, 180, 0.11);
+        }
+        /* Button Animations */
+        .btn-outline-primary, .btn-outline-success, .btn-outline-warning {
+            border-radius: 14px;
+            font-weight: 600;
+            border-width: 2px;
+            transition: all 0.3s cubic-bezier(.4,1.3,.5,1);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-outline-primary {
+            border-color: #ff8fab;
+            color: #ff6b9d;
+        }
+        .btn-outline-primary:hover {
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+            color: #fff;
+            box-shadow: 0 8px 25px rgba(255,182,193,0.18);
+            transform: translateY(-2px) scale(1.05);
+        }
+        .btn-outline-success:hover {
+            background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+            transform: translateY(-2px) scale(1.05);
+        }
+        .btn-outline-warning:hover {
+            background: linear-gradient(90deg, #ffc107 0%, #ffeb3b 100%);
+            transform: translateY(-2px) scale(1.05);
+        }
+        .btn-gradient {
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+            color: #fff !important;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+            transition: all 0.3s;
+        }
+        .btn-gradient:hover {
+            background: linear-gradient(90deg, #ffe4ec 0%, #ffb6c1 100%);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+            transform: translateY(-2px) scale(1.03);
+        }
+        /* Status badges */
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .status-active {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+        .status-expired {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            color: white;
+        }
+        .status-expiring {
+            background: linear-gradient(45deg, #ffc107, #e0a800);
+            color: white;
+        }
+        /* Progress bar */
+        .progress-custom {
+            height: 12px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.3);
+            overflow: hidden;
+        }
+        .progress-bar-custom {
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+            transition: width 0.6s ease;
+        }
+        /* Info cards */
+        .info-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .info-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255,255,255,0.25);
+        }
+        .info-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        /* Alert styling */
+        .alert {
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+        }
+        /* Icon animations */
+        .icon-bounce { animation: iconBounce 2s ease-in-out infinite;}
+        @keyframes iconBounce {
+            0%,20%,50%,80%,100% { transform: translateY(0);}
+            40% { transform: translateY(-10px);}
+            60% { transform: translateY(-5px);}
+        }
+        .icon-pulse { animation: iconPulse 2s ease-in-out infinite;}
+        @keyframes iconPulse {
+            0%,100% { transform: scale(1);}
+            50% { transform: scale(1.1);}
+        }
+        /* Animations */
+        .slide-in-up { animation: slideInUp 0.8s cubic-bezier(.68,-0.55,.27,1.55);}
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(50px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .fade-in { animation: fadeIn 1s ease-in-out;}
+        @keyframes fadeIn {
+            from { opacity: 0;}
+            to { opacity: 1;}
+        }
+        /* Footer */
+        footer {
+            margin-top: auto;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.18);
+            color: #b48a9b;
+            font-size: 1rem;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .bubble { display: none; }
+            .info-card .icon { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+<!-- Floating Bubbles -->
+<div class="bubble" style="width:90px; height:90px; left:8%; top:12%;"></div>
+<div class="bubble" style="width:130px; height:130px; left:18%; top:70%;"></div>
+<div class="bubble" style="width:70px; height:70px; right:12%; top:24%;"></div>
+<div class="bubble" style="width:110px; height:110px; right:22%; top:60%;"></div>
+
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/dashboard}">
+            <i class="fas fa-spa me-2 icon-bounce"></i>SpaZone
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarContent" aria-controls="navbarContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item me-2">
+                    <a th:href="@{/dashboard}" class="btn btn-outline-primary">
+                        <i class="fas fa-home me-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item me-2">
+                    <a th:href="@{/membership}" class="btn btn-outline-success">
+                        <i class="fas fa-crown me-1"></i> View Plans
+                    </a>
+                </li>
+                <li class="nav-item me-2">
+                    <a th:href="@{/membership/order-history}" class="btn btn-outline-warning">
+                        <i class="fas fa-history me-1"></i> Order History
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="fas fa-sign-out-alt me-1"></i> Logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="text-center mb-5 slide-in-up">
+        <h1 class="mb-3">
+            <i class="fas fa-crown me-3 icon-bounce"></i>
+            My Membership
+        </h1>
+        <p class="lead">Manage your current membership status and benefits</p>
+    </div>
+
+    <!-- Alerts -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Active Membership Section -->
+    <div th:if="${customerMembership}" class="row g-4 mb-5">
+        <!-- Membership Status Card -->
+        <div class="col-12">
+            <div class="card membership-status-card h-100 fade-in">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center mb-3 mb-md-0">
+                            <i class="fas fa-gem fs-1 text-warning icon-pulse"></i>
+                        </div>
+                        <div class="col-md-6">
+                            <h3 class="card-title mb-2" th:text="${customerMembership.membership.name}">Premium Plan</h3>
+                            <p class="text-muted mb-2" th:text="${customerMembership.membership.description}">Perfect for regular spa visits</p>
+                            <div class="d-flex align-items-center">
+                                <span class="status-badge status-active me-2" th:if="${customerMembership.status == 'ACTIVE'}">
+                                    <i class="fas fa-check-circle me-1"></i>Active
+                                </span>
+                                <span class="status-badge status-expired me-2" th:if="${customerMembership.status == 'EXPIRED'}">
+                                    <i class="fas fa-times-circle me-1"></i>Expired
+                                </span>
+                                <span class="status-badge status-expiring me-2" th:if="${customerMembership.status == 'EXPIRING'}">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Expiring Soon
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="mb-2">
+                                <small class="text-muted">Valid Until</small>
+                                <div class="h5 mb-0" th:text="${#temporals.format(customerMembership.endDate, 'dd/MM/yyyy')}">31/12/2024</div>
+                            </div>
+                            <div>
+                                <small class="text-muted">Days Remaining</small>
+                                <div class="h5 mb-0 text-primary" th:text="${#temporals.daysBetween(#temporals.createNow(), customerMembership.endDate)} + ' days'">30 days</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Membership Stats -->
+        <div class="col-md-4">
+            <div class="info-card">
+                <div class="icon text-primary">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <h5>Bookings This Month</h5>
+                <div class="h3 mb-2" th:text="${customerMembership.usedBookingsThisMonth ?: 0}">5</div>
+                <div class="progress-custom">
+                    <div class="progress-bar-custom"
+                         th:style="'width: ' + (${customerMembership.membership.maxBookingsPerMonth != null ? (customerMembership.usedBookingsThisMonth ?: 0) * 100 / customerMembership.membership.maxBookingsPerMonth : 0}) + '%'"></div>
+                </div>
+                <small class="text-muted mt-2 d-block" th:if="${customerMembership.membership.maxBookingsPerMonth != null}">
+                    <span th:text="${customerMembership.membership.maxBookingsPerMonth - (customerMembership.usedBookingsThisMonth ?: 0)}">3</span> bookings remaining
+                </small>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="info-card">
+                <div class="icon text-success">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <h5>Start Date</h5>
+                <div class="h5 mb-0" th:text="${#temporals.format(customerMembership.startDate, 'dd/MM/yyyy')}">01/01/2024</div>
+                <small class="text-muted">Member since</small>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="info-card">
+                <div class="icon text-warning">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <h5>Duration</h5>
+                <div class="h5 mb-0" th:text="${customerMembership.membership.durationMonths} + ' months'">12 months</div>
+                <small class="text-muted">Total period</small>
+            </div>
+        </div>
+
+        <!-- Membership Benefits -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star me-2"></i>
+                        Your Membership Benefits
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6" th:if="${customerMembership.membership.maxBookingsPerMonth != null}">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-calendar-check text-success me-3 fs-5"></i>
+                                <div>
+                                    <strong th:text="${customerMembership.membership.maxBookingsPerMonth} + ' Bookings Per Month'">10 Bookings Per Month</strong>
+                                    <div class="small text-muted">Maximum bookings allowed monthly</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" th:if="${customerMembership.membership.priorityBooking != null && customerMembership.membership.priorityBooking}">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-star text-warning me-3 fs-5"></i>
+                                <div>
+                                    <strong>Priority Booking</strong>
+                                    <div class="small text-muted">Get priority access to appointments</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" th:if="${customerMembership.membership.freeConsultation != null && customerMembership.membership.freeConsultation}">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-md text-info me-3 fs-5"></i>
+                                <div>
+                                    <strong>Free Consultation</strong>
+                                    <div class="small text-muted">Complimentary consultation sessions</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" th:each="benefit : ${customerMembership.membership.benefits}">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-check text-success me-3 fs-5"></i>
+                                <div>
+                                    <strong th:text="${benefit}">Additional Benefit</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="col-12 text-center">
+            <div class="d-flex flex-wrap gap-3 justify-content-center">
+                <a th:href="@{/membership}" class="btn btn-outline-primary">
+                    <i class="fas fa-crown me-2"></i>Upgrade Plan
+                </a>
+                <a th:href="@{/membership/order-history}" class="btn btn-outline-warning">
+                    <i class="fas fa-history me-2"></i>Order History
+                </a>
+                <a th:href="@{/bookings}" class="btn btn-gradient">
+                    <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- No Membership Section -->
+    <div th:unless="${customerMembership}" class="text-center py-5">
+        <div class="card p-5">
+            <i class="fas fa-crown fs-1 text-muted mb-4 icon-bounce"></i>
+            <h3 class="text-muted mb-3">No Active Membership</h3>
+            <p class="text-muted mb-4">You don't have an active membership plan. Choose from our available plans to enjoy exclusive benefits and priority booking.</p>
+            <div class="d-flex flex-wrap gap-3 justify-content-center">
+                <a th:href="@{/membership}" class="btn btn-gradient">
+                    <i class="fas fa-crown me-2"></i>View Membership Plans
+                </a>
+                <a th:href="@{/membership/order-history}" class="btn btn-outline-warning">
+                    <i class="fas fa-history me-2"></i>Order History
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center py-3">
+    <div class="container">
+        <span class="text-muted">
+            <i class="fas fa-heart text-danger me-1"></i>
+            © 2025 SpaZone. All rights reserved.
+        </span>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Create floating bubbles
+    function createBubbles() {
+        const container = document.body;
+        for (let i = 0; i < 6; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 60 + 40;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 95}%`;
+            bubble.style.top = `${Math.random() * 80}%`;
+            bubble.style.animationDelay = `${Math.random() * 8}s`;
+            container.appendChild(bubble);
+        }
+    }
+    createBubbles();
+
+    // Animate progress bars on page load
+    window.addEventListener('load', function() {
+        const progressBars = document.querySelectorAll('.progress-bar-custom');
+        progressBars.forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => {
+                bar.style.width = width;
+            }, 500);
+        });
+    });
+
+    // Add countdown timer for expiring memberships
+    function updateCountdown() {
+        const daysElements = document.querySelectorAll('[data-days-remaining]');
+        daysElements.forEach(element => {
+            const days = parseInt(element.getAttribute('data-days-remaining'));
+            if (days <= 7 && days > 0) {
+                element.classList.add('text-warning');
+                element.innerHTML = `<i class="fas fa-exclamation-triangle me-1"></i>${days} days`;
+            } else if (days <= 0) {
+                element.classList.add('text-danger');
+                element.innerHTML = '<i class="fas fa-times-circle me-1"></i>Expired';
+            }
+        });
+    }
+    updateCountdown();
+</script>
+</body>
+</html>

@@ -11,6 +11,8 @@ public interface InvoiceService {
     Invoice getById(Integer id);
     void save(Invoice invoice);
     List<Invoice> getByCustomer(User customer);
+    Invoice createInvoiceForAppointment(Appointment appointment, String paymentMethod, String notes);
+    Invoice createInvoiceForAppointments(List<Appointment> appointments, String paymentMethod, String notes);
+
 
 }
-

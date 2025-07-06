@@ -5,101 +5,240 @@
     <title>Thông Tin Cá Nhân</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet"/>
     <style>
         body {
-            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
+            background: linear-gradient(120deg, #fff0f6 0%, #ffe4ec 60%, #fdfbfb 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-family: 'Poppins', Arial, sans-serif;
         }
-        .card {
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(255, 107, 157, 0.3);
-            padding: 2rem;
+        .main-container {
+            max-width: 900px;
+            margin: 40px auto 0 auto;
+        }
+        .profile-card {
+            border-radius: 22px;
+            box-shadow: 0 20px 40px rgba(255, 107, 157, 0.13);
+            background: rgba(255,255,255,0.95);
+            border: 1.5px solid #ffe4ec;
+            margin-bottom: 2rem;
+        }
+        .profile-avatar {
+            width: 140px;
+            height: 180px;
+            border-radius: 24px;
+            border: 2.5px solid #ff8fab;
+            object-fit: cover;
+            background: linear-gradient(135deg, #fff0f6 0%, #ffe4ec 100%);
+            box-shadow: 0 4px 18px rgba(255, 139, 171, 0.16);
         }
         .profile-label {
             font-weight: 600;
             color: #ff6b9d;
         }
         .btn-gradient {
-            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
             color: white;
             font-weight: 600;
             border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+            transition: box-shadow 0.3s, transform 0.2s;
         }
         .btn-gradient:hover {
-            background: linear-gradient(135deg, #e55a87, #ff7ba3);
+            background: linear-gradient(90deg, #ffe4ec 0%, #ffb6c1 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .section-card {
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(255, 107, 157, 0.10);
+            background: rgba(255,255,255,0.93);
+            border: 1.5px solid #ffe4ec;
+            margin-bottom: 2rem;
+        }
+        .section-header {
+            background: none;
+            border-bottom: 1px solid #ffe4ec;
+            padding: 1rem 1.5rem 0.5rem 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ff6b9d;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .footer {
+            margin-top: 3rem;
+            background: rgba(255,255,255,0.85);
+            border-top: 1.5px solid #ffe4ec;
+            text-align: center;
+            padding: 1.2rem 0;
+            color: #b48a9c;
+        }
+        @media (max-width: 768px) {
+            .main-container { padding: 0 0.5rem; }
+            .profile-avatar { width: 90px; height: 120px; }
         }
     </style>
 </head>
 <body>
-
-<div class="container" style="max-width: 700px;">
-    <div class="card">
-        <div class="text-center mb-4">
-            <h3><i class="fas fa-user-circle"></i> Hồ sơ cá nhân</h3>
-            <p class="text-muted">Thông tin tài khoản của bạn</p>
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/dashboard}"><i class="fas fa-spa me-2"></i>SpaZone</a>
+        <div class="d-flex align-items-center gap-2 ms-auto">
+            <a th:href="@{/dashboard}" class="btn btn-outline-primary btn-sm"><i class="fas fa-arrow-left me-1"></i>Trang chủ</a>
+            <a th:href="@{/auth/change-password}" class="btn btn-outline-secondary btn-sm">Đổi mật khẩu</a>
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-danger btn-sm"><i class="fas fa-sign-out-alt me-1"></i>Đăng xuất</button>
+            </form>
         </div>
-
-        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-
-        <div class="row mb-3">
-            <label class="col-sm-4 profile-label">Tên đăng nhập:</label>
-            <div class="col-sm-8" th:text="${profile.username}"></div>
-        </div>
-
-        <div class="row mb-3">
-            <label class="col-sm-4 profile-label">Họ tên:</label>
-            <div class="col-sm-8" th:text="${profile.fullName}"></div>
-        </div>
-
-        <div class="row mb-3">
-            <label class="col-sm-4 profile-label">Email:</label>
-            <div class="col-sm-8" th:text="${profile.email}"></div>
-        </div>
-
-        <div class="row mb-3">
-            <label class="col-sm-4 profile-label">Số điện thoại:</label>
-            <div class="col-sm-8" th:text="${profile.phone}"></div>
-        </div>
-
-        <div class="row mb-3">
-            <label class="col-sm-4 profile-label">Ngày sinh:</label>
-            <div class="col-sm-8" th:text="${profile.dateOfBirth}"></div>
-        </div>
-
-        <div class="row mb-3">
-            <label class="col-sm-4 profile-label">Giới tính:</label>
-            <div class="col-sm-8" th:text="${profile.gender}"></div>
-        </div>
-
-        <div class="row mb-3">
-            <label class="col-sm-4 profile-label">Địa chỉ:</label>
-            <div class="col-sm-8" th:text="${profile.address}"></div>
-        </div>
-
-        <div class="text-center mb-4">
-            <img th:src="${profile.profilePicture}" class="img-thumbnail rounded-circle"
-                 alt="Ảnh đại diện" style="max-width: 150px;">
-        </div>
-
-        <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
-            <a class="btn btn-gradient" th:href="@{/profile/edit}"><i class="fas fa-edit"></i> Chỉnh sửa</a>
-            <a class="btn btn-secondary" th:href="@{/auth/change-password}">Đổi mật khẩu</a>
-            <a class="btn btn-outline-dark" th:href="@{/dashboard}">Quay về</a>
-        </div>
-
-        <form th:action="@{/profile/picture}" method="post" enctype="multipart/form-data" class="mt-3">
-            <div class="mb-3">
-                <label for="file" class="form-label">Chọn ảnh đại diện mới:</label>
-                <input type="file" class="form-control" id="file" name="file" accept="image/*" required>
+    </div>
+</nav>
+<div class="main-container">
+    <div class="profile-card p-4 mb-4">
+        <div class="row g-4 align-items-center">
+            <div class="col-md-4 text-center">
+                <img th:src="${profile.profilePicture}" class="profile-avatar mb-3" alt="Ảnh đại diện">
+                <form th:action="@{/profile/picture}" method="post" enctype="multipart/form-data" class="mt-2">
+                    <input type="file" class="form-control mb-2" id="file" name="file" accept="image/*" required>
+                    <button type="submit" class="btn btn-gradient btn-sm w-100"><i class="fas fa-upload me-2"></i>Cập nhật ảnh</button>
+                </form>
             </div>
-            <button type="submit" class="btn btn-primary">Cập nhật ảnh đại diện</button>
-        </form>
+            <div class="col-md-8">
+                <h3 class="mb-2"><i class="fas fa-user-circle me-2"></i>Hồ sơ cá nhân</h3>
+                <div th:if="${error}" class="alert alert-danger py-2" th:text="${error}"></div>
+                <div class="row mb-2">
+                    <div class="col-5 profile-label">Tên đăng nhập:</div>
+                    <div class="col-7" th:text="${profile.username}"></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-5 profile-label">Họ tên:</div>
+                    <div class="col-7" th:text="${profile.fullName}"></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-5 profile-label">Email:</div>
+                    <div class="col-7" th:text="${profile.email}"></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-5 profile-label">Số điện thoại:</div>
+                    <div class="col-7" th:text="${profile.phone}"></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-5 profile-label">Ngày sinh:</div>
+                    <div class="col-7" th:text="${profile.dateOfBirth}"></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-5 profile-label">Giới tính:</div>
+                    <div class="col-7" th:text="${profile.gender}"></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-5 profile-label">Địa chỉ:</div>
+                    <div class="col-7" th:text="${profile.address}"></div>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <a class="btn btn-gradient btn-sm" th:href="@{/profile/edit}"><i class="fas fa-edit"></i> Chỉnh sửa</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="section-card mb-4">
+        <div class="section-header"><i class="fas fa-crown"></i>Thành viên & Ưu đãi</div>
+        <div class="p-3">
+            <div th:if="${membership != null}">
+                <p><b>Gói thành viên:</b> <span th:text="${membership.membership.name}"></span></p>
+                <p><b>Hiệu lực:</b> <span th:text="${#temporals.format(membership.startDate, 'dd/MM/yyyy')}"></span> - <span th:text="${#temporals.format(membership.endDate, 'dd/MM/yyyy')}"></span></p>
+                <p><b>Ưu đãi:</b> <span th:text="${membership.membership.benefits}"></span></p>
+            </div>
+            <div th:if="${membership == null}">
+                <p>Bạn chưa là thành viên. <a th:href="@{/membership/list}">Tham gia ngay để nhận ưu đãi!</a></p>
+            </div>
+        </div>
+    </div>
+    <div class="section-card mb-4">
+        <div class="section-header"><i class="fas fa-notes-medical"></i>Kế hoạch điều trị & Lịch sử đặt lịch</div>
+        <div class="p-3">
+            <div th:if="${appointments != null && !appointments.isEmpty()}">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Dịch vụ</th>
+                            <th>Ngày giờ</th>
+                            <th>Chi nhánh</th>
+                            <th>Kỹ thuật viên</th>
+                            <th>Trạng thái</th>
+                            <th>Kế hoạch điều trị</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="appt : ${appointments}">
+                            <td th:text="${appt.service.name}"></td>
+                            <td th:text="${#temporals.format(appt.startTime, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td th:text="${appt.branch.name}"></td>
+                            <td th:text="${appt.technician.fullName}"></td>
+                            <td th:text="${appt.status}"></td>
+                            <td>
+                                <a th:href="@{'/appointments/' + ${appt.appointmentId} + '/treatment-records'}" class="btn btn-sm btn-outline-primary">Xem</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div th:if="${appointments == null || appointments.isEmpty()}">
+                <p>Bạn chưa có lịch sử đặt lịch hoặc kế hoạch điều trị nào.</p>
+            </div>
+        </div>
+    </div>
+    <div class="section-card mb-4">
+        <div class="section-header"><i class="fas fa-heart"></i>Dịch vụ yêu thích</div>
+        <div class="p-3">
+            <div th:if="${favoriteServices != null && !favoriteServices.isEmpty()}">
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center" th:each="fav : ${favoriteServices}">
+                        <span th:text="${fav.service.name}"></span>
+                        <a th:href="@{'/spa-service/detail/' + ${fav.service.serviceId}}" class="btn btn-sm btn-outline-info">Xem dịch vụ</a>
+                    </li>
+                </ul>
+            </div>
+            <div th:if="${favoriteServices == null || favoriteServices.isEmpty()}">
+                <p>Bạn chưa thêm dịch vụ nào vào danh sách yêu thích.</p>
+            </div>
+        </div>
+    </div>
+    <div class="section-card mb-4">
+        <div class="section-header"><i class="fas fa-star text-warning"></i>Đánh giá của bạn</div>
+        <div class="p-3">
+            <div th:if="${serviceRatings != null && !serviceRatings.isEmpty()}">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2" th:each="rating : ${serviceRatings}">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <b th:text="${rating.service.name}" class="me-2"></b>
+                            <span th:each="star : ${#numbers.sequence(1, rating.rating)}">
+                                <i class="fas fa-star text-warning"></i>
+                            </span>
+                            <span th:each="star : ${#numbers.sequence(rating.rating+1, 5)}">
+                                <i class="far fa-star text-warning"></i>
+                            </span>
+                            <span th:if="${rating.comment != null}" class="ms-2 small fst-italic text-muted">- <i th:text="${rating.comment}"></i></span>
+                        </div>
+                        <span class="text-muted small" th:text="${#temporals.format(rating.createdAt, 'dd/MM/yyyy')}"></span>
+                    </li>
+                </ul>
+            </div>
+            <div th:if="${serviceRatings == null || serviceRatings.isEmpty()}">
+                <p class="text-center text-muted mb-0">Bạn chưa đánh giá dịch vụ nào.</p>
+            </div>
+        </div>
     </div>
 </div>
-
+<footer class="footer">
+    <div class="container">
+        <span>© 2025 SpaZone. All rights reserved.</span>
+    </div>
+</footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

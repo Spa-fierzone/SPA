@@ -2,11 +2,12 @@ package com.spazone.service.impl;
 
 import com.spazone.dto.TimeSlot;
 import com.spazone.entity.Appointment;
+import com.spazone.entity.Branch;
 import com.spazone.entity.ServiceSchedule;
 import com.spazone.entity.User;
-import com.spazone.repository.AppointmentRepository;
-import com.spazone.repository.ServiceScheduleRepository;
+import com.spazone.repository.*;
 import com.spazone.service.AppointmentService;
+import com.spazone.service.UserKPIService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,18 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Autowired
     private ServiceScheduleRepository serviceScheduleRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ServiceRepository serviceRepository;
+
+    @Autowired
+    private BranchRepository branchRepository;
+
+    @Autowired
+    private UserKPIService userKPIService;
 
     @Override
     public void create(Appointment appointment) {
@@ -66,8 +79,8 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         appointmentRepository.save(appointment);
 
+        // Check if ServiceSchedule exists
         int dayOfWeek = appointment.getAppointmentDate().getDayOfWeek().getValue() % 7;
-
         boolean exists = serviceScheduleRepository
                 .existsByTechnicianUserIdAndBranchBranchIdAndDayOfWeekAndStartTimeAndEndTimeAndServiceServiceId(
                         appointment.getTechnician().getUserId(),
@@ -89,6 +102,9 @@ public class AppointmentServiceImpl implements AppointmentService {
             schedule.setActive(true);
             serviceScheduleRepository.save(schedule);
         }
+
+        // Update User KPI
+        userKPIService.updateKPIOnAppointmentCreated(appointment.getTechnician().getUserId(), duration);
     }
 
     @Override
@@ -159,9 +175,85 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointmentRepository.save(appt);
     }
 
+    @Override
+    public Appointment findByIdWithTreatmentRecords(Integer id) {
+        return appointmentRepository.findByIdWithTreatmentRecords(id);
+    }
+
+    @Override
+    public boolean createAppointment(Integer customerId, Integer serviceId, String appointmentDateTime, Integer technicianId, Integer branchId) {
+        try {
+            // Fetch customer, service, technician, and branch entities
+            User customer = userRepository.findById(customerId).orElseThrow(() -> new IllegalArgumentException("Invalid customer ID"));
+            com.spazone.entity.Service service = serviceRepository.findById(serviceId).orElseThrow(() -> new IllegalArgumentException("Invalid service ID"));
+            User technician = userRepository.findById(technicianId).orElseThrow(() -> new IllegalArgumentException("Invalid technician ID"));
+            Branch branch = branchRepository.findById(branchId).orElseThrow(() -> new IllegalArgumentException("Invalid branch ID"));
+            // Parse appointmentDateTime
+            LocalDateTime appointmentDate = LocalDateTime.parse(appointmentDateTime);
+
+            // Create appointment entity
+            Appointment appointment = new Appointment();
+            appointment.setCustomer(customer);
+            appointment.setService(service);
+            appointment.setTechnician(technician);
+            appointment.setBranch(branch);
+            appointment.setAppointmentDate(appointmentDate);
+            appointment.setStartTime(appointmentDate);
+            appointment.setEndTime(appointmentDate.plusMinutes(service.getDuration()));
+            appointment.setStatus("scheduled");
+
+            // Save appointment
+            appointmentRepository.save(appointment);
+
+            // Check if ServiceSchedule exists
+            int dayOfWeek = appointmentDate.getDayOfWeek().getValue() % 7;
+            boolean exists = serviceScheduleRepository
+                    .existsByTechnicianUserIdAndBranchBranchIdAndDayOfWeekAndStartTimeAndEndTimeAndServiceServiceId(
+                            technician.getUserId(),
+                            branch.getBranchId(),
+                            dayOfWeek,
+                            appointmentDate,
+                            appointmentDate.plusMinutes(service.getDuration()),
+                            service.getServiceId()
+                    );
+
+            if (!exists) {
+                ServiceSchedule schedule = new ServiceSchedule();
+                schedule.setTechnician(technician);
+                schedule.setBranch(branch);
+                schedule.setService(service);
+                schedule.setStartTime(appointmentDate);
+                schedule.setEndTime(appointmentDate.plusMinutes(service.getDuration()));
+                schedule.setDayOfWeek(dayOfWeek);
+                schedule.setActive(true);
+                serviceScheduleRepository.save(schedule);
+            }
+
+            // Update User KPI when technician is assigned
+            userKPIService.updateKPIOnAppointmentCreated(technicianId, service.getDuration());
+
+            return true;
+        } catch (Exception e) {
+            // Log error (optional)
+            System.err.println("Error creating appointment: " + e.getMessage());
+            return false;
+        }
+    }
+
 
     @Override
     public List<Appointment> getByCustomer(User customer) {
         return appointmentRepository.findByCustomer(customer);
+    }
+
+    @Override
+    public Appointment findLatestAppointment(Integer customerId, Integer serviceId, Integer technicianId, Integer branchId) {
+        return appointmentRepository.findTopByCustomerUserIdAndServiceServiceIdAndTechnicianUserIdAndBranchBranchIdOrderByCreatedAtDesc(
+                customerId, serviceId, technicianId, branchId);
+    }
+
+    @Override
+    public void update(Appointment appointment) {
+        appointmentRepository.save(appointment);
     }
 }

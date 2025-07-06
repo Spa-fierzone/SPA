@@ -1,5 +1,6 @@
 package com.spazone.repository;
 
+import com.spazone.entity.Role;
 import com.spazone.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
@@ -38,6 +40,26 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("UPDATE User u SET u.status = :status WHERE u.userId = :id")
     void updateStatusById(@Param("id") Integer id, @Param("status") String status);
 
+    @Query("SELECT u FROM User u LEFT JOIN u.roles r WHERE u.status = 'active' AND u.enabled = true AND r.roleName <> 'ADMIN'")
+    List<User> findActiveUsers();
+
+    @Query("""
+    SELECT DISTINCT u FROM User u 
+    JOIN u.roles r 
+    WHERE r.roleName IN ('RECEPTIONIST', 'TECHNICIAN', 'MANAGER')
+""")
+    List<User> findUsersByMainRoles();
+
+    @Query("""
+    SELECT u FROM User u 
+    JOIN u.roles r 
+    WHERE r.roleName = 'TECHNICIAN' 
+""")
+    List<User> findTop3Technicians(Pageable pageable);
+
+
+    @Query("SELECT u FROM User u WHERE u.status = 'active' AND u.enabled = true AND u.preferredBranchId = :branchId")
+    List<User> findActiveUsersByBranch(@Param("branchId") Integer branchId);
 
     Optional<User> findByUsername(String username);
 
@@ -66,15 +88,26 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r.roleName = :roleName")
     List<User> findUsersByRole(@Param("roleName") String roleName);
 
-    @Query("""
-    SELECT DISTINCT u FROM User u 
-    JOIN u.roles r 
-    WHERE r.roleName IN ('RECEPTIONIST', 'TECHNICIAN', 'MANAGER')
-""")
-    List<User> findUsersByMainRoles();
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE u.branch.branchId = :branchId AND r.roleName = :roleName")
+    List<User> findByBranchIdAndRoleName(@Param("branchId") Integer branchId, @Param("roleName") String roleName);
 
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.roleName = 'CUSTOMER' AND u.status = 'active'")
+    List<User> findAllCustomers();
 
-    @Query("SELECT u FROM User u WHERE u.status = 'active' AND u.enabled = true AND u.preferredBranchId = :branchId")
-    List<User> findActiveUsersByBranch(@Param("branchId") Integer branchId);
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.roleName = 'TECHNICIAN' AND u.status = 'active'")
+    List<User> findAllTechnicians();
 
+    // Method for UserKPIService
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.roleName = :roleName AND u.status = 'active'")
+    List<User> findByRoles_RoleName(@Param("roleName") String roleName);
+
+    // Methods for Report Service
+    @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.roleName = 'CUSTOMER' AND u.createdAt BETWEEN :startDate AND :endDate")
+    Long countNewCustomersByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.roleName = 'CUSTOMER' AND u.status = 'active'")
+    Long countTotalCustomers();
+
+    @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.roleName = 'TECHNICIAN' AND u.status = 'active'")
+    Long countActiveTechnicians();
 }

@@ -4,63 +4,179 @@
     <meta charset="UTF-8">
     <title>Cập nhật lương cơ bản</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Font & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <style>
+        :root {
+            --primary-pink: #ff6b9d;
+            --light-pink: #ff8fab;
+            --pastel-pink: #ffb6c1;
+            --pastel-light: #ffe4ec;
+            --pastel-bg: #fff0f6;
+        }
         body {
-            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
+            background: linear-gradient(120deg, var(--pastel-bg) 0%, var(--pastel-light) 60%, #fdfbfb 100%);
             min-height: 100vh;
+            font-family: 'Poppins', Arial, sans-serif;
             display: flex;
             flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            animation: gradientShift 16s infinite alternate;
         }
-
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        /* Floating Bubbles */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,182,193,0.13);
+            animation: float 8s infinite ease-in-out;
+            z-index: 0;
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0);}
+            50% { transform: translateY(-32px);}
+        }
+        /* Glassmorphism Navbar */
         .navbar {
-            border-bottom: 2px solid #ffb3c6;
+            background: rgba(255,255,255,0.85) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1.5px solid rgba(255,182,193,0.18);
+            box-shadow: 0 2px 8px rgba(255,182,193,0.08);
         }
-
-        h2, h3, h4, h5 {
-            color: #fff;
-            font-weight: bold;
+        .navbar-brand {
+            color: var(--primary-pink) !important;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
-
-        .card {
-            background: linear-gradient(135deg, #ff6b9d, #ffb3c6);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            color: white;
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255,255,255,0.74);
+            border-radius: 22px;
+            box-shadow: 0 8px 32px 0 rgba(31,38,135,0.10);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,182,193,0.18);
+            padding: 2.2rem 2rem 2rem 2rem;
+            margin-top: 2.5rem;
+            animation: floatCard 4s infinite ease-in-out;
         }
-
-        .btn-primary {
-            background-color: #ff6b9d;
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0);}
+            50% { transform: translateY(-8px);}
+        }
+        .glass-card h4 {
+            color: var(--primary-pink);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .form-label {
+            color: #c77d8c;
+            font-weight: 600;
+        }
+        .form-control {
+            background-color: #fff0f6 !important;
+            border: 1.5px solid #ffb6c1;
+            color: #6c3a5c;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            animation: slideIn 0.7s cubic-bezier(.68,-0.55,.27,1.55);
+        }
+        .form-control:focus {
+            background-color: #ffe4ec !important;
             border-color: #ff8fab;
+            box-shadow: 0 0 8px rgba(255, 139, 171, 0.3);
+            color: #6c3a5c;
         }
-
-        .btn-primary:hover {
-            background-color: #ff8fab;
-            border-color: #ff6b9d;
+        .form-control:valid {
+            border-color: #28a745 !important;
+            animation: pulseValid 0.5s;
         }
-
+        .form-control:invalid {
+            border-color: #dc3545 !important;
+            animation: shake 0.5s;
+        }
+        @keyframes pulseValid {
+            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        .btn-gradient {
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.2s;
+            padding: 0.7rem 2.2rem;
+        }
+        .btn-gradient:before {
+            content: '';
+            position: absolute;
+            left: -60%;
+            top: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(120deg,rgba(255,255,255,0.3),rgba(255,255,255,0));
+            transform: skewX(-25deg);
+            transition: left 0.5s;
+        }
+        .btn-gradient:hover {
+            box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .btn-gradient:hover:before {
+            left: 120%;
+        }
+        .alert {
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(255,182,193,0.07);
+        }
         footer {
             margin-top: auto;
-            background-color: #fff;
-            padding: 1rem 0;
+            background-color: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            border-top: 1.5px solid rgba(255,182,193,0.18);
+            padding: 1.2rem 0;
             text-align: center;
+        }
+        @media (max-width: 576px) {
+            .glass-card { padding: 1.2rem 0.5rem 1.2rem 0.5rem;}
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(40px);}
+            to { opacity: 1; transform: translateY(0);}
         }
     </style>
 </head>
 <body>
-
+<!-- Floating Bubbles -->
+<div id="bubbles"></div>
 <!-- Header -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm">
     <div class="container">
-        <a class="navbar-brand text-danger fw-bold" th:href="@{/dashboard}">SpaZone</a>
+        <a class="navbar-brand fw-bold" th:href="@{/dashboard}">
+            <i class="fas fa-spa me-2"></i>SpaZone
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarContent" aria-controls="navbarContent"
                 aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse" id="navbarContent">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item me-2" sec:authorize="isAuthenticated()">
@@ -90,32 +206,89 @@
         </div>
     </div>
 </nav>
-
 <!-- Main content -->
 <div class="container py-4">
-    <div class="card">
-        <div class="card-header">
-            <h4>Cập nhật lương cơ bản cho nhân viên</h4>
+    <div class="glass-card mx-auto" style="max-width: 480px;">
+        <div class="mb-4 text-center">
+            <h4><i class="fa fa-money-bill-wave me-2"></i>Cập nhật lương cơ bản cho nhân viên</h4>
         </div>
-        <div class="card-body">
-            <form th:action="@{/salary/admin/user/{userId}/set-base-salary(userId=${user.userId})}" method="post">
-                <div class="mb-3">
-                    <label for="baseSalary" class="form-label">Lương cơ bản</label>
-                    <input type="number" step="0.01" name="baseSalary" id="baseSalary" class="form-control"
-                           th:value="${user.baseSalary}" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Cập nhật</button>
-            </form>
-        </div>
+        <form th:action="@{/salary/admin/user/{userId}/set-base-salary(userId=${user.userId})}" method="post" autocomplete="off" id="salaryForm">
+            <div class="mb-3">
+                <label for="baseSalary" class="form-label"><i class="fa fa-coins me-2"></i>Lương cơ bản</label>
+                <input type="number" step="0.01" name="baseSalary" id="baseSalary" class="form-control"
+                       th:value="${user.baseSalary}" required min="0" placeholder="Nhập lương cơ bản...">
+            </div>
+            <button type="submit" class="btn btn-gradient w-100 ripple-btn">
+                <i class="fa fa-save me-2"></i>Cập nhật
+            </button>
+        </form>
     </div>
 </div>
-
 <!-- Footer -->
 <footer>
     <span class="text-muted">© 2025 SpaZone. All rights reserved.</span>
 </footer>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Floating Bubbles
+    function createBubbles() {
+        const container = document.createElement('div');
+        container.id = 'bubbles';
+        document.body.appendChild(container);
+        for (let i = 0; i < 10; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 35 + 20;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.top = `${Math.random() * 100}%`;
+            bubble.style.animationDelay = `${Math.random() * 8}s`;
+            container.appendChild(bubble);
+        }
+    }
+    createBubbles();
 
+    // Ripple effect for button
+    document.querySelectorAll('.ripple-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            ripple.style.left = `${e.offsetX}px`;
+            ripple.style.top = `${e.offsetY}px`;
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+
+    // Loading state on submit
+    document.getElementById('salaryForm').addEventListener('submit', function() {
+        const btn = this.querySelector('.btn-gradient');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang cập nhật...';
+    });
+</script>
+<style>
+    /* Ripple effect for button */
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        transform: scale(0);
+        animation: ripple 0.6s linear;
+        background: rgba(255,255,255,0.5);
+        pointer-events: none;
+        width: 100px;
+        height: 100px;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    @keyframes ripple {
+        to {
+            transform: translate(-50%, -50%) scale(2.5);
+            opacity: 0;
+        }
+    }
+</style>
 </body>
 </html>

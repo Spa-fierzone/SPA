@@ -23,15 +23,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -254,6 +252,63 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<Role> getAllRoles() {
         return roleRepository.findByRoleNameNot("ADMIN");
+    }
+
+    @Override
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
+
+    @Override
+    public void createUserWithRoleAndSalary(CreateUserDto dto) {
+        if (userRepository.existsByUsername(dto.getUsername())) {
+            throw new UserAlreadyExistsException("Username already exists");
+        }
+
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new UserAlreadyExistsException("Email already exists");
+        }
+
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getEmail());
+        user.setFullName(dto.getFullName());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setPhone(dto.getPhone());
+        user.setGender(Gender.valueOf(dto.getGender().toUpperCase()));
+        user.setDateOfBirth(dto.getDateOfBirth());
+        user.setAddress(dto.getAddress());
+        user.setEnabled(true);
+        user.setStatus("active");
+        user.setEmailVerified(true);
+
+        String roleName = dto.getRole().toUpperCase();
+        Role role = roleRepository.findByRoleName(roleName)
+                .orElseGet(() -> roleRepository.save(new Role(roleName)));
+        user.setRoles(Set.of(role));
+
+        BigDecimal salary = dto.getBaseSalary();
+        if (salary == null || salary.compareTo(BigDecimal.ZERO) <= 0) {
+            Map<String, BigDecimal> defaultSalaries = Map.of(
+                    "MANAGER", new BigDecimal("15000000"),
+                    "TECHNICIAN", new BigDecimal("10000000"),
+                    "RECEPTIONIST", new BigDecimal("8000000")
+            );
+            salary = defaultSalaries.getOrDefault(roleName, BigDecimal.ZERO);
+        }
+        user.setBaseSalary(salary);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public List<User> findTechniciansByBranch(Integer branchId) {
+        return userRepository.findByBranchIdAndRoleName(branchId, "TECHNICIAN");
+    }
+
+    @Override
+    public List<User> findTop3Technicians() {
+        return userRepository.findTop3Technicians(PageRequest.of(0, 3));
     }
 
     private String saveProfilePicture(MultipartFile file, String username) throws IOException {

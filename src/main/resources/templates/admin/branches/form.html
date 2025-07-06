@@ -4,73 +4,472 @@
     <meta charset="UTF-8">
     <title>Thêm/Chỉnh sửa Chi nhánh</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 25%, #ff9a9e 50%, #fecfef 75%, #ffecd2 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
             min-height: 100vh;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Poppins', sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating elements background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                    radial-gradient(circle at 20% 80%, rgba(255, 182, 193, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 192, 203, 0.4) 0%, transparent 50%),
+                    radial-gradient(circle at 40% 40%, rgba(255, 218, 224, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-bubbles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .bubble {
+            position: absolute;
+            background: linear-gradient(45deg, rgba(255, 182, 193, 0.6), rgba(255, 218, 224, 0.4));
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .bubble:nth-child(1) { width: 80px; height: 80px; left: 10%; animation-delay: 0s; }
+        .bubble:nth-child(2) { width: 60px; height: 60px; left: 20%; animation-delay: 2s; }
+        .bubble:nth-child(3) { width: 100px; height: 100px; left: 35%; animation-delay: 4s; }
+        .bubble:nth-child(4) { width: 40px; height: 40px; left: 50%; animation-delay: 1s; }
+        .bubble:nth-child(5) { width: 120px; height: 120px; left: 70%; animation-delay: 3s; }
+        .bubble:nth-child(6) { width: 90px; height: 90px; left: 85%; animation-delay: 5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .container {
+            animation: slideInUp 0.8s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(255, 182, 193, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            animation: headerPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes headerPulse {
+            from { box-shadow: 0 20px 40px rgba(255, 182, 193, 0.3); }
+            to { box-shadow: 0 25px 50px rgba(255, 182, 193, 0.5); }
+        }
+
+        .header-section h2 {
+            background: linear-gradient(45deg, #ff6b9d, #c44569);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: 2rem;
+            margin: 0;
+            animation: textShimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes textShimmer {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .back-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .back-btn:hover::before {
+            left: 100%;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 154, 158, 0.6);
+            color: white;
         }
 
         .content-card {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 3rem;
+            box-shadow: 0 30px 60px rgba(255, 182, 193, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+            overflow: hidden;
+            animation: cardFloat 6s ease-in-out infinite;
+        }
+
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .content-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 192, 203, 0.1), transparent);
+            animation: cardShine 4s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes cardShine {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+            animation: formSlideIn 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.4s; }
+        .form-group:nth-child(5) { animation-delay: 0.5s; }
+        .form-group:nth-child(6) { animation-delay: 0.6s; }
+        .form-group:nth-child(7) { animation-delay: 0.7s; }
+        .form-group:nth-child(8) { animation-delay: 0.8s; }
+        .form-group:nth-child(9) { animation-delay: 0.9s; }
+        .form-group:nth-child(10) { animation-delay: 1.0s; }
+
+        @keyframes formSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #c44569;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .form-label i {
+            margin-right: 8px;
+            color: #ff6b9d;
         }
 
         .form-control, .form-select {
+            border: 2px solid rgba(255, 182, 193, 0.3);
+            border-radius: 15px;
+            padding: 12px 18px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #ff6b9d;
+            box-shadow: 0 0 0 0.2rem rgba(255, 107, 157, 0.25);
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-1px);
+        }
+
+        .form-control:hover, .form-select:hover {
+            border-color: #ff9a9e;
+            transform: translateY(-1px);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ff6b9d;
+            pointer-events: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            animation: buttonsSlideIn 0.8s ease-out 1.2s both;
+        }
+
+        @keyframes buttonsSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 20px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #ff6b9d, #c44569);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.4);
+        }
+
+        .btn-success::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-success:hover::before {
+            left: 100%;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.6);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #fecfef, #ff9a9e);
+            color: white;
+            box-shadow: 0 5px 15px rgba(254, 207, 239, 0.4);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(254, 207, 239, 0.6);
+            color: white;
+        }
+
+        /* Status select styling */
+        .status-option {
+            padding: 8px 12px;
             border-radius: 10px;
+            margin: 2px 0;
         }
 
-        .btn-primary, .btn-warning, .btn-secondary {
-            border-radius: 8px;
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .content-card {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+            }
+
+            .header-section {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .back-btn {
+                margin-top: 1rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
         }
 
-        label {
-            font-weight: bold;
+        /* Loading animation for form submission */
+        .btn-success:active {
+            transform: scale(0.98);
+        }
+
+        /* Hover effects for form elements */
+        .form-group:hover .form-label {
+            color: #ff6b9d;
+            transform: translateX(5px);
+            transition: all 0.3s ease;
+        }
+
+        /* Floating label effect */
+        .floating-label {
+            position: relative;
+        }
+
+        .floating-label input:focus + label,
+        .floating-label input:not(:placeholder-shown) + label {
+            transform: translateY(-25px) scale(0.8);
+            color: #ff6b9d;
+        }
+
+        /* Success animation */
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .form-control:valid {
+            border-color: #20c997;
+            animation: successPulse 0.3s ease;
         }
     </style>
 </head>
 <body>
+<!-- Floating bubbles background -->
+<div class="floating-bubbles">
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+</div>
 
 <div class="container py-5">
-    <div class="d-flex justify-content-between mb-3">
-        <h2 th:text="${branch.branchId == null ? 'Thêm Chi nhánh' : 'Chỉnh sửa Chi nhánh'}" class="text-dark"></h2>
-        <a th:href="@{/admin/branches}" class="btn btn-outline-dark">← Quay lại</a>
+    <div class="header-section d-flex justify-content-between align-items-center">
+        <h2>
+            <i class="fas fa-spa me-2"></i>
+            <span th:text="${branch.branchId == null ? 'Thêm Chi nhánh Spa' : 'Chỉnh sửa Chi nhánh Spa'}"></span>
+        </h2>
+        <a th:href="@{/admin/branches}" class="back-btn">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại
+        </a>
     </div>
 
     <div class="content-card">
         <form th:action="@{/admin/branches/save}" th:object="${branch}" method="post">
             <input type="hidden" th:field="*{branchId}" />
 
-            <div class="mb-3">
-                <label for="name" class="form-label">Tên Chi nhánh</label>
-                <input type="text" id="name" class="form-control" th:field="*{name}" required />
+            <div class="form-group">
+                <label for="name" class="form-label">
+                    <i class="fas fa-store"></i>Tên Chi nhánh
+                </label>
+                <input type="text" id="name" class="form-control" th:field="*{name}" required placeholder="Nhập tên chi nhánh spa..." />
             </div>
 
-            <div class="mb-3">
-                <label for="address" class="form-label">Địa chỉ</label>
-                <textarea id="address" class="form-control" th:field="*{address}" required></textarea>
+            <div class="form-group">
+                <label for="address" class="form-label">
+                    <i class="fas fa-map-marker-alt"></i>Địa chỉ
+                </label>
+                <textarea id="address" class="form-control" th:field="*{address}" required placeholder="Nhập địa chỉ chi nhánh..."></textarea>
             </div>
 
-            <div class="mb-3">
-                <label for="phone" class="form-label">Số điện thoại</label>
-                <input type="text" id="phone" class="form-control" th:field="*{phone}" />
+            <div class="form-group">
+                <label for="phone" class="form-label">
+                    <i class="fas fa-phone"></i>Số điện thoại
+                </label>
+                <input type="text" id="phone" class="form-control" th:field="*{phone}" placeholder="Nhập số điện thoại liên hệ..." />
             </div>
 
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" id="email" class="form-control" th:field="*{email}" />
+            <div class="form-group">
+                <label for="email" class="form-label">
+                    <i class="fas fa-envelope"></i>Email
+                </label>
+                <input type="email" id="email" class="form-control" th:field="*{email}" placeholder="Nhập email liên hệ..." />
             </div>
 
-            <div class="mb-3">
-                <label for="capacity" class="form-label">Sức chứa</label>
-                <input type="number" id="capacity" class="form-control" th:field="*{capacity}" min="1" />
+            <div class="form-group">
+                <label for="capacity" class="form-label">
+                    <i class="fas fa-users"></i>Sức chứa
+                </label>
+                <input type="number" id="capacity" class="form-control" th:field="*{capacity}" min="1" placeholder="Số khách tối đa..." />
             </div>
 
-            <div class="mb-3">
-                <label for="manager" class="form-label">Người quản lý</label>
+            <div class="form-group">
+                <label for="manager" class="form-label">
+                    <i class="fas fa-user-tie"></i>Người quản lý
+                </label>
                 <select id="manager" class="form-select" name="managerId" required>
+                    <option value="">-- Chọn người quản lý --</option>
                     <option th:each="m : ${managers}"
                             th:value="${m.userId}"
                             th:selected="${branch.managerId != null and branch.managerId == m.userId}"
@@ -78,38 +477,100 @@
                 </select>
             </div>
 
-            <div class="mb-3">
-                <label for="opening_hours" class="form-label">Giờ mở cửa</label>
-                <input type="text" id="opening_hours" class="form-control" th:field="*{openingHours}" />
+            <div class="form-group">
+                <label for="opening_hours" class="form-label">
+                    <i class="fas fa-clock"></i>Giờ mở cửa
+                </label>
+                <input type="text" id="opening_hours" class="form-control" th:field="*{openingHours}" placeholder="VD: 08:00 - 22:00" />
             </div>
 
-            <div class="mb-3">
-                <label for="operating_hours" class="form-label">Giờ hoạt động</label>
-                <input type="text" id="operating_hours" class="form-control" th:field="*{operatingHours}" />
+            <div class="form-group">
+                <label for="operating_hours" class="form-label">
+                    <i class="fas fa-business-time"></i>Giờ hoạt động
+                </label>
+                <input type="text" id="operating_hours" class="form-control" th:field="*{operatingHours}" placeholder="VD: Thứ 2 - Chủ nhật" />
             </div>
 
-            <div class="mb-3">
-                <label for="holiday_schedule" class="form-label">Lịch nghỉ</label>
-                <input type="text" id="holiday_schedule" class="form-control" th:field="*{holidaySchedule}" />
+            <div class="form-group">
+                <label for="holiday_schedule" class="form-label">
+                    <i class="fas fa-calendar-times"></i>Lịch nghỉ
+                </label>
+                <input type="text" id="holiday_schedule" class="form-control" th:field="*{holidaySchedule}" placeholder="VD: Tết Nguyên Đán, 30/4, 1/5..." />
             </div>
 
-            <div class="mb-3">
-                <label for="status" class="form-label">Trạng thái</label>
+            <div class="form-group">
+                <label for="status" class="form-label">
+                    <i class="fas fa-toggle-on"></i>Trạng thái
+                </label>
                 <select id="status" class="form-select" th:field="*{status}">
-                    <option value="active">Hoạt động</option>
-                    <option value="inactive">Không hoạt động</option>
-                    <option value="suspended">Tạm dừng</option>
-                    <option value="maintenance">Bảo trì</option>
+                    <option value="active">🟢 Hoạt động</option>
+                    <option value="inactive">🔴 Không hoạt động</option>
+                    <option value="suspended">🟡 Tạm dừng</option>
+                    <option value="maintenance">🔧 Bảo trì</option>
                 </select>
             </div>
 
-            <div class="d-flex justify-content-end">
-                <button type="submit" class="btn btn-success me-2">Lưu</button>
-                <a th:href="@{/admin/branches}" class="btn btn-secondary">Hủy</a>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save me-2"></i>Lưu thông tin
+                </button>
+                <a th:href="@{/admin/branches}" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>Hủy bỏ
+                </a>
             </div>
         </form>
     </div>
 </div>
 
+<script>
+    // Add smooth scrolling and form validation animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const inputs = document.querySelectorAll('.form-control, .form-select');
+
+        // Add floating label effect
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+
+            input.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.parentElement.classList.remove('focused');
+                }
+            });
+        });
+
+        // Form submission animation
+        form.addEventListener('submit', function(e) {
+            const submitBtn = document.querySelector('.btn-success');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang lưu...';
+            submitBtn.disabled = true;
+        });
+
+        // Add ripple effect to buttons
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+
+                this.appendChild(ripple);
+
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+    });
+</script>
 </body>
 </html>

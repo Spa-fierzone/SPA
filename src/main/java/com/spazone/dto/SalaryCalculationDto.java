@@ -24,6 +24,7 @@ public class SalaryCalculationDto {
     private boolean hasSalaryRecord;
     private SalaryRecord existingSalaryRecord;
     private BigDecimal commission;
+    private BigDecimal hourlyRate;
 
     public BigDecimal getCommission() {
         return commission;
@@ -171,6 +172,14 @@ public class SalaryCalculationDto {
 
     public void setExistingSalaryRecord(SalaryRecord existingSalaryRecord) {
         this.existingSalaryRecord = existingSalaryRecord;
+    }
+
+    public BigDecimal getHourlyRate() {
+        return hourlyRate;
+    }
+
+    public void setHourlyRate(BigDecimal hourlyRate) {
+        this.hourlyRate = hourlyRate;
     }
 
     // Additional getter methods for template compatibility

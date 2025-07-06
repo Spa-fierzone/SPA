@@ -2,10 +2,7 @@
 // UserService.java
 package com.spazone.service;
 
-import com.spazone.dto.ChangePasswordDto;
-import com.spazone.dto.RegisterDto;
-import com.spazone.dto.UpdateProfileDto;
-import com.spazone.dto.UserProfileDto;
+import com.spazone.dto.*;
 import com.spazone.entity.Role;
 import com.spazone.entity.User;
 import org.springframework.data.domain.Page;
@@ -46,5 +43,11 @@ public interface UserService {
 
     List<Role> getAllRoles();
 
+    void saveUser(User user);
 
+    void createUserWithRoleAndSalary(CreateUserDto createUserDto);
+
+    List<User> findTechniciansByBranch(Integer branchId);
+
+    List<User> findTop3Technicians();
 }

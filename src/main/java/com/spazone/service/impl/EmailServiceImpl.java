@@ -1,5 +1,9 @@
 package com.spazone.service.impl;
 
+import com.spazone.entity.Invoice;
+import com.spazone.entity.User;
+import com.spazone.exception.InvalidTokenException;
+import com.spazone.exception.ResourceNotFoundException;
 import com.spazone.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -11,6 +15,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import java.time.LocalDateTime;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -76,6 +82,24 @@ public class EmailServiceImpl implements EmailService {
         message.setText("This is a confirmation that your password has been successfully changed. " +
                 "If you did not perform this change, please contact support immediately.");
 
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendInvoiceEmail(Invoice invoice) {
+        String to = invoice.getCustomer().getEmail();
+        String subject = "Hóa đơn thanh toán SpaZone #" + invoice.getInvoiceNumber();
+        String body = "Chào " + invoice.getCustomer().getFullName() + ",\n\n"
+                + "Cảm ơn bạn đã sử dụng dịch vụ. Dưới đây là thông tin hóa đơn:\n"
+                + "Dịch vụ: " + invoice.getAppointment().getService().getName() + "\n"
+                + "Tổng cộng: " + invoice.getFinalAmount() + " VNĐ\n"
+                + "Phương thức thanh toán: " + invoice.getPaymentMethod() + "Thanh Toán Tiền Mặt\n\n"
+                + "Trân trọng,\nSpaZone";
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
         mailSender.send(message);
     }
 }

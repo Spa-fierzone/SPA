@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface AppointmentService {
     void create(Appointment appointment);
+
     List<Appointment> getByCustomer(User customer);
 
     List<TimeSlot> suggestFreeSlots(Integer technicianId, LocalDateTime date, int duration);
@@ -20,4 +21,13 @@ public interface AppointmentService {
     Appointment checkIn(Integer appointmentId);
 
     void checkOut(Integer appointmentId);
+
+    Appointment findByIdWithTreatmentRecords(Integer id);
+
+    // For receptionist: create appointment by ids and datetime
+    boolean createAppointment(Integer customerId, Integer serviceId, String appointmentDateTime, Integer technicianId, Integer branchId);
+
+    Appointment findLatestAppointment(Integer customerId, Integer serviceId, Integer technicianId, Integer branchId);
+
+    void update(Appointment appointment);
 }

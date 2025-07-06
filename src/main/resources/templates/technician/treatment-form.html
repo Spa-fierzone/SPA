@@ -3,80 +3,287 @@
 <head>
     <meta charset="UTF-8">
     <title>Ghi nhận điều trị</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <style>
         body {
-            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            background: linear-gradient(120deg, #fff0f6 0%, #ffe4ec 60%, #fdfbfb 100%);
             min-height: 100vh;
+            font-family: 'Poppins', Arial, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+            animation: gradientShift 16s infinite alternate;
         }
-        .card {
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        /* Floating Bubbles */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,182,193,0.13);
+            animation: float 8s infinite ease-in-out;
+            z-index: 0;
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0);}
+            50% { transform: translateY(-32px);}
         }
         h2 {
             font-weight: bold;
-            color: white;
+            color: #ff6b9d;
+            letter-spacing: 1px;
+            background: rgba(255,255,255,0.5);
+            padding: 0.6rem 1.5rem;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(255,182,193,0.12);
+            display: inline-block;
+        }
+        .glass-card {
+            border-radius: 22px;
+            box-shadow: 0 16px 32px rgba(255, 107, 157, 0.13);
+            border: none;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(10px);
+            animation: floatCard 4s infinite ease-in-out;
+        }
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0);}
+            50% { transform: translateY(-8px);}
+        }
+        .form-label {
+            color: #c77d8c;
+            font-weight: 600;
+        }
+        .form-control {
+            background-color: #fff0f6 !important;
+            border: 1.5px solid #ffb6c1;
+            color: #6c3a5c;
+            border-radius: 12px;
+            font-size: 1.08rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            animation: slideIn 0.7s cubic-bezier(.68,-0.55,.27,1.55);
+        }
+        .form-control:focus {
+            background-color: #ffe4ec !important;
+            border-color: #ff8fab;
+            box-shadow: 0 0 8px rgba(255, 139, 171, 0.3);
+            color: #6c3a5c;
+        }
+        .form-control:valid {
+            border-color: #28a745 !important;
+            animation: pulseValid 0.5s;
+        }
+        .form-control:invalid {
+            border-color: #dc3545 !important;
+            animation: shake 0.5s;
+        }
+        @keyframes pulseValid {
+            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        .btn-gradient {
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.2s;
+            padding: 0.7rem 2.2rem;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-gradient:before {
+            content: '';
+            position: absolute;
+            left: -60%;
+            top: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(120deg,rgba(255,255,255,0.3),rgba(255,255,255,0));
+            transform: skewX(-25deg);
+            transition: left 0.5s;
+        }
+        .btn-gradient:hover {
+            box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+            transform: translateY(-2px) scale(1.03);
+            color: #fff;
+        }
+        .btn-gradient:hover:before {
+            left: 120%;
+        }
+        .btn-gradient:active {
+            filter: brightness(0.95);
+        }
+        .text-center {
+            text-align: center !important;
+        }
+        @media (max-width: 576px) {
+            .glass-card { padding: 1.2rem 0.5rem 1.2rem 0.5rem;}
+            h2 { font-size: 1.2rem; }
         }
     </style>
 </head>
 <body>
+<!-- Floating Bubbles -->
+<div id="bubbles"></div>
 <div class="container py-5">
-    <h2 class="text-center mb-4">Ghi nhận điều trị</h2>
-    <div class="card p-4">
-        <form th:action="@{/technician/treatments/save}" th:object="${treatment}" method="post" enctype="multipart/form-data">
+    <h2 class="text-center mb-4"><i class="fa fa-notes-medical me-2"></i>Ghi nhận điều trị</h2>
+    <div class="glass-card p-4 mx-auto" style="max-width: 640px;">
+        <form th:action="@{/technician/treatments/save}" th:object="${treatment}" method="post" enctype="multipart/form-data" id="treatmentForm">
             <input type="hidden" th:field="*{appointment}" />
             <input type="hidden" th:field="*{technician}" />
 
             <div class="mb-3">
-                <label class="form-label">Ghi chú trước điều trị</label>
+                <label class="form-label"><i class="fa fa-pen-nib me-2"></i>Ghi chú trước điều trị</label>
                 <textarea class="form-control" th:field="*{preTreatmentNotes}" rows="3"></textarea>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Ảnh trước điều trị</label>
+                <label class="form-label"><i class="fa fa-image me-2"></i>Ảnh trước điều trị</label>
                 <input class="form-control" type="file" name="beforeImageFile">
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Ghi chú sau điều trị</label>
+                <label class="form-label"><i class="fa fa-pen-nib me-2"></i>Ghi chú sau điều trị</label>
                 <textarea class="form-control" th:field="*{postTreatmentNotes}" rows="3"></textarea>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Ảnh sau điều trị</label>
+                <label class="form-label"><i class="fa fa-image me-2"></i>Ảnh sau điều trị</label>
                 <input class="form-control" type="file" name="afterImageFile">
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Ngày điều trị</label>
+                <label class="form-label"><i class="fa fa-calendar-alt me-2"></i>Ngày điều trị</label>
                 <input class="form-control" type="datetime-local" th:field="*{treatmentDate}">
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Phản hồi của khách</label>
+                <label class="form-label"><i class="fa fa-comment-dots me-2"></i>Phản hồi của khách</label>
                 <textarea class="form-control" th:field="*{customerFeedback}" rows="2"></textarea>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Ghi chú hẹn tái khám</label>
+                <label class="form-label"><i class="fa fa-calendar-check me-2"></i>Ghi chú hẹn tái khám</label>
                 <textarea class="form-control" th:field="*{followUpNotes}" rows="2"></textarea>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Tiến độ điều trị (%)</label>
+                <label class="form-label"><i class="fa fa-tasks me-2"></i>Tiến độ điều trị (%)</label>
                 <input class="form-control" type="number" min="0" max="100" th:field="*{treatmentProgress}">
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Đề xuất lịch hẹn tiếp theo</label>
-                <input class="form-control" type="date" th:field="*{nextAppointmentRecommendation}">
+            <div class="mb-3 form-check">
+                <input class="form-check-input" type="checkbox" id="createNextAppointment" name="createNextAppointment" checked onchange="toggleNextAppointmentInput()">
+                <label class="form-check-label" for="createNextAppointment">
+                    Tạo lịch hẹn tiếp theo cho khách hàng
+                </label>
+            </div>
+
+            <div id="nextAppointmentInput" class="mb-3">
+                <label class="form-label"><i class="fa fa-calendar-plus me-2"></i>Đặt lịch hẹn tiếp theo</label>
+                <input class="form-control" type="datetime-local" name="nextAppointmentDateTime"
+                       th:value="${treatment.nextAppointmentRecommendation != null ? #temporals.format(treatment.nextAppointmentRecommendation, 'yyyy-MM-dd''T''HH:mm') : ''}">
+                <div class="form-text">Kỹ thuật viên có thể chọn ngày giờ cho lịch hẹn tiếp theo.</div>
+            </div>
+
+            <div class="alert alert-info text-center mb-3">
+                Sau khi lưu điều trị, một lịch hẹn và lịch trình dịch vụ mới sẽ được tạo tự động cho khách hàng.
             </div>
 
             <div class="text-center">
-                <button type="submit" class="btn btn-success px-4">Lưu điều trị</button>
+                <button type="submit" class="btn btn-gradient px-4 ripple-btn">
+                    <i class="fa fa-save me-2"></i>Lưu điều trị
+                </button>
             </div>
         </form>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Floating Bubbles
+    function createBubbles() {
+        const container = document.createElement('div');
+        container.id = 'bubbles';
+        document.body.appendChild(container);
+        for (let i = 0; i < 10; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 35 + 20;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.top = `${Math.random() * 100}%`;
+            bubble.style.animationDelay = `${Math.random() * 8}s`;
+            container.appendChild(bubble);
+        }
+    }
+    createBubbles();
+
+    // Ripple effect for button
+    document.querySelectorAll('.ripple-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            ripple.style.left = `${e.offsetX}px`;
+            ripple.style.top = `${e.offsetY}px`;
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+
+    // Loading state on submit
+    document.getElementById('treatmentForm').addEventListener('submit', function() {
+        const btn = this.querySelector('.btn-gradient');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang lưu...';
+    });
+
+    function toggleNextAppointmentInput() {
+        var checkbox = document.getElementById('createNextAppointment');
+        var inputDiv = document.getElementById('nextAppointmentInput');
+        inputDiv.style.display = checkbox.checked ? 'block' : 'none';
+    }
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleNextAppointmentInput();
+    });
+</script>
+<style>
+    /* Ripple effect for button */
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        transform: scale(0);
+        animation: ripple 0.6s linear;
+        background: rgba(255,255,255,0.5);
+        pointer-events: none;
+        width: 100px;
+        height: 100px;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    @keyframes ripple {
+        to {
+            transform: translate(-50%, -50%) scale(2.5);
+            opacity: 0;
+        }
+    }
+</style>
 </body>
 </html>

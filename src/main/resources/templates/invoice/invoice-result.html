@@ -3,35 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <title>Kết quả thanh toán</title>
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
         body {
-            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
+            background: linear-gradient(120deg, #fff0f6 0%, #ffe4ec 60%, #fdfbfb 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            font-family: 'Poppins', Arial, sans-serif;
+            position: relative;
+            overflow-x: hidden;
         }
-        .card {
-            border-radius: 20px;
-            box-shadow: 0 10px 20px rgba(255, 107, 157, 0.2);
+        /* Floating Bubbles */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,182,193,0.13);
+            animation: float 8s infinite ease-in-out;
+            z-index: 0;
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0);}
+            50% { transform: translateY(-32px);}
+        }
+        /* Glassmorphism Card */
+        .glass-card, .card {
+            border-radius: 22px;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 10px 32px 0 rgba(255,182,193,0.10);
+            border: 1px solid rgba(255,182,193,0.16);
         }
         h2 {
             color: #ff6b9d;
             font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .result-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: pop 0.7s cubic-bezier(.68,-0.55,.27,1.55);
+        }
+        @keyframes pop {
+            0% { transform: scale(0.7);}
+            60% { transform: scale(1.2);}
+            100% { transform: scale(1);}
+        }
+        .btn-gradient {
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+            color: #fff !important;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.2s;
+        }
+        .btn-gradient:before {
+            content: '';
+            position: absolute;
+            left: -60%;
+            top: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(120deg,rgba(255,255,255,0.3),rgba(255,255,255,0));
+            transform: skewX(-25deg);
+            transition: left 0.5s;
+        }
+        .btn-gradient:hover {
+            box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .btn-gradient:hover:before {
+            left: 120%;
+        }
+        .status-paid {
+            color: #56c596;
+        }
+        .status-failed {
+            color: #e55a87;
         }
         footer {
             margin-top: auto;
             background-color: #fff;
+            border-top: 1.5px solid #ffe4ec;
+        }
+        @media (max-width: 576px) {
+            .glass-card, .card { padding: 1.2rem 0.5rem 1.2rem 0.5rem;}
         }
     </style>
 </head>
 <body>
+<!-- Floating Bubbles -->
+<div id="bubbles"></div>
 
 <!-- Header -->
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container">
-        <a class="navbar-brand text-danger fw-bold" href="#">SpaZone</a>
+        <a class="navbar-brand fw-bold" style="color:#ff6b9d;" th:href="@{/dashboard}">
+            <i class="bi bi-flower1 me-2"></i>SpaZone
+        </a>
         <ul class="navbar-nav ms-auto align-items-center">
             <li class="nav-item">
                 <a th:href="@{/}" class="btn btn-outline-primary">Trang chủ</a>
@@ -42,20 +118,26 @@
 
 <!-- Main content -->
 <div class="container py-5">
-    <div class="card p-4">
-        <h2 class="mb-3">Kết quả thanh toán</h2>
-
+    <div class="glass-card p-4 text-center mx-auto" style="max-width: 500px;">
+        <div th:if="${invoice.paymentStatus == 'paid'}">
+            <div class="result-icon text-success"><i class="bi bi-check-circle-fill"></i></div>
+            <h2 class="mb-3">Thanh toán thành công!</h2>
+        </div>
+        <div th:if="${invoice.paymentStatus != 'paid'}">
+            <div class="result-icon text-danger"><i class="bi bi-x-circle-fill"></i></div>
+            <h2 class="mb-3">Thanh toán thất bại</h2>
+        </div>
         <p><strong>Mã hóa đơn:</strong> <span th:text="${invoice.invoiceNumber}">HD001</span></p>
         <p><strong>Dịch vụ:</strong> <span th:text="${invoice.appointment.service.name}">Massage Thư Giãn</span></p>
         <p><strong>Số tiền:</strong>
             <span th:text="${#numbers.formatDecimal(invoice.finalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">330.000 đ</span>
         </p>
         <p><strong>Trạng thái:</strong>
-            <span class="fw-bold" th:classappend="${invoice.paymentStatus == 'paid'} ? 'text-success' : 'text-danger'"
+            <span th:classappend="${invoice.paymentStatus == 'paid'} ? 'status-paid fw-bold' : 'status-failed fw-bold'"
                   th:text="${invoice.paymentStatus == 'paid' ? 'Đã thanh toán' : 'Thanh toán thất bại'}">Đã thanh toán</span>
         </p>
 
-        <a th:href="@{/invoices}" class="btn btn-success mt-4">
+        <a th:href="@{/invoices}" class="btn btn-gradient w-100 mt-4 py-2">
             <i class="bi bi-arrow-left me-1"></i> Quay về danh sách hóa đơn
         </a>
     </div>
@@ -68,5 +150,23 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Floating Bubbles
+    function createBubbles() {
+        const container = document.getElementById('bubbles');
+        for (let i = 0; i < 8; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 30 + 25;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.top = `${Math.random() * 100}%`;
+            bubble.style.animationDelay = `${Math.random() * 8}s`;
+            container.appendChild(bubble);
+        }
+    }
+    createBubbles();
+</script>
 </body>
 </html>

@@ -13,4 +13,6 @@ public interface SpaServiceService {
 
     List<Service> getTop6();
     List<Service> findAllActive();
+
+    Service getServiceById(Integer serviceId);
 }

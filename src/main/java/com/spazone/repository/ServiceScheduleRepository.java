@@ -4,7 +4,11 @@ import com.spazone.entity.Branch;
 import com.spazone.entity.Service;
 import com.spazone.entity.ServiceSchedule;
 import com.spazone.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -16,14 +20,28 @@ public interface ServiceScheduleRepository extends JpaRepository<ServiceSchedule
 
     boolean existsByTechnicianAndServiceAndBranch(User technician, Service service, Branch branch);
 
+    // Replace the problematic exists method with a count-based query to avoid NonUniqueResultException
+    @Query("SELECT COUNT(s) > 0 FROM ServiceSchedule s WHERE s.technician.userId = :technicianId " +
+            "AND s.branch.branchId = :branchId AND s.dayOfWeek = :dayOfWeek " +
+            "AND s.startTime = :startTime AND s.endTime = :endTime AND s.service.serviceId = :serviceId")
     boolean existsByTechnicianUserIdAndBranchBranchIdAndDayOfWeekAndStartTimeAndEndTimeAndServiceServiceId(
-            Integer technicianId,
-            Integer branchId,
-            Integer dayOfWeek,
-            LocalDateTime startTime,
-            LocalDateTime endTime,
-            Integer serviceId
+            @Param("technicianId") Integer technicianId,
+            @Param("branchId") Integer branchId,
+            @Param("dayOfWeek") Integer dayOfWeek,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
+            @Param("serviceId") Integer serviceId
     );
 
-}
+    @Query("SELECT s FROM ServiceSchedule s WHERE (:technicianId IS NULL OR s.technician.userId = :technicianId) " +
+            "AND (:serviceName IS NULL OR LOWER(s.service.name) LIKE LOWER(CONCAT('%', :serviceName, '%'))) " +
+            "AND (:branchId IS NULL OR s.branch.branchId = :branchId) " +
+            "AND (:active IS NULL OR s.isActive = :active)")
+    Page<ServiceSchedule> searchSchedules(
+            @Param("technicianId") Integer technicianId,
+            @Param("serviceName") String serviceName,
+            @Param("branchId") Integer branchId,
+            @Param("active") Boolean active,
+            Pageable pageable);
 
+}

@@ -6,32 +6,195 @@
   <title>Điểm danh hôm nay</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    * {
+      font-family: 'Poppins', sans-serif;
+    }
+
     body {
-      background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
+      background: linear-gradient(300deg, #ffeef8, #ffe4f1, #ffd9ec, #ffcee7);
+      background-size: 400% 400%;
+      animation: gradient-animation 15s ease infinite;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
+      position: relative;
     }
+
+    @keyframes gradient-animation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Floating Bubbles */
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 55%, rgba(255, 182, 193, 0.3), rgba(255, 182, 193, 0.1) 40%, rgba(255, 105, 180, 0.2) 60%, rgba(255, 20, 147, 0.1));
+      animation: float 6s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .bubble:nth-child(1) { width: 80px; height: 80px; left: 10%; animation-delay: 0s; animation-duration: 8s; }
+    .bubble:nth-child(2) { width: 120px; height: 120px; left: 20%; animation-delay: 2s; animation-duration: 10s; }
+    .bubble:nth-child(3) { width: 60px; height: 60px; right: 15%; animation-delay: 4s; animation-duration: 7s; }
+    .bubble:nth-child(4) { width: 100px; height: 100px; right: 30%; animation-delay: 1s; animation-duration: 9s; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) scale(1); opacity: 0.7; }
+      50% { transform: translateY(-30px) scale(1.1); opacity: 0.9; }
+    }
+
+    /* Glassmorphism Navbar */
     .navbar {
-      border-bottom: 2px solid #ffb3c6;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(255, 105, 180, 0.1);
+      z-index: 1000;
+      position: relative;
     }
+    .navbar-brand {
+      font-weight: 700;
+      color: #ff69b4 !important;
+      text-shadow: 0 2px 4px rgba(255, 105, 180, 0.3);
+    }
+
+    /* Glassmorphism Card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(255, 105, 180, 0.15);
+      transition: all 0.3s ease;
+      animation: gentle-float 4s ease-in-out infinite;
+      position: relative;
+      z-index: 10;
+    }
+    @keyframes gentle-float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    .glass-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 30px 60px rgba(255, 105, 180, 0.25);
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Button Animations */
+    .btn {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      border-radius: 12px;
+      font-weight: 600;
+      box-shadow: 0 6px 20px rgba(255, 105, 180, 0.2);
+    }
+    .btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(255, 105, 180, 0.4);
+    }
+    .btn-outline-info {
+      border-color: #0dcaf0;
+      color: #0dcaf0;
+    }
+    .btn-outline-info:hover {
+      background: linear-gradient(135deg, #0dcaf0, #0d6efd);
+      color: white;
+    }
+    .btn-outline-secondary {
+      border-color: #6c757d;
+      color: #6c757d;
+    }
+    .btn-outline-secondary:hover {
+      background: linear-gradient(135deg, #6c757d, #495057);
+      color: white;
+    }
+
+    /* Ripple Effect */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.6);
+      transform: scale(0);
+      animation: ripple-animation 0.6s linear;
+    }
+    @keyframes ripple-animation {
+      to { transform: scale(4); opacity: 0; }
+    }
+
+    /* Slide-in Animation */
+    .slide-in-up {
+      animation: slideInUp 0.8s ease-out;
+    }
+    @keyframes slideInUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Table Animation */
+    .table-row {
+      transition: all 0.3s ease;
+      animation: slideInLeft 0.5s ease-out;
+    }
+    @keyframes slideInLeft {
+      from { transform: translateX(-50px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .table-row:hover {
+      background: rgba(255, 255, 255, 0.4) !important;
+      transform: translateX(5px);
+    }
+
+    /* Status Badges */
+    .status-present {
+      background: linear-gradient(135deg, #20c997, #198754);
+      color: white;
+    }
+    .status-late {
+      background: linear-gradient(135deg, #ffc107, #fd7e14);
+      color: black;
+    }
+    .status-absent {
+      background: linear-gradient(135deg, #dc3545, #b02a37);
+      color: white;
+    }
+
+    /* Footer */
     footer {
       margin-top: auto;
-      background-color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
     }
-    h2 {
-      font-weight: bold;
-      color: #fff;
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .bubble { display: none; }
+      .glass-card { padding: 1rem; }
+      .table-responsive { overflow-x: auto; }
     }
   </style>
 </head>
 <body class="bg-light">
+<!-- Floating Bubbles -->
+<div class="bubble"></div>
+<div class="bubble"></div>
+<div class="bubble"></div>
+<div class="bubble"></div>
 
 <!-- Header -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-light">
   <div class="container">
-    <a class="navbar-brand text-danger fw-bold" th:href="@{/dashboard}">SpaZone</a>
+    <a class="navbar-brand" th:href="@{/dashboard}">
+      <i class="fas fa-spa me-2"></i>SpaZone
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
             data-bs-target="#navbarContent" aria-controls="navbarContent"
             aria-expanded="false" aria-label="Toggle navigation">
@@ -45,8 +208,8 @@
             <i class="fas fa-chart-line me-1"></i> Báo cáo công
           </a>
         </li>
-        <li class="nav-item me-2">
-          <a href="/" class="btn btn-outline-secondary">
+        <li class="nav-item">
+          <a href="/dashboard" class="btn btn-outline-secondary ms-2">
             <i class="fas fa-home me-1"></i> Trang chủ
           </a>
         </li>
@@ -56,38 +219,77 @@
 </nav>
 
 <!-- Main Content -->
-<div class="container py-4">
-  <h2 class="mb-4">Chấm công hôm nay - <span th:text="${currentDate}"></span></h2>
+<div class="container py-4 slide-in-up">
+  <h2 class="mb-4 text-center">Chấm công hôm nay - <span th:text="${currentDate}"></span></h2>
 
-  <div class="table-responsive">
-    <table class="table table-bordered table-striped">
-      <thead class="table-primary text-center">
-      <tr>
-        <th>Nhân viên</th>
-        <th>Chi nhánh</th>
-        <th>Check-in</th>
-        <th>Check-out</th>
-        <th>Trạng thái</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr th:each="att : ${attendances}">
-        <td th:text="${att.user.fullName}"></td>
-        <td th:text="${att.branch.name}"></td>
-        <td th:text="${att.checkInTime}"></td>
-        <td th:text="${att.checkOutTime}"></td>
-        <td th:text="${att.status}"></td>
-      </tr>
-      </tbody>
-    </table>
+  <div class="glass-card p-4 mb-5">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead class="text-center" style="background: rgba(255, 105, 180, 0.1);">
+        <tr>
+          <th><i class="fas fa-user me-1"></i> Nhân viên</th>
+          <th><i class="fas fa-store me-1"></i> Chi nhánh</th>
+          <th><i class="fas fa-sign-in-alt me-1"></i> Check-in</th>
+          <th><i class="fas fa-sign-out-alt me-1"></i> Check-out</th>
+          <th><i class="fas fa-info-circle me-1"></i> Trạng thái</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="att, iter : ${attendances}" class="table-row"
+            th:style="${iter.index % 2 == 0} ? 'background: rgba(255,255,255,0.2)' : 'background: rgba(255,255,255,0.1)'">
+          <td th:text="${att.user.fullName}"></td>
+          <td th:text="${att.branch.name}"></td>
+          <td th:text="${att.checkInTime} ?: 'Chưa điểm danh'"></td>
+          <td th:text="${att.checkOutTime} ?: 'Chưa điểm danh'"></td>
+          <td>
+              <span class="badge rounded-pill p-2"
+                    th:classappend="${att.status == 'PRESENT'} ? 'status-present' :
+                                  ${att.status == 'LATE'} ? 'status-late' :
+                                  'status-absent'"
+                    th:text="${att.status == 'PRESENT'} ? 'Đúng giờ' :
+                            ${att.status == 'LATE'} ? 'Muộn' : 'Vắng'">
+              </span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
 <!-- Footer -->
-<footer class="text-center py-4 bg-white mt-5 border-top">
-  <span class="text-muted">© 2025 SpaZone. All rights reserved.</span>
+<footer class="text-center py-4">
+  <div class="container">
+      <span class="text-muted">
+        <i class="fas fa-heart text-danger me-1"></i>
+        © 2025 SpaZone. All rights reserved.
+      </span>
+  </div>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Ripple effect for buttons
+  function createRipple(event) {
+    const button = event.currentTarget;
+    const circle = document.createElement("span");
+    const diameter = Math.max(button.clientWidth, button.clientHeight);
+    const radius = diameter / 2;
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+    circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+    circle.classList.add("ripple");
+
+    const ripple = button.getElementsByClassName("ripple")[0];
+    if (ripple) ripple.remove();
+
+    button.appendChild(circle);
+  }
+
+  const buttons = document.querySelectorAll('.btn');
+  buttons.forEach(button => {
+    button.addEventListener('click', createRipple);
+  });
+</script>
 </body>
 </html>

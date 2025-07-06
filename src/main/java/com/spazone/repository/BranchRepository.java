@@ -22,4 +22,6 @@ public interface BranchRepository extends JpaRepository<Branch, Integer> {
 
     List<Branch> findByIsActiveTrue();
 
+    @Override
+    List<Branch> findAll();
 }

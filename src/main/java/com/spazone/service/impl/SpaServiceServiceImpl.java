@@ -1,6 +1,5 @@
 package com.spazone.service.impl;
 
-import com.spazone.entity.Service;
 import com.spazone.exception.ResourceNotFoundException;
 import com.spazone.repository.ServiceRepository;
 import com.spazone.service.SpaServiceService;
@@ -9,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import com.spazone.entity.Service;
 
 import java.util.List;
 
@@ -49,5 +49,11 @@ public class SpaServiceServiceImpl implements SpaServiceService {
     @Override
     public List<Service> findAllActive() {
         return serviceRepository.findByStatusOrderByCreatedAtDesc("active");
+    }
+
+    @Override
+    public Service getServiceById(Integer serviceId) {
+        return serviceRepository.findById(serviceId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy dịch vụ."));
     }
 }

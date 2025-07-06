@@ -1,40 +1,229 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
+  <meta charset="UTF-8" />
   <title>Xác Thực OTP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- Google Fonts: Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet"/>
+  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(120deg, #fff0f6 0%, #ffe4ec 60%, #fdfbfb 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Floating Bubbles */
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,182,193,0.13);
+      animation: float 8s infinite ease-in-out;
+      z-index: 0;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0);}
+      50% { transform: translateY(-32px);}
+    }
+    /* Glassmorphism Card */
+    .glass-card {
+      background: rgba(255,255,255,0.7);
+      border-radius: 22px;
+      box-shadow: 0 8px 32px 0 rgba(31,38,135,0.10);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,182,193,0.16);
+      padding: 2.2rem 2rem 2rem 2rem;
+      position: relative;
+      z-index: 1;
+      animation: floatCard 4s infinite ease-in-out;
+    }
+    @keyframes floatCard {
+      0%, 100% { transform: translateY(0);}
+      50% { transform: translateY(-8px);}
+    }
+    .glass-card .otp-icon {
+      color: #ff8fab;
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+      display: block;
+      text-align: center;
+    }
+    .glass-card h3 {
+      color: #ff6b9d;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .form-label {
+      font-weight: 600;
+      color: #c77d8c;
+    }
+    .otp-input-group {
+      display: flex;
+      justify-content: center;
+      gap: 0.7rem;
+      margin-bottom: 1.2rem;
+    }
+    .otp-input {
+      width: 44px;
+      height: 54px;
+      border: none;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 2px 8px rgba(255,182,193,0.10);
+      text-align: center;
+      font-size: 1.6rem;
+      color: #ff6b9d;
+      font-weight: 600;
+      outline: none;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .otp-input:focus {
+      box-shadow: 0 0 0 2px #ffb6c1;
+      border-color: #ffb6c1;
+      background: #fff;
+    }
+    .btn-gradient {
+      background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow 0.3s, transform 0.2s;
+    }
+    .btn-gradient:before {
+      content: '';
+      position: absolute;
+      left: -60%;
+      top: 0;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(120deg,rgba(255,255,255,0.3),rgba(255,255,255,0));
+      transform: skewX(-25deg);
+      transition: left 0.5s;
+    }
+    .btn-gradient:hover {
+      box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+      transform: translateY(-2px) scale(1.03);
+    }
+    .btn-gradient:hover:before {
+      left: 120%;
+    }
+    .text-muted {
+      color: #c77d8c !important;
+    }
+    @media (max-width: 576px) {
+      .glass-card { padding: 1.2rem 0.5rem 1.2rem 0.5rem;}
+      .otp-input { width: 36px; height: 46px; font-size: 1.2rem;}
+    }
+  </style>
 </head>
-<body class="bg-light">
-<div class="container mt-5">
+<body>
+<!-- Floating Bubbles -->
+<div id="bubbles"></div>
+<div class="container">
   <div class="row justify-content-center">
     <div class="col-md-6 col-lg-5">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h3 class="card-title text-center mb-4">Nhập mã OTP</h3>
+      <div class="glass-card shadow-sm mt-5">
+        <span class="otp-icon"><i class="fas fa-shield-alt"></i></span>
+        <h3 class="mb-4">Nhập mã OTP</h3>
 
-          <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-          <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
 
-          <form th:action="@{/auth/verify-otp}" method="post">
-            <input type="hidden" name="email" th:value="${email}">
-
-            <div class="mb-3">
-              <label for="otp" class="form-label">Mã OTP (6 chữ số)</label>
-              <input type="text" id="otp" name="otp" class="form-control" maxlength="6" required>
-            </div>
-
-            <div class="d-grid mb-3">
-              <button type="submit" class="btn btn-primary">Xác thực</button>
-            </div>
-          </form>
-
-          <div class="text-center">
-            <small class="text-muted">Kiểm tra hộp thư email để nhận mã OTP</small>
+        <form th:action="@{/auth/verify-otp}" method="post" id="otpForm" autocomplete="off">
+          <input type="hidden" name="email" th:value="${email}">
+          <label class="form-label text-center w-100 mb-2"><i class="fas fa-key me-2"></i>Mã OTP (6 chữ số)</label>
+          <div class="otp-input-group mb-3">
+            <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" class="otp-input" name="otp1" required autocomplete="off">
+            <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" class="otp-input" name="otp2" required autocomplete="off">
+            <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" class="otp-input" name="otp3" required autocomplete="off">
+            <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" class="otp-input" name="otp4" required autocomplete="off">
+            <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" class="otp-input" name="otp5" required autocomplete="off">
+            <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" class="otp-input" name="otp6" required autocomplete="off">
           </div>
+          <input type="hidden" id="otp" name="otp" />
+          <div class="d-grid mb-3">
+            <button type="submit" class="btn btn-gradient py-2"><i class="fas fa-check"></i> Xác thực</button>
+          </div>
+        </form>
+        <div class="text-center">
+          <small class="text-muted">Kiểm tra hộp thư email để nhận mã OTP</small>
         </div>
       </div>
     </div>
   </div>
 </div>
+<!-- Bubble Script & OTP Script -->
+<script>
+  // Floating Bubbles
+  function createBubbles() {
+    const container = document.getElementById('bubbles');
+    for (let i = 0; i < 8; i++) {
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      const size = Math.random() * 30 + 25;
+      bubble.style.width = `${size}px`;
+      bubble.style.height = `${size}px`;
+      bubble.style.left = `${Math.random() * 100}%`;
+      bubble.style.top = `${Math.random() * 100}%`;
+      bubble.style.animationDelay = `${Math.random() * 8}s`;
+      container.appendChild(bubble);
+    }
+  }
+  createBubbles();
+
+  // OTP Input UX
+  const otpInputs = document.querySelectorAll('.otp-input');
+  otpInputs.forEach((input, idx) => {
+    input.addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '');
+      if (this.value && idx < otpInputs.length - 1) {
+        otpInputs[idx + 1].focus();
+      }
+      updateOtpHidden();
+    });
+    input.addEventListener('keydown', function(e) {
+      if (e.key === "Backspace" && !this.value && idx > 0) {
+        otpInputs[idx - 1].focus();
+      }
+    });
+    input.addEventListener('paste', function(e) {
+      e.preventDefault();
+      const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0,6);
+      paste.split('').forEach((char, i) => {
+        if (otpInputs[i]) otpInputs[i].value = char;
+      });
+      if (paste.length > 0) {
+        const next = Math.min(paste.length, otpInputs.length) - 1;
+        otpInputs[next].focus();
+      }
+      updateOtpHidden();
+    });
+  });
+  function updateOtpHidden() {
+    document.getElementById('otp').value = Array.from(otpInputs).map(i=>i.value).join('');
+  }
+  // Ensure OTP is filled before submit
+  document.getElementById('otpForm').addEventListener('submit', function(e) {
+    updateOtpHidden();
+    if (document.getElementById('otp').value.length !== 6) {
+      e.preventDefault();
+      otpInputs[0].focus();
+    }
+  });
+</script>
 </body>
 </html>

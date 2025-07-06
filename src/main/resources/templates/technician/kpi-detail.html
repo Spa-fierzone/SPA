@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết KPI - SpaZone</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        html, body { height: 100%; }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(120deg, #fdfbfb 0%, #ffe4ec 40%, #fff0f6 100%);
+            background-size: 400% 400%;
+            animation: gradientMove 18s ease-in-out infinite;
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        @keyframes gradientMove {
+            0%,100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        /* Floating Bubbles */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 55%, rgba(255,182,193,0.25), rgba(255,182,193,0.08) 40%, rgba(255,105,180,0.13) 60%, rgba(255,20,147,0.07));
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0) scale(1); opacity: 0.7;}
+            50% { transform: translateY(-40px) scale(1.12); opacity: 0.9;}
+        }
+        /* Glassmorphism Navbar */
+        .navbar {
+            background: rgba(255,255,255,0.2) !important;
+            backdrop-filter: blur(18px);
+            border-bottom: 1.5px solid rgba(255,182,193,0.18);
+            box-shadow: 0 8px 32px rgba(255,105,180,0.08);
+            z-index: 1000;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: #ff69b4 !important;
+            text-shadow: 0 2px 4px rgba(255, 105, 180, 0.14);
+            letter-spacing: 1px;
+        }
+        /* Card and other styles same as my-kpi.html */
+        .card, .glass-card {
+            background: rgba(255,255,255,0.22);
+            backdrop-filter: blur(16px);
+            border-radius: 22px;
+            box-shadow: 0 18px 40px rgba(255, 105, 180, 0.13);
+            border: 1px solid rgba(255,255,255,0.21);
+            transition: all 0.3s cubic-bezier(.4,1.3,.5,1);
+            animation: gentle-float 4s ease-in-out infinite;
+            position: relative;
+            z-index: 10;
+        }
+        .card:hover, .glass-card:hover {
+            transform: translateY(-10px) scale(1.025);
+            box-shadow: 0 30px 60px rgba(255, 105, 180, 0.18);
+            background: rgba(255,255,255,0.33);
+        }
+        @keyframes gentle-float {
+            0%,100% { transform: translateY(0);}
+            50% { transform: translateY(-10px);}
+        }
+        h1, h2, h3, h4, h5 {
+            font-weight: 700;
+            color: #ff6b9d;
+            text-shadow: 0 4px 8px rgba(255, 105, 180, 0.11);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,182,193,0.3);
+            color: #ff6b9d;
+            border-radius: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,182,193,0.2);
+            border-color: #ff8fab;
+            color: #ff4080;
+            transform: translateY(-2px);
+        }
+        .stats-card {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            background: rgba(255,255,255,0.35);
+        }
+        .stats-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ff6b9d;
+            margin-bottom: 0.5rem;
+        }
+        .stats-label {
+            color: #888;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        .chart-container {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .badge {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 0.5rem 0.75rem;
+        }
+        .badge.bg-success {
+            background: linear-gradient(90deg, #90EE90 0%, #98FB98 100%) !important;
+            color: #2d5a2d;
+        }
+        .badge.bg-warning {
+            background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%) !important;
+            color: #8B4513;
+        }
+        .badge.bg-danger {
+            background: linear-gradient(90deg, #FF6B6B 0%, #FF8E53 100%) !important;
+            color: #8B0000;
+        }
+        .icon-bounce { animation: iconBounce 2s ease-in-out infinite;}
+        @keyframes iconBounce {
+            0%,20%,50%,80%,100% { transform: translateY(0);}
+            40% { transform: translateY(-10px);}
+            60% { transform: translateY(-5px);}
+        }
+        .slide-in-up { animation: slideInUp 0.8s cubic-bezier(.68,-0.55,.27,1.55);}
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(50px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .alert {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .alert-success {
+            background: rgba(144, 238, 144, 0.2);
+            border-color: rgba(144, 238, 144, 0.3);
+            color: #2d5a2d;
+        }
+        .alert-warning {
+            background: rgba(255, 193, 7, 0.2);
+            border-color: rgba(255, 193, 7, 0.3);
+            color: #856404;
+        }
+        .alert-info {
+            background: rgba(173, 216, 230, 0.2);
+            border-color: rgba(135, 206, 235, 0.3);
+            color: #1e3a8a;
+        }
+        @media (max-width: 768px) {
+            .bubble { display: none; }
+            .card { margin: 1rem 0.5rem; }
+            .stats-number { font-size: 2rem; }
+            .stats-icon { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+<!-- Floating Bubbles -->
+<div class="bubble" style="width:90px; height:90px; left:8%; top:12%;"></div>
+<div class="bubble" style="width:130px; height:130px; left:18%; top:70%;"></div>
+<div class="bubble" style="width:70px; height:70px; right:12%; top:24%;"></div>
+<div class="bubble" style="width:110px; height:110px; right:22%; top:60%;"></div>
+
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/dashboard}">
+            <i class="fas fa-spa me-2 icon-bounce"></i>SpaZone
+        </a>
+    </div>
+</nav>
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4 slide-in-up">
+                <h2><i class="fas fa-chart-line me-2"></i>Chi tiết KPI</h2>
+                <a href="/technician/kpi" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Quay lại
+                </a>
+            </div>
+
+            <!-- KPI Overview Cards -->
+            <div class="row mb-4">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="stats-card slide-in-up">
+                        <i class="fas fa-calendar-alt stats-icon text-info"></i>
+                        <div class="stats-label">Thời gian</div>
+                        <div class="stats-number" th:text="${kpi.month + '/' + kpi.year}"></div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="stats-card slide-in-up">
+                        <i class="fas fa-bullseye stats-icon text-warning"></i>
+                        <div class="stats-label">Mục tiêu</div>
+                        <div class="stats-number" th:text="${kpi.targetAppointments}"></div>
+                        <small class="text-muted">lịch hẹn</small>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="stats-card slide-in-up">
+                        <i class="fas fa-chart-bar stats-icon text-success"></i>
+                        <div class="stats-label">Thực tế</div>
+                        <div class="stats-number" th:text="${kpi.actualAppointments}"></div>
+                        <small class="text-muted">lịch hẹn</small>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="stats-card slide-in-up">
+                        <i class="fas fa-percentage stats-icon text-primary"></i>
+                        <div class="stats-label">Hoàn thành</div>
+                        <div class="stats-number" th:text="${#numbers.formatDecimal(kpi.completionPercentage, 1, 1)} + '%'"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Progress -->
+            <div class="row mb-4">
+                <div class="col-lg-8">
+                    <div class="card slide-in-up">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>Chi tiết hiệu suất
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="fw-bold">Tỷ lệ hoàn thành</span>
+                                            <span class="fw-bold" th:text="${#numbers.formatDecimal(kpi.completionPercentage, 1, 1)} + '%'"></span>
+                                        </div>
+                                        <div class="progress" style="height: 30px;">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                                 th:classappend="${kpi.completionPercentage >= 100} ? 'bg-success' : (${kpi.completionPercentage >= 80} ? 'bg-warning' : 'bg-danger')"
+                                                 th:style="'width: ' + ${kpi.completionPercentage} + '%'"
+                                                 th:text="${#numbers.formatDecimal(kpi.completionPercentage, 1, 1)} + '%'">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row text-center">
+                                        <div class="col-4">
+                                            <div class="fw-bold text-primary" th:text="${kpi.actualAppointments}"></div>
+                                            <small class="text-muted">Đã hoàn thành</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="fw-bold text-warning" th:text="${kpi.targetAppointments - kpi.actualAppointments}"></div>
+                                            <small class="text-muted">Còn lại</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="fw-bold text-success" th:text="${kpi.targetAppointments}"></div>
+                                            <small class="text-muted">Tổng mục tiêu</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="chart-container">
+                                        <canvas id="kpiChart" width="200" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card slide-in-up">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Thông tin KPI
+                            </h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <span class="badge fs-6"
+                                      th:classappend="${kpi.completionPercentage >= 100} ? 'bg-success' : (${kpi.completionPercentage >= 80} ? 'bg-warning' : 'bg-danger')"
+                                      th:text="${kpi.completionPercentage >= 100} ? 'Hoàn thành xuất sắc' : (${kpi.completionPercentage >= 80} ? 'Đang tiến bộ tốt' : 'Cần cố gắng thêm')">
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Manager phụ trách:</strong><br>
+                                <span th:text="${kpi.manager.fullName}"></span><br>
+                                <small class="text-muted" th:text="${kpi.manager.email}"></small>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Ngày tạo:</strong><br>
+                                <span th:text="${#temporals.format(kpi.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                            </div>
+                            <div class="mb-3" th:if="${kpi.updatedAt != null}">
+                                <strong>Cập nhật cuối:</strong><br>
+                                <span th:text="${#temporals.format(kpi.updatedAt, 'dd/MM/yyyy HH:mm')}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Feedback -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card slide-in-up">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-lightbulb me-2"></i>Đánh giá và gợi ý
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary"><i class="fas fa-star me-2"></i>Đánh giá hiệu suất</h6>
+                                    <div th:if="${kpi.completionPercentage >= 100}" class="alert alert-success">
+                                        <i class="fas fa-trophy me-2"></i>
+                                        <strong>Xuất sắc!</strong> Bạn đã hoàn thành vượt mục tiêu được giao.
+                                        Hiệu suất làm việc rất tốt và đáng được ghi nhận!
+                                    </div>
+                                    <div th:if="${kpi.completionPercentage >= 80 && kpi.completionPercentage < 100}" class="alert alert-warning">
+                                        <i class="fas fa-thumbs-up me-2"></i>
+                                        <strong>Tốt!</strong> Bạn đang trên đà hoàn thành mục tiêu.
+                                        Hãy duy trì và cố gắng thêm để đạt 100%.
+                                    </div>
+                                    <div th:if="${kpi.completionPercentage < 80}" class="alert alert-info">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        <strong>Cần cố gắng thêm!</strong> Bạn cần nỗ lực hơn nữa để đạt được mục tiêu đã đề ra.
+                                        Hãy tìm hiểu các cách cải thiện hiệu suất.
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-success"><i class="fas fa-target me-2"></i>Gợi ý cải thiện</h6>
+                                    <ul class="list-unstyled">
+                                        <li th:if="${kpi.completionPercentage < 100}">
+                                            <i class="fas fa-arrow-right me-2 text-primary"></i>
+                                            Tăng cường kỹ năng tư vấn và chăm sóc khách hàng
+                                        </li>
+                                        <li th:if="${kpi.completionPercentage < 80}">
+                                            <i class="fas fa-arrow-right me-2 text-primary"></i>
+                                            Cải thiện kỹ thuật và chất lượng dịch vụ
+                                        </li>
+                                        <li th:if="${kpi.completionPercentage < 50}">
+                                            <i class="fas fa-arrow-right me-2 text-primary"></i>
+                                            Tham gia các khóa đào tạo nâng cao kỹ năng
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-arrow-right me-2 text-primary"></i>
+                                            Duy trì thái độ tích cực và chuyên nghiệp
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-arrow-right me-2 text-primary"></i>
+                                            Tạo mối quan hệ tốt với khách hàng để có booking lặp lại
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // KPI Doughnut Chart
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('kpiChart').getContext('2d');
+        const completionRate = [[${kpi.completionPercentage}]];
+        const remaining = Math.max(0, 100 - completionRate);
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Hoàn thành', 'Còn lại'],
+                datasets: [{
+                    data: [completionRate, remaining],
+                    backgroundColor: [
+                        completionRate >= 100 ? '#28a745' :
+                        completionRate >= 80 ? '#ffc107' : '#dc3545',
+                        'rgba(255, 255, 255, 0.3)'
+                    ],
+                    borderWidth: 0,
+                    cutout: '70%'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Add percentage text in center
+        const centerText = completionRate.toFixed(1) + '%';
+        const centerTextElement = document.createElement('div');
+        centerTextElement.style.position = 'absolute';
+        centerTextElement.style.top = '50%';
+        centerTextElement.style.left = '50%';
+        centerTextElement.style.transform = 'translate(-50%, -50%)';
+        centerTextElement.style.fontSize = '1.2rem';
+        centerTextElement.style.fontWeight = 'bold';
+        centerTextElement.style.color = '#ff6b9d';
+        centerTextElement.textContent = centerText;
+
+        ctx.canvas.parentElement.style.position = 'relative';
+        ctx.canvas.parentElement.appendChild(centerTextElement);
+    });
+</script>
+</body>
+</html>

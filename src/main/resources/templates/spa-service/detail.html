@@ -3,57 +3,157 @@
 <head>
   <meta charset="UTF-8"/>
   <title>Chi tiết dịch vụ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <style>
     body {
-      background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
+      background: linear-gradient(120deg, #fff0f6 0%, #ffe4ec 60%, #fdfbfb 100%);
       min-height: 100vh;
+      font-family: 'Poppins', Arial, sans-serif;
       display: flex;
       flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+      animation: gradientShift 16s infinite alternate;
     }
-
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+    /* Floating Bubbles */
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,182,193,0.13);
+      animation: float 8s infinite ease-in-out;
+      z-index: 0;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0);}
+      50% { transform: translateY(-32px);}
+    }
     .navbar {
+      background: rgba(255,255,255,0.85) !important;
+      backdrop-filter: blur(10px);
       border-bottom: 2px solid #ffb3c6;
+      box-shadow: 0 2px 8px rgba(255,182,193,0.08);
     }
-
-    .btn-success {
-      background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+    .navbar-brand {
+      color: #ff6b9d !important;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .glass-card {
+      background: rgba(255,255,255,0.75);
+      border-radius: 24px;
+      box-shadow: 0 16px 32px rgba(255, 107, 157, 0.13);
       border: none;
+      backdrop-filter: blur(10px);
+      animation: floatCard 4s infinite ease-in-out;
     }
-
-    .btn-success:hover {
-      background: linear-gradient(135deg, #ff8fab, #ffb3c6);
+    @keyframes floatCard {
+      0%, 100% { transform: translateY(0);}
+      50% { transform: translateY(-8px);}
     }
-
+    h2 {
+      font-weight: 700;
+      color: #ff6b9d;
+      letter-spacing: 1px;
+    }
+    .service-image {
+      border-radius: 20px;
+      box-shadow: 0 6px 24px rgba(255,182,193,0.18);
+      object-fit: cover;
+      max-height: 400px;
+      width: 100%;
+      transition: transform 0.35s, box-shadow 0.35s, filter 0.35s;
+      background: linear-gradient(135deg, #fff0f6 0%, #ffe4ec 100%);
+      filter: brightness(0.97) saturate(0.97);
+    }
+    .service-image:hover {
+      transform: scale(1.04) rotate(1deg);
+      box-shadow: 0 16px 48px rgba(255, 139, 171, 0.24);
+      filter: brightness(1.05) saturate(1.1);
+    }
+    .btn-gradient {
+      background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      border-radius: 14px;
+      box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow 0.3s, transform 0.2s;
+      padding: 0.7rem 2.2rem;
+      font-size: 1.1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-gradient:before {
+      content: '';
+      position: absolute;
+      left: -60%;
+      top: 0;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(120deg,rgba(255,255,255,0.3),rgba(255,255,255,0));
+      transform: skewX(-25deg);
+      transition: left 0.5s;
+    }
+    .btn-gradient:hover {
+      box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+      transform: translateY(-2px) scale(1.03);
+      color: #fff;
+    }
+    .btn-gradient:hover:before {
+      left: 120%;
+    }
+    .btn-gradient:active {
+      filter: brightness(0.95);
+    }
+    .service-info p, .service-info span {
+      font-size: 1.08rem;
+    }
+    .service-info i {
+      color: #ff8fab;
+      margin-right: 6px;
+    }
+    .mt-auto {
+      margin-top: auto !important;
+    }
     footer {
       margin-top: auto;
-      background-color: #fff;
+      background-color: rgba(255,255,255,0.85);
+      backdrop-filter: blur(10px);
+      border-top: 1.5px solid rgba(255,182,193,0.18);
+      padding: 1.2rem 0;
+      text-align: center;
     }
-
-    h2 {
-      font-weight: bold;
-      color: #ff6b9d;
-    }
-
-    .card {
-      border-radius: 20px;
-      box-shadow: 0 10px 20px rgba(255, 107, 157, 0.2);
+    @media (max-width: 768px) {
+      .glass-card { padding: 1.2rem; }
+      .service-image { max-height: 220px; }
+      h2 { font-size: 1.3rem; }
     }
   </style>
 </head>
 <body>
-
+<!-- Floating Bubbles -->
+<div id="bubbles"></div>
 <!-- Header -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm">
   <div class="container">
-    <a class="navbar-brand text-danger fw-bold" href="#">SpaZone</a>
+    <a class="navbar-brand fw-bold" th:href="@{/dashboard}">
+      <i class="fas fa-spa me-2"></i>SpaZone
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
             data-bs-target="#navbarContent" aria-controls="navbarContent"
             aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-
     <div class="collapse navbar-collapse" id="navbarContent">
       <ul class="navbar-nav ms-auto align-items-center">
         <li class="nav-item me-2" sec:authorize="isAuthenticated()">
@@ -86,40 +186,118 @@
 
 <!-- Main content -->
 <div class="container py-5">
-  <div class="card p-4">
-    <div class="row">
+  <div class="glass-card p-4">
+    <div class="row g-4 align-items-center">
       <div class="col-md-6">
-        <img th:src="${service.imageUrl}" alt="Ảnh dịch vụ" class="img-fluid rounded shadow-sm" style="max-height: 400px; object-fit: cover;">
+        <img th:src="${service.imageUrl}" alt="Ảnh dịch vụ" class="service-image shadow-sm">
       </div>
-      <div class="col-md-6 d-flex flex-column">
+      <div class="col-md-6 d-flex flex-column service-info">
         <h2 class="mb-3" th:text="${service.name}">Tên dịch vụ</h2>
-        <p th:text="${service.description}">Mô tả chi tiết của dịch vụ...</p>
-        <p><strong>Thời gian thực hiện:</strong> <span th:text="${service.duration} + ' phút'">60 phút</span></p>
-        <p><strong>Giá:</strong> <span th:text="${#numbers.formatDecimal(service.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">300.000 đ</span></p>
-
+        <p><i class="fa fa-align-left"></i><span th:text="${service.description}">Mô tả chi tiết của dịch vụ...</span></p>
+        <p>
+          <i class="fa fa-clock"></i>
+          <strong>Thời gian thực hiện:</strong>
+          <span th:text="${service.duration} + ' phút'">60 phút</span>
+        </p>
+        <p>
+          <i class="fa fa-money-bill-wave"></i>
+          <strong>Giá:</strong>
+          <span th:text="${#numbers.formatDecimal(service.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">300.000 đ</span>
+        </p>
         <div class="mt-auto">
           <!-- Nếu đã đăng nhập -->
           <a th:href="@{/templates/appointment/book/{id}(id=${service.serviceId})}"
-             class="btn btn-success mt-3"
-             sec:authorize="isAuthenticated()">Đặt lịch ngay</a>
-
+             class="btn btn-gradient mt-3"
+             sec:authorize="isAuthenticated()">
+            <i class="fa fa-calendar-plus me-1"></i> Đặt lịch ngay
+          </a>
           <!-- Nếu chưa đăng nhập -->
           <a th:href="@{/auth/login}"
-             class="btn btn-success mt-3"
-             sec:authorize="isAnonymous()">Đăng nhập để đặt lịch</a>
+             class="btn btn-gradient mt-3"
+             sec:authorize="isAnonymous()">
+            <i class="fa fa-sign-in-alt me-1"></i> Đăng nhập để đặt lịch
+          </a>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Service Ratings Section -->
+  <div class="glass-card p-4 mt-4">
+    <h4 class="mb-3"><i class="fas fa-star text-warning"></i> Đánh giá dịch vụ</h4>
+    <div th:if="${ratings != null && !ratings.isEmpty()}">
+      <ul class="list-group mb-3">
+        <li class="list-group-item" th:each="rating : ${ratings}">
+          <b th:text="${rating.customer.fullName}"></b>:
+          <span th:each="star : ${#numbers.sequence(1, rating.rating)}">
+            <i class="fas fa-star text-warning"></i>
+          </span>
+          <span th:each="star : ${#numbers.sequence(rating.rating+1, 5)}">
+            <i class="far fa-star text-warning"></i>
+          </span>
+          <span th:if="${rating.comment != null}">- <i th:text="${rating.comment}"></i></span>
+          <span class="text-muted float-end" th:text="${#temporals.format(rating.createdAt, 'dd/MM/yyyy')}"></span>
+        </li>
+      </ul>
+    </div>
+    <div th:if="${ratings == null || ratings.isEmpty()}">
+      <p>Chưa có đánh giá nào cho dịch vụ này.</p>
+    </div>
+
+    <!-- Rating Form for Authenticated Users -->
+    <div sec:authorize="isAuthenticated()">
+      <div th:if="${!hasRated}">
+        <form th:action="@{'/services/' + ${service.serviceId} + '/rate'}" method="post" class="mb-2">
+          <div class="mb-2">
+            <label for="rating" class="form-label">Chọn số sao:</label>
+            <select id="rating" name="rating" class="form-select w-auto d-inline-block">
+              <option th:each="i : ${#numbers.sequence(1,5)}" th:value="${i}" th:text="${i} + ' sao'"></option>
+            </select>
+          </div>
+          <div class="mb-2">
+            <label for="comment" class="form-label">Nhận xét (tuỳ chọn):</label>
+            <input type="text" id="comment" name="comment" class="form-control" maxlength="255"/>
+          </div>
+          <button type="submit" class="btn btn-gradient"><i class="fas fa-paper-plane me-1"></i>Gửi đánh giá</button>
+        </form>
+      </div>
+      <div th:if="${hasRated}">
+        <div class="alert alert-info">Bạn đã đánh giá dịch vụ này.</div>
+      </div>
+    </div>
+    <div sec:authorize="isAnonymous()">
+      <div class="alert alert-warning mt-2">Vui lòng <a th:href="@{/auth/login}">đăng nhập</a> để đánh giá dịch vụ.</div>
     </div>
   </div>
 </div>
 
 <!-- Footer -->
-<footer class="text-center py-3 mt-5">
+<footer>
   <div class="container">
     <span class="text-muted">© 2025 SpaZone. All rights reserved.</span>
   </div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Floating Bubbles
+  function createBubbles() {
+    const container = document.createElement('div');
+    container.id = 'bubbles';
+    document.body.appendChild(container);
+    for (let i = 0; i < 10; i++) {
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      const size = Math.random() * 35 + 20;
+      bubble.style.width = `${size}px`;
+      bubble.style.height = `${size}px`;
+      bubble.style.left = `${Math.random() * 100}%`;
+      bubble.style.top = `${Math.random() * 100}%`;
+      bubble.style.animationDelay = `${Math.random() * 8}s`;
+      container.appendChild(bubble);
+    }
+  }
+  createBubbles();
+</script>
 </body>
 </html>

@@ -4,100 +4,171 @@
     <meta charset="UTF-8">
     <title>Đăng Ký Tài Khoản</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 50%, #ffb3c6 100%);
+            background: linear-gradient(120deg, #fff0f6 0%, #ffe4ec 60%, #fdfbfb 100%);
             min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow-x: hidden;
+            position: relative;
         }
-
-        .floating-shapes {
+        /* Floating Bubbles */
+        .bubble {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
+            border-radius: 50%;
+            background: rgba(255,182,193,0.12);
+            animation: float 8s infinite ease-in-out;
             z-index: 0;
         }
-
-        .shape {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            animation: float 3s ease-in-out infinite;
-        }
-
         @keyframes float {
-            0%, 100% {
-                transform: translateY(0px) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-20px) rotate(180deg);
-            }
+            0%,100% { transform: translateY(0);}
+            50% { transform: translateY(-32px);}
         }
-
-        .card {
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 20px 40px rgba(255, 107, 157, 0.3);
-            z-index: 10;
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255,255,255,0.7);
+            border-radius: 22px;
+            box-shadow: 0 8px 32px 0 rgba(31,38,135,0.10);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,182,193,0.16);
+            padding: 2.5rem 2rem 2rem 2rem;
+            position: relative;
+            z-index: 1;
+            animation: floatCard 4s infinite ease-in-out;
         }
-
-        .card-header h3 {
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0);}
+            50% { transform: translateY(-8px);}
+        }
+        .glass-header {
+            background: rgba(255,255,255,0.5);
+            border-radius: 18px 18px 0 0;
+            padding: 1.2rem 1rem 1rem 1rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .glass-header h3 {
             color: #ff6b9d;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
         }
-
+        .glass-header .fa-user-plus {
+            color: #ff8fab;
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .glass-header p {
+            color: #c77d8c;
+            font-size: 1rem;
+        }
+        /* Form Elements */
+        .form-label {
+            font-weight: 600;
+            color: #c77d8c;
+        }
+        .input-group {
+            background: rgba(255,255,255,0.5);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(255,182,193,0.06);
+            transition: box-shadow 0.3s;
+        }
+        .input-group:focus-within {
+            box-shadow: 0 4px 16px rgba(255,182,193,0.16);
+        }
+        .input-group-text {
+            background: transparent;
+            border: none;
+            color: #ff6b9d;
+            font-size: 1.1rem;
+        }
+        .form-control {
+            background: transparent;
+            border: none;
+            font-size: 1rem;
+            color: #6c3a5c;
+            padding-left: 0;
+        }
+        .form-control:focus {
+            box-shadow: none;
+            background: transparent;
+        }
+        /* Modern Button */
         .btn-gradient {
-            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
-            color: white;
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+            color: #fff;
             font-weight: 600;
             border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.2s;
         }
-
+        .btn-gradient:before {
+            content: '';
+            position: absolute;
+            left: -60%;
+            top: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(120deg,rgba(255,255,255,0.3),rgba(255,255,255,0));
+            transform: skewX(-25deg);
+            transition: left 0.5s;
+        }
         .btn-gradient:hover {
-            background: linear-gradient(135deg, #e55a87, #ff7ba3);
+            box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+            transform: translateY(-2px) scale(1.03);
         }
-
-        .form-label {
-            font-weight: 500;
-            color: #ff6b9d;
+        .btn-gradient:hover:before {
+            left: 120%;
         }
-
-        .form-check-label {
-            font-weight: 500;
+        /* Validation Animation */
+        .form-control:invalid {
+            animation: shake 0.3s;
         }
-
+        @keyframes shake {
+            0%, 100% { transform: translateX(0);}
+            25% { transform: translateX(-4px);}
+            75% { transform: translateX(4px);}
+        }
+        .text-danger {
+            color: #e55a87 !important;
+        }
         .card-footer a {
-            color: #ff6b9d;
+            color: #c77d8c;
             font-weight: 500;
             text-decoration: none;
+            transition: color 0.2s;
         }
-
         .card-footer a:hover {
+            color: #ff6b9d;
             text-decoration: underline;
+        }
+        @media (max-width: 576px) {
+            .glass-card { padding: 1.5rem 0.5rem 1.5rem 0.5rem;}
         }
     </style>
 </head>
 <body>
-
-<!-- Floating Shapes -->
-<div class="floating-shapes">
-    <div class="shape" style="width:100px; height:100px; top:10%; left:5%;"></div>
-    <div class="shape" style="width:80px; height:80px; top:80%; right:10%;"></div>
-    <div class="shape" style="width:120px; height:120px; top:30%; right:20%;"></div>
-    <div class="shape" style="width:70px; height:70px; bottom:10%; left:30%;"></div>
-</div>
-
+<!-- Floating Bubbles -->
+<div id="bubbles"></div>
 <div class="container mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
-            <div class="card p-4">
-                <div class="card-header text-center mb-3">
-                    <h3><i class="fas fa-user-plus"></i> Đăng Ký</h3>
+            <div class="glass-card">
+                <div class="glass-header">
+                    <span><i class="fas fa-user-plus"></i></span>
+                    <h3>Đăng Ký</h3>
                     <p class="text-muted">Tạo tài khoản mới để bắt đầu</p>
                 </div>
 
@@ -107,73 +178,67 @@
                 <form th:action="@{/auth/register}" method="post" th:object="${registerDto}">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Tên đăng nhập</label>
+                            <label class="form-label"><i class="fas fa-user me-2"></i>Tên đăng nhập</label>
                             <input type="text" th:field="*{username}" class="form-control" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Email</label>
+                            <label class="form-label"><i class="fas fa-envelope me-2"></i>Email</label>
                             <input type="email" th:field="*{email}" class="form-control" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Mật khẩu</label>
+                            <label class="form-label"><i class="fas fa-lock me-2"></i>Mật khẩu</label>
                             <div class="input-group">
-                                <input type="password" th:field="*{password}" class="form-control" id="password"
-                                       required>
-                                <button type="button" class="btn btn-outline-secondary toggle-password"
-                                        data-target="password">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" th:field="*{password}" class="form-control" id="password" required>
+                                <button type="button" class="btn btn-outline-secondary toggle-password" data-target="password">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
                         </div>
-
                         <div class="col-md-6">
-                            <label class="form-label">Xác nhận mật khẩu</label>
+                            <label class="form-label"><i class="fas fa-check-double me-2"></i>Xác nhận mật khẩu</label>
                             <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-check-double"></i></span>
                                 <input type="password" id="confirmPassword" class="form-control" required>
-                                <button type="button" class="btn btn-outline-secondary toggle-password"
-                                        data-target="confirmPassword">
+                                <button type="button" class="btn btn-outline-secondary toggle-password" data-target="confirmPassword">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
-                            <div id="confirmError" class="text-danger small mt-1 d-none">Mật khẩu xác nhận không khớp
-                            </div>
+                            <div id="confirmError" class="text-danger small mt-1 d-none">Mật khẩu xác nhận không khớp</div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Họ và tên</label>
+                            <label class="form-label"><i class="fas fa-id-card me-2"></i>Họ và tên</label>
                             <input type="text" th:field="*{fullName}" class="form-control" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Số điện thoại</label>
+                            <label class="form-label"><i class="fas fa-phone me-2"></i>Số điện thoại</label>
                             <input type="text" th:field="*{phone}" class="form-control">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Ngày sinh</label>
+                            <label class="form-label"><i class="fas fa-calendar-alt me-2"></i>Ngày sinh</label>
                             <input type="date" th:field="*{dateOfBirth}" class="form-control">
                         </div>
                         <div class="col-md-12">
-                            <label class="form-label">Giới tính</label>
+                            <label class="form-label"><i class="fas fa-venus-mars me-2"></i>Giới tính</label>
                             <div class="form-check form-check-inline ms-2">
-                                <input class="form-check-input" type="radio" th:field="*{gender}" value="male"
-                                       id="male">
+                                <input class="form-check-input" type="radio" th:field="*{gender}" value="male" id="male">
                                 <label class="form-check-label" for="male">Nam</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" th:field="*{gender}" value="female"
-                                       id="female">
+                                <input class="form-check-input" type="radio" th:field="*{gender}" value="female" id="female">
                                 <label class="form-check-label" for="female">Nữ</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" th:field="*{gender}" value="other"
-                                       id="other">
+                                <input class="form-check-input" type="radio" th:field="*{gender}" value="other" id="other">
                                 <label class="form-check-label" for="other">Khác</label>
                             </div>
                         </div>
                         <div class="col-md-12">
-                            <label class="form-label">Địa chỉ</label>
+                            <label class="form-label"><i class="fas fa-map-marker-alt me-2"></i>Địa chỉ</label>
                             <input type="text" th:field="*{address}" class="form-control">
                         </div>
                         <div class="col-md-12 mt-3 d-grid">
-                            <button type="submit" class="btn btn-gradient">
+                            <button type="submit" class="btn btn-gradient py-2">
                                 <i class="fas fa-user-plus"></i> Đăng Ký
                             </button>
                         </div>
@@ -187,41 +252,61 @@
         </div>
     </div>
 </div>
-</body>
+<!-- Floating Bubbles Script -->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Toggle mật khẩu
-        document.querySelectorAll(".toggle-password").forEach(button => {
-            button.addEventListener("click", () => {
-                const target = document.getElementById(button.dataset.target);
-                const icon = button.querySelector("i");
+    // Floating Bubbles
+    function createBubbles() {
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.width = '100%';
+        container.style.height = '100%';
+        container.style.pointerEvents = 'none';
+        container.style.zIndex = 0;
+        document.body.appendChild(container);
+        for (let i = 0; i < 10; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 35 + 30;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.top = `${Math.random() * 100}%`;
+            bubble.style.animationDelay = `${Math.random() * 8}s`;
+            container.appendChild(bubble);
+        }
+    }
+    createBubbles();
 
-                if (target.type === "password") {
-                    target.type = "text";
-                    icon.classList.remove("fa-eye");
-                    icon.classList.add("fa-eye-slash");
-                } else {
-                    target.type = "password";
-                    icon.classList.remove("fa-eye-slash");
-                    icon.classList.add("fa-eye");
-                }
-            });
-        });
-
-        // Kiểm tra confirm password
-        const form = document.querySelector("form");
-        form.addEventListener("submit", function (e) {
-            const password = document.getElementById("password").value;
-            const confirm = document.getElementById("confirmPassword").value;
-            const error = document.getElementById("confirmError");
-
-            if (password !== confirm) {
-                e.preventDefault();
-                error.classList.remove("d-none");
+    // Toggle mật khẩu
+    document.querySelectorAll(".toggle-password").forEach(button => {
+        button.addEventListener("click", () => {
+            const target = document.getElementById(button.dataset.target);
+            const icon = button.querySelector("i");
+            if (target.type === "password") {
+                target.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
             } else {
-                error.classList.add("d-none");
+                target.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
             }
         });
     });
+
+    // Kiểm tra confirm password
+    const form = document.querySelector("form");
+    form.addEventListener("submit", function (e) {
+        const password = document.getElementById("password").value;
+        const confirm = document.getElementById("confirmPassword").value;
+        const error = document.getElementById("confirmError");
+        if (password !== confirm) {
+            e.preventDefault();
+            error.classList.remove("d-none");
+        } else {
+            error.classList.add("d-none");
+        }
+    });
 </script>
+</body>
 </html>

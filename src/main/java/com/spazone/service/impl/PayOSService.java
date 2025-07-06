@@ -47,7 +47,21 @@ public class PayOSService {
                     entity,
                     PayOSPaymentResponse.class
             );
-
+            // Log full response for debugging
+            System.out.println("PayOS API HTTP Status: " + response.getStatusCode());
+            System.out.println("PayOS API Response Body: " + (response.getBody() != null ? response.getBody().toString() : "null"));
+            // Log raw JSON response for debugging
+            String rawJson = restTemplate.postForObject(PayOSConfig.CREATE_PAYMENT_URL, entity, String.class);
+            System.out.println("PayOS RAW JSON Response: " + rawJson);
+            if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
+                throw new RuntimeException("PayOS API call failed: " + response);
+            }
+            if (response.getBody().getData() == null) {
+                System.err.println("PayOS error: code=" + response.getBody().getError() + ", desc=" + response.getBody().getMessage());
+                throw new RuntimeException("PayOS response data is null: " + response.getBody().getData());
+            }
+            System.out.println("Response from PayOS: " + response.getBody().getData().getCheckoutUrl());
+            System.out.println("Response Status: " + response.getBody().getData().getPaymentLinkId());
             return response.getBody();
 
         } catch (Exception e) {
