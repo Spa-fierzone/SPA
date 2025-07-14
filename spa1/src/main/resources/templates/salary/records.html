@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Danh sách bản ghi lương - SpaZone</title>
+    <!-- Font & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        :root {
+            --primary-pink: #ff6b9d;
+            --light-pink: #ff8fab;
+            --pastel-pink: #ffb6c1;
+            --pastel-light: #ffe4ec;
+            --pastel-bg: #fff0f6;
+        }
+        body {
+            background: linear-gradient(120deg, var(--pastel-bg) 0%, var(--pastel-light) 60%, #fdfbfb 100%);
+            min-height: 100vh;
+            font-family: 'Poppins', Arial, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+            animation: gradientShift 18s infinite alternate;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        /* Floating Bubbles */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,182,193,0.13);
+            animation: float 8s infinite ease-in-out;
+            z-index: 0;
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0);}
+            50% { transform: translateY(-32px);}
+        }
+        .navbar {
+            background: rgba(255,255,255,0.85) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #ffb3c6;
+            box-shadow: 0 2px 8px rgba(255,182,193,0.08);
+        }
+        .navbar-brand {
+            color: var(--primary-pink) !important;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .card, .glass-card {
+            border-radius: 22px;
+            box-shadow: 0 16px 32px rgba(255, 107, 157, 0.13);
+            border: none;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(10px);
+            animation: floatCard 4s infinite ease-in-out;
+        }
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0);}
+            50% { transform: translateY(-8px);}
+        }
+        .card-header {
+            background: linear-gradient(90deg, var(--primary-pink), var(--light-pink));
+            color: white;
+            border-radius: 22px 22px 0 0 !important;
+            border: none;
+        }
+        .btn-primary, .btn-outline-primary, .btn-outline-success, .btn-outline-info {
+            border-radius: 14px;
+            font-weight: 600;
+            transition: box-shadow 0.3s, transform 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary-pink), var(--light-pink));
+            border: none;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(90deg, var(--light-pink), var(--pastel-pink));
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .btn-outline-primary {
+            border-color: #ff8fab;
+            color: #ff6b9d;
+        }
+        .btn-outline-primary:hover {
+            background-color: #ff8fab;
+            color: white;
+        }
+        .btn-outline-success:hover, .btn-outline-info:hover {
+            opacity: 0.9;
+            transform: translateY(-2px) scale(1.03);
+        }
+        .table-hover tbody tr {
+            transition: transform 0.3s, background 0.3s;
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(255, 107, 157, 0.10);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255,182,193,0.12);
+        }
+        .avatar-sm {
+            background: linear-gradient(135deg, #ffb6c1 0%, #ffe4ec 100%);
+            border: 2px solid #ff8fab;
+            box-shadow: 0 2px 8px rgba(255,182,193,0.13);
+            font-weight: 700;
+        }
+        .badge-paid {
+            background-color: #28a745;
+        }
+        .badge-calculated {
+            background-color: #ffc107;
+            color: #fff;
+        }
+        .badge-pending {
+            background-color: #6c757d;
+            color: #fff;
+        }
+        .text-pink {
+            color: #ff6b9d;
+        }
+        .btn-group .btn {
+            border-radius: 12px !important;
+        }
+        .table-responsive {
+            animation: fadeIn 0.7s cubic-bezier(.68,-0.55,.27,1.55);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .alert {
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(255,182,193,0.07);
+        }
+        footer {
+            margin-top: auto;
+            background-color: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            border-top: 1.5px solid rgba(255,182,193,0.18);
+            padding: 1.2rem 0;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .card, .glass-card { padding: 1.2rem; }
+            h2, h3, h4, h5 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+<!-- Floating Bubbles -->
+<div id="bubbles"></div>
+
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/dashboard}">
+            <i class="fas fa-spa me-2"></i>SpaZone
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarContent" aria-controls="navbarContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item me-2">
+                    <a href="/" class="btn btn-outline-primary">
+                        <i class="bi bi-house me-1"></i> Trang chủ
+                    </a>
+                </li>
+                <li class="nav-item me-2">
+                    <a th:href="@{/salary/calculate}" class="btn btn-outline-primary">
+                        <i class="bi bi-calculator me-1"></i> Tính lương
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4 pb-5">
+    <!-- Header Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h4 class="mb-0">
+                        <i class="bi bi-file-earmark-text me-2"></i>
+                        Danh sách bản ghi lương
+                    </h4>
+                    <small class="opacity-75">Quản lý và theo dõi bản ghi lương đã được tính toán</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" th:action="@{/salary/records}">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold"><i class="fa fa-calendar me-1"></i> Tháng</label>
+                        <select name="month" class="form-select">
+                            <option th:each="i : ${#numbers.sequence(1,12)}"
+                                    th:value="${i}"
+                                    th:text="'Tháng ' + ${i}"
+                                    th:selected="${i == selectedMonth}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold"><i class="fa fa-calendar-alt me-1"></i> Năm</label>
+                        <select name="year" class="form-select">
+                            <option th:each="i : ${#numbers.sequence(2020, 2030)}"
+                                    th:value="${i}"
+                                    th:text="${i}"
+                                    th:selected="${i == selectedYear}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold"><i class="fa fa-building me-1"></i> Chi nhánh</label>
+                        <select name="branchId" class="form-select">
+                            <option value="">Tất cả chi nhánh</option>
+                            <option th:each="branch : ${branches}"
+                                    th:value="${branch.branchId}"
+                                    th:text="${branch.name}"
+                                    th:selected="${branch.branchId == selectedBranchId}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i> Lọc
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Card -->
+    <div class="card">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">
+                        <i class="fa fa-list-alt me-1"></i>
+                        Bản ghi lương <span th:text="${monthName}"></span>/<span th:text="${selectedYear}"></span>
+                    </h5>
+                    <small class="opacity-75">Tổng: <span th:text="${#lists.size(salaryRecords)}"></span> bản ghi</small>
+                </div>
+                <div class="col-auto">
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary btn-sm" onclick="exportToExcel()">
+                            <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="printReport()">
+                            <i class="bi bi-printer me-1"></i> In báo cáo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div th:if="${#lists.isEmpty(salaryRecords)}" class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+                <h5 class="text-muted">Không có bản ghi lương nào</h5>
+                <p class="text-muted">Vui lòng tính lương trước khi xem bản ghi</p>
+                <a th:href="@{/salary/calculate}" class="btn btn-primary">
+                    <i class="bi bi-calculator me-1"></i> Tính lương
+                </a>
+            </div>
+            <div th:if="${not #lists.isEmpty(salaryRecords)}" class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>STT</th>
+                        <th><i class="fa fa-user me-1"></i> Nhân viên</th>
+                        <th><i class="fa fa-building me-1"></i> Chi nhánh</th>
+                        <th><i class="fa fa-money-bill me-1"></i> Lương cơ bản</th>
+                        <th><i class="fa fa-wallet me-1"></i> Lương tăng ca</th>
+                        <th><i class="fa fa-minus-circle me-1"></i> Khấu trừ</th>
+                        <th><i class="fa fa-coins me-1"></i> Lương thực nhận</th>
+                        <th><i class="fa fa-info-circle me-1"></i> Trạng thái</th>
+                        <th><i class="fa fa-calendar-alt me-1"></i> Ngày tạo</th>
+                        <th><i class="fa fa-cogs me-1"></i> Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="record, iterStat : ${salaryRecords}">
+                        <td th:text="${iterStat.count}"></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                     style="width: 35px; height: 35px;">
+                                    <span th:text="${#strings.substring(record.user.fullName, 0, 1)}"></span>
+                                </div>
+                                <div>
+                                    <div class="fw-bold" th:text="${record.user.fullName}"></div>
+                                    <small class="text-muted" th:text="${record.user.email}"></small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-info" th:text="${record.branch?.name ?: 'N/A'}"></span>
+                        </td>
+                        <td class="text-end">
+                            <span th:text="${#numbers.formatDecimal(record.baseSalary, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                        </td>
+                        <td class="text-end">
+                            <span th:text="${record.overtimePay != null ? (#numbers.formatDecimal(record.overtimePay, 0, 'COMMA', 0, 'POINT') + ' đ') : '0 đ'}"></span>
+                        </td>
+                        <td class="text-end text-danger">
+                            <span th:text="${record.deductions != null ? (#numbers.formatDecimal(record.deductions, 0, 'COMMA', 0, 'POINT') + ' đ') : '0 đ'}"></span>
+                        </td>
+                        <td class="text-end">
+                            <strong class="text-success" th:text="${#numbers.formatDecimal(record.netSalary, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                        </td>
+                        <td>
+                            <span th:switch="${record.status}" class="badge">
+                                <span th:case="'paid'" class="badge badge-paid"><i class="fa fa-check-circle me-1"></i>Đã trả</span>
+                                <span th:case="'calculated'" class="badge badge-calculated"><i class="fa fa-calculator me-1"></i>Đã tính</span>
+                                <span th:case="*" class="badge badge-pending"><i class="fa fa-clock me-1"></i>Chờ xử lý</span>
+                            </span>
+                        </td>
+                        <td>
+                            <span th:text="${#temporals.format(record.createdAt, 'dd/MM/yyyy')}"></span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a th:href="@{/salary/detail/{userId}(userId=${record.user.userId}, month=${record.month}, year=${record.year})}"
+                                   class="btn btn-outline-primary btn-sm" title="Xem chi tiết">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <button class="btn btn-outline-success btn-sm"
+                                        th:if="${record.status != 'paid'}"
+                                        onclick="markAsPaid(this)"
+                                        th:data-id="${record.salaryId}"
+                                        title="Đánh dấu đã trả">
+                                    <i class="bi bi-check-circle"></i>
+                                </button>
+                                <button class="btn btn-outline-info btn-sm"
+                                        onclick="editRecord(this)"
+                                        th:data-id="${record.salaryId}"
+                                        title="Chỉnh sửa">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Card -->
+    <div th:if="${not #lists.isEmpty(salaryRecords)}" class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-graph-up me-2"></i>
+                Tổng kết
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <div class="border-end">
+                        <h4 class="text-pink mb-1" th:text="${#numbers.formatDecimal(#aggregates.sum(salaryRecords.![baseSalary]), 0, 'COMMA', 0, 'POINT')} + ' đ'"></h4>
+                        <small class="text-muted">Tổng lương cơ bản</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border-end">
+                        <h4 class="text-info mb-1" th:text="${#numbers.formatDecimal(#aggregates.sum(salaryRecords.![overtimePay ?: 0]), 0, 'COMMA', 0, 'POINT')} + ' đ'"></h4>
+                        <small class="text-muted">Tổng lương tăng ca</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border-end">
+                        <h4 class="text-danger mb-1" th:text="${#numbers.formatDecimal(#aggregates.sum(salaryRecords.![deductions ?: 0]), 0, 'COMMA', 0, 'POINT')} + ' đ'"></h4>
+                        <small class="text-muted">Tổng khấu trừ</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <h4 class="text-success mb-1" th:text="${#numbers.formatDecimal(#aggregates.sum(salaryRecords.![netSalary]), 0, 'COMMA', 0, 'POINT')} + ' đ'"></h4>
+                    <small class="text-muted">Tổng thực nhận</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <span class="text-muted">© 2025 SpaZone. All rights reserved.</span>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Floating Bubbles
+    function createBubbles() {
+        const container = document.createElement('div');
+        container.id = 'bubbles';
+        document.body.appendChild(container);
+        for (let i = 0; i < 10; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 35 + 20;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.top = `${Math.random() * 100}%`;
+            bubble.style.animationDelay = `${Math.random() * 8}s`;
+            container.appendChild(bubble);
+        }
+    }
+    createBubbles();
+
+    function markAsPaid(button) {
+        const recordId = button.getAttribute('data-id');
+        if (confirm('Xác nhận đánh dấu bản ghi này đã được trả lương?')) {
+            fetch(`/salary/mark-paid/${recordId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Có lỗi xảy ra khi cập nhật trạng thái');
+                });
+        }
+    }
+
+    function editRecord(button) {
+        const recordId = button.getAttribute('data-id');
+        alert('Chức năng chỉnh sửa đang được phát triển');
+    }
+
+    function exportToExcel() {
+        const params = new URLSearchParams(window.location.search);
+        window.location.href = '/salary/export?' + params.toString();
+    }
+
+    function printReport() {
+        window.print();
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo thống kê - SpaZone Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            overflow-x: hidden;
+        }
+        .container-fluid {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        .main-content {
+            min-height: 100vh;
+            max-width: 100%;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+        }
+        .stat-card.revenue {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .stat-card.customers {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .stat-card.appointments {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        .stat-card.technicians {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            max-height: 400px;
+        }
+        .growth-positive {
+            color: #28a745;
+        }
+        .growth-negative {
+            color: #dc3545;
+        }
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .table-responsive {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        canvas {
+            max-height: 300px !important;
+        }
+        .row {
+            margin-right: 0;
+            margin-left: 0;
+        }
+        .col-md-3, .col-md-6 {
+            padding-right: 15px;
+            padding-left: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="main-content p-4">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-chart-line me-2"></i>Báo cáo thống kê</h2>
+                        <div class="d-flex gap-2">
+                            <a href="/admin/reports/revenue" class="btn btn-outline-primary">
+                                <i class="fas fa-dollar-sign me-2"></i>Báo cáo doanh thu
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Filter Section -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <form method="get" action="/admin/reports" class="row g-3">
+                                <div class="col-md-3">
+                                    <label for="month" class="form-label">Tháng</label>
+                                    <select name="month" id="month" class="form-select">
+                                        <option th:each="i : ${#numbers.sequence(1, 12)}"
+                                                th:value="${i}"
+                                                th:text="${i}"
+                                                th:selected="${i == selectedMonth}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="year" class="form-label">Năm</label>
+                                    <select name="year" id="year" class="form-select">
+                                        <option th:each="i : ${#numbers.sequence(2023, 2030)}"
+                                                th:value="${i}"
+                                                th:text="${i}"
+                                                th:selected="${i == selectedYear}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-filter me-2"></i>Lọc báo cáo
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Overview Stats -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="stat-card revenue">
+                                <div class="d-flex justify-content-between align-items-center w-100">
+                                    <div>
+                                        <h5>Tổng doanh thu</h5>
+                                        <h3 th:text="${#numbers.formatDecimal(overviewData.totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VNĐ</h3>
+                                        <small th:if="${overviewData.revenueGrowth != null}">
+                                            <i th:class="${overviewData.revenueGrowth >= 0 ? 'fas fa-arrow-up growth-positive' : 'fas fa-arrow-down growth-negative'}"></i>
+                                            <span th:class="${overviewData.revenueGrowth >= 0 ? 'growth-positive' : 'growth-negative'}"
+                                                  th:text="${#numbers.formatDecimal(overviewData.revenueGrowth, 1, 1)} + '%'">0%</span>
+                                            so với tháng trước
+                                        </small>
+                                    </div>
+                                    <i class="fas fa-dollar-sign fa-3x opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card appointments">
+                                <div class="d-flex justify-content-between align-items-center w-100">
+                                    <div>
+                                        <h5>Tổng lịch hẹn</h5>
+                                        <h3 th:text="${overviewData.totalAppointments}">0</h3>
+                                        <small th:if="${overviewData.appointmentGrowth != null}">
+                                            <i th:class="${overviewData.appointmentGrowth >= 0 ? 'fas fa-arrow-up growth-positive' : 'fas fa-arrow-down growth-negative'}"></i>
+                                            <span th:class="${overviewData.appointmentGrowth >= 0 ? 'growth-positive' : 'growth-negative'}"
+                                                  th:text="${#numbers.formatDecimal(overviewData.appointmentGrowth, 1, 1)} + '%'">0%</span>
+                                            so với tháng trước
+                                        </small>
+                                    </div>
+                                    <i class="fas fa-calendar-check fa-3x opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card customers">
+                                <div class="d-flex justify-content-between align-items-center w-100">
+                                    <div>
+                                        <h5>Khách hàng mới</h5>
+                                        <h3 th:text="${overviewData.newCustomers}">0</h3>
+                                        <small>Tỷ lệ hoàn thành: <span th:text="${#numbers.formatDecimal(overviewData.completionRate, 1, 1)} + '%'">0%</span></small>
+                                    </div>
+                                    <i class="fas fa-users fa-3x opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card technicians">
+                                <div class="d-flex justify-content-between align-items-center w-100">
+                                    <div>
+                                        <h5>Technician hoạt động</h5>
+                                        <h3 th:text="${overviewData.activeTechnicians}">0</h3>
+                                        <small>Đang làm việc</small>
+                                    </div>
+                                    <i class="fas fa-user-md fa-3x opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h5><i class="fas fa-chart-bar me-2"></i>Doanh thu theo ngày</h5>
+                                <canvas id="revenueChart" height="300"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h5><i class="fas fa-chart-pie me-2"></i>Lịch hẹn theo trạng thái</h5>
+                                <canvas id="appointmentStatusChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tables Row -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="table-container">
+                                <h5><i class="fas fa-star me-2"></i>Top dịch vụ được đặt nhiều nhất</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Dịch vụ</th>
+                                                <th>Số lượng</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="service, iterStat : ${serviceData.topServices}" th:if="${iterStat.index < 5}">
+                                                <td th:text="${iterStat.index + 1}">1</td>
+                                                <td th:text="${service.serviceName}">Dịch vụ</td>
+                                                <td>
+                                                    <span class="badge bg-primary" th:text="${service.appointmentCount}">0</span>
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${#lists.isEmpty(serviceData.topServices)}">
+                                                <td colspan="3" class="text-center">Không có dữ liệu</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="table-container">
+                                <h5><i class="fas fa-user-md me-2"></i>Top technician</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Technician</th>
+                                                <th>Số lịch hẹn</th>
+                                                <th>Đánh giá TB</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="tech, iterStat : ${technicianData.performance}" th:if="${iterStat.index < 5}">
+                                                <td th:text="${iterStat.index + 1}">1</td>
+                                                <td th:text="${tech.technicianName}">Technician</td>
+                                                <td>
+                                                    <span class="badge bg-success" th:text="${tech.appointmentCount}">0</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-warning" th:text="${#numbers.formatDecimal(tech.avgRating, 1, 1)}">0.0</span>
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${#lists.isEmpty(technicianData.performance)}">
+                                                <td colspan="4" class="text-center">Không có dữ liệu</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI Section -->
+                    <div class="row" th:if="${!#lists.isEmpty(technicianData.kpi)}">
+                        <div class="col-md-12">
+                            <div class="table-container">
+                                <h5><i class="fas fa-target me-2"></i>KPI Technician tháng <span th:text="${selectedMonth}"></span>/<span th:text="${selectedYear}"></span></h5>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Technician</th>
+                                                <th>Mục tiêu</th>
+                                                <th>Thực tế</th>
+                                                <th>Tỷ lệ hoàn thành</th>
+                                                <th>Trạng thái</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="kpi : ${technicianData.kpi}">
+                                                <td th:text="${kpi.technicianName}"></td>
+                                                <td>
+                                                    <span class="badge bg-info" th:text="${kpi.target}"></span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-secondary" th:text="${kpi.actual}"></span>
+                                                </td>
+                                                <td>
+                                                    <div class="progress" style="height: 20px;">
+                                                        <div class="progress-bar"
+                                                             th:classappend="${kpi.completionRate >= 100} ? 'bg-success' : 'bg-warning'"
+                                                             th:style="'width: ' + ${kpi.completionRate} + '%'"
+                                                             th:text="${#numbers.formatDecimal(kpi.completionRate, 1, 1)} + '%'">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span th:if="${kpi.status == 'active'}" class="badge bg-success">Hoạt động</span>
+                                                    <span th:if="${kpi.status != 'active'}" class="badge bg-secondary">Không hoạt động</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        // Dữ liệu từ server
+        const dailyRevenueData = /*[[${revenueData.dailyRevenue}]]*/ [];
+        const statusCountData = /*[[${appointmentData.statusCount}]]*/ {};
+
+        // Xử lý dữ liệu doanh thu theo ngày
+        const revenueDates = [];
+        const revenueAmounts = [];
+
+        if (dailyRevenueData && dailyRevenueData.length > 0) {
+            dailyRevenueData.forEach(item => {
+                revenueDates.push(item.date || item.day);
+                revenueAmounts.push(item.revenue || item.amount || 0);
+            });
+        }
+
+        // Xử lý dữ liệu appointment theo trạng thái
+        const appointmentLabels = [];
+        const appointmentCounts = [];
+        const appointmentColors = [
+            'rgba(75, 192, 192, 0.8)',
+            'rgba(255, 99, 132, 0.8)',
+            'rgba(255, 205, 86, 0.8)',
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(153, 102, 255, 0.8)'
+        ];
+
+        if (statusCountData) {
+            Object.keys(statusCountData).forEach((status, index) => {
+                appointmentLabels.push(status);
+                appointmentCounts.push(statusCountData[status]);
+            });
+        }
+
+        // Revenue Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: revenueDates.length > 0 ? revenueDates : ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Doanh thu (VNĐ)',
+                    data: revenueAmounts.length > 0 ? revenueAmounts : [0, 0, 0, 0, 0],
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return new Intl.NumberFormat('vi-VN').format(value) + ' VNĐ';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' VNĐ';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Appointment Status Chart
+        const appointmentCtx = document.getElementById('appointmentStatusChart').getContext('2d');
+        new Chart(appointmentCtx, {
+            type: 'pie',
+            data: {
+                labels: appointmentLabels.length > 0 ? appointmentLabels : ['Hoàn thành', 'Đã hủy', 'Đang chờ'],
+                datasets: [{
+                    data: appointmentCounts.length > 0 ? appointmentCounts : [0, 0, 0],
+                    backgroundColor: appointmentColors.slice(0, appointmentLabels.length > 0 ? appointmentLabels.length : 3)
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

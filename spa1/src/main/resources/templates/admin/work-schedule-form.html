@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${schedule != null ? 'Chỉnh sửa lịch làm việc' : 'Thêm lịch làm việc'} + ' - SpaZone'"></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .time-input {
+            width: 120px;
+        }
+        .recurring-options {
+            display: none;
+        }
+        .recurring-options.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid mt-4">
+        <div class="form-container">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-plus me-2"></i>
+                        <span th:text="${schedule != null ? 'Chỉnh sửa lịch làm việc' : 'Thêm lịch làm việc'}"></span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="scheduleForm" th:object="${schedule}" method="post" th:action="@{/api/work-schedules}">
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                        <input type="hidden" th:field="*{scheduleId}" th:if="${schedule != null}">
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="userId" class="form-label">Nhân viên <span class="text-danger">*</span></label>
+                                <select class="form-select" id="userId" name="userId" required>
+                                    <option value="">Chọn nhân viên</option>
+                                    <option th:each="user : ${users}"
+                                            th:value="${user.userId}"
+                                            th:text="${user.fullName} + ' (' + ${user.roles.iterator().next().roleName} + ')'"
+                                            th:selected="${schedule != null && schedule.userId == user.userId}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="branchId" class="form-label">Chi nhánh <span class="text-danger">*</span></label>
+                                <select class="form-select" id="branchId" name="branchId" required>
+                                    <option value="">Chọn chi nhánh</option>
+                                    <option th:each="branch : ${branches}"
+                                            th:value="${branch.branchId}"
+                                            th:text="${branch.name}"
+                                            th:selected="${schedule != null && schedule.branchId == branch.branchId}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="workDate" class="form-label">Ngày làm việc <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="workDate" name="workDate"
+                                       th:value="${schedule != null ? schedule.workDate : ''}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="shiftType" class="form-label">Ca làm việc <span class="text-danger">*</span></label>
+                                <select class="form-select" id="shiftType" name="shiftType" required>
+                                    <option value="">Chọn ca làm việc</option>
+                                    <option value="MORNING" th:selected="${schedule != null && schedule.shiftType == 'MORNING'}">Ca sáng</option>
+                                    <option value="AFTERNOON" th:selected="${schedule != null && schedule.shiftType == 'AFTERNOON'}">Ca chiều</option>
+                                    <option value="EVENING" th:selected="${schedule != null && schedule.shiftType == 'EVENING'}">Ca tối</option>
+                                    <option value="NIGHT" th:selected="${schedule != null && schedule.shiftType == 'NIGHT'}">Ca đêm</option>
+                                    <option value="FULL_DAY" th:selected="${schedule != null && schedule.shiftType == 'FULL_DAY'}">Cả ngày</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="startTime" class="form-label">Giờ bắt đầu <span class="text-danger">*</span></label>
+                                <input type="time" class="form-control time-input" id="startTime" name="startTime"
+                                       th:value="${schedule != null ? schedule.startTime : ''}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="endTime" class="form-label">Giờ kết thúc <span class="text-danger">*</span></label>
+                                <input type="time" class="form-control time-input" id="endTime" name="endTime"
+                                       th:value="${schedule != null ? schedule.endTime : ''}" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="breakStart" class="form-label">Giờ nghỉ bắt đầu</label>
+                                <input type="time" class="form-control time-input" id="breakStart" name="breakStart"
+                                       th:value="${schedule != null ? schedule.breakStart : ''}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="breakEnd" class="form-label">Giờ nghỉ kết thúc</label>
+                                <input type="time" class="form-control time-input" id="breakEnd" name="breakEnd"
+                                       th:value="${schedule != null ? schedule.breakEnd : ''}">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">Trạng thái</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="SCHEDULED" th:selected="${schedule == null || schedule.status == 'SCHEDULED'}">Đã lên lịch</option>
+                                    <option value="COMPLETED" th:selected="${schedule != null && schedule.status == 'COMPLETED'}">Hoàn thành</option>
+                                    <option value="CANCELLED" th:selected="${schedule != null && schedule.status == 'CANCELLED'}">Đã hủy</option>
+                                    <option value="RESCHEDULED" th:selected="${schedule != null && schedule.status == 'RESCHEDULED'}">Đã thay đổi lịch</option>
+                                    <option value="NO_SHOW" th:selected="${schedule != null && schedule.status == 'NO_SHOW'}">Không có mặt</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" id="isRecurring" name="isRecurring"
+                                           th:checked="${schedule != null && schedule.isRecurring}">
+                                    <label class="form-check-label" for="isRecurring">
+                                        Lặp lại theo chu kỳ
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recurring Options -->
+                        <div class="recurring-options" id="recurringOptions">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="recurringPattern" class="form-label">Chu kỳ lặp lại</label>
+                                    <select class="form-select" id="recurringPattern" name="recurringPattern">
+                                        <option value="DAILY" th:selected="${schedule != null && schedule.recurringPattern == 'DAILY'}">Hàng ngày</option>
+                                        <option value="WEEKLY" th:selected="${schedule != null && schedule.recurringPattern == 'WEEKLY'}">Hàng tuần</option>
+                                        <option value="MONTHLY" th:selected="${schedule != null && schedule.recurringPattern == 'MONTHLY'}">Hàng tháng</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="recurringEndDate" class="form-label">Ngày kết thúc chu kỳ</label>
+                                    <input type="date" class="form-control" id="recurringEndDate" name="recurringEndDate"
+                                           th:value="${schedule != null ? schedule.recurringEndDate : ''}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Ghi chú</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3"
+                                      th:text="${schedule != null ? schedule.notes : ''}"></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="/schedules/manage" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                <span th:text="${schedule != null ? 'Cập nhật' : 'Thêm mới'}"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const isRecurringCheckbox = document.getElementById('isRecurring');
+            const recurringOptions = document.getElementById('recurringOptions');
+            const shiftTypeSelect = document.getElementById('shiftType');
+            const startTimeInput = document.getElementById('startTime');
+            const endTimeInput = document.getElementById('endTime');
+
+            // Toggle recurring options
+            isRecurringCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    recurringOptions.classList.add('show');
+                } else {
+                    recurringOptions.classList.remove('show');
+                }
+            });
+
+            // Initialize recurring options visibility
+            if (isRecurringCheckbox.checked) {
+                recurringOptions.classList.add('show');
+            }
+
+            // Auto-fill time based on shift type
+            shiftTypeSelect.addEventListener('change', function() {
+                switch(this.value) {
+                    case 'MORNING':
+                        startTimeInput.value = '08:00';
+                        endTimeInput.value = '12:00';
+                        break;
+                    case 'AFTERNOON':
+                        startTimeInput.value = '13:00';
+                        endTimeInput.value = '17:00';
+                        break;
+                    case 'EVENING':
+                        startTimeInput.value = '18:00';
+                        endTimeInput.value = '22:00';
+                        break;
+                    case 'NIGHT':
+                        startTimeInput.value = '22:00';
+                        endTimeInput.value = '06:00';
+                        break;
+                    case 'FULL_DAY':
+                        startTimeInput.value = '08:00';
+                        endTimeInput.value = '17:00';
+                        break;
+                }
+            });
+
+            // Form submission
+            document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+
+                // Don't send the CSRF token in the body
+                delete data._csrf;
+
+                // Convert checkbox to boolean
+                data.isRecurring = document.getElementById('isRecurring').checked;
+
+                const url = data.scheduleId ? `/api/work-schedules/${data.scheduleId}` : '/api/work-schedules';
+                const method = data.scheduleId ? 'PUT' : 'POST';
+                const csrfToken = document.querySelector('input[name="_csrf"]').value;
+
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/schedules/manage';
+                    } else {
+                        return response.text().then(text => {
+                            throw new Error(text || 'Có lỗi xảy ra');
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra: ' + error.message);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
