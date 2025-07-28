@@ -1,0 +1,266 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/header :: head}" th:with="pageTitle='Treatment Report Export'">
+    <meta charset="UTF-8">
+    <title>Treatment Report Export</title>
+</head>
+
+<!-- Page-specific styles --><style>
+        body {
+            background: linear-gradient(120deg, #fff0f6 0%, #ffe4ec 60%, #fdfbfb 100%);
+            min-height: 100vh;
+            font-family: 'Poppins', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            animation: gradientShift 16s infinite alternate;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        .navbar {
+            background: rgba(255,255,255,0.85) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #ffb3c6;
+            box-shadow: 0 2px 8px rgba(255,182,193,0.08);
+        }
+        .navbar-brand {
+            color: #ff6b9d !important;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        h1, h2, h3 {
+            font-weight: bold;
+            color: #ff6b9d;
+            letter-spacing: 1px;
+        }
+        .glass-card, .card {
+            border-radius: 22px;
+            box-shadow: 0 16px 32px rgba(255, 107, 157, 0.13);
+            border: none;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card-header {
+            background: linear-gradient(90deg, #ffb6c1, #ffe4ec);
+            color: #ff6b9d;
+            border-radius: 22px 22px 0 0 !important;
+            border: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .btn-gradient, .btn-primary {
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+            color: #fff !important;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.2s;
+            padding: 0.5rem 1.3rem;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-gradient:hover, .btn-primary:hover {
+            box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+            transform: translateY(-2px) scale(1.03);
+            color: #fff;
+        }
+        .btn-outline-primary {
+            border-color: #ff8fab;
+            color: #ff6b9d;
+            border-radius: 14px;
+            font-weight: 600;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-outline-primary:hover {
+            background-color: #ff8fab;
+            color: white;
+        }
+        .export-form {
+            background: rgba(255,255,255,0.8);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #ffb6c1;
+        }
+        .form-control:focus {
+            border-color: #ff8fab;
+            box-shadow: 0 0 0 0.2rem rgba(255, 139, 171, 0.25);
+        }
+        footer {
+            margin-top: auto;
+            background-color: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            border-top: 1.5px solid rgba(255,182,193,0.18);
+            padding: 1.2rem 0;
+            text-align: center;
+        }
+        @media print {
+            body { background: white !important; }
+            .navbar, footer, .export-form { display: none !important; }
+            .card { box-shadow: none !important; border: 1px solid #ddd !important; }
+        }
+    </style>
+</head>
+<body>
+<!-- Floating Bubbles -->
+<div th:replace="~{fragments/header :: bubbles}"></div>
+
+<!-- Header Navigation -->
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/dashboard}">
+            <i class="fas fa-spa me-2"></i>SpaZone
+        </a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item me-2">
+                    <a th:href="@{/technician/treatments/history}" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to History
+                    </a>
+                </li>
+                <li class="nav-item me-2">
+                    <button onclick="window.print()" class="btn btn-gradient">
+                        <i class="fas fa-print me-2"></i>Print Report
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main content -->
+<div class="container py-5">
+    <!-- Export Options -->
+    <div class="export-form">
+        <h3 class="mb-3">
+            <i class="fas fa-download me-2"></i>Export Treatment Reports
+        </h3>
+        <form method="get" th:action="@{/technician/treatments/export}" class="row g-3">
+            <div class="col-md-3">
+                <label for="startDate" class="form-label">Start Date</label>
+                <input type="date" class="form-control" id="startDate" name="startDate" th:value="${startDate}">
+            </div>
+            <div class="col-md-3">
+                <label for="endDate" class="form-label">End Date</label>
+                <input type="date" class="form-control" id="endDate" name="endDate" th:value="${endDate}">
+            </div>
+            <div class="col-md-3">
+                <label for="format" class="form-label">Format</label>
+                <select class="form-select" id="format" name="format">
+                    <option value="pdf" th:selected="${format == 'pdf'}">PDF Report</option>
+                    <option value="excel" th:selected="${format == 'excel'}">Excel Spreadsheet</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-gradient w-100">
+                    <i class="bi bi-download me-2"></i>Generate Report
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Report Content -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">
+                <i class="fas fa-file-pdf me-2"></i>Treatment Report
+            </h4>
+            <p class="mb-0 small">
+                Technician: <span th:text="${technician.fullName}">Technician Name</span> | 
+                Period: <span th:text="${startDate ?: 'All time'}">Start</span> - <span th:text="${endDate ?: 'Present'}">End</span> |
+                Total Records: <span th:text="${treatments.size()}">0</span>
+            </p>
+        </div>
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(treatments)}" class="text-center py-4">
+                <i class="fas fa-notes-medical fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No treatment records found for the selected period.</p>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(treatments)}">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Pre-treatment Notes</th>
+                            <th>Post-treatment Notes</th>
+                            <th>Progress</th>
+                            <th>Feedback</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="treatment : ${treatments}">
+                            <td th:text="${#temporals.format(treatment.treatmentDate, 'dd/MM/yyyy')}">Date</td>
+                            <td th:text="${treatment.appointment.customer.fullName}">Customer</td>
+                            <td th:text="${#strings.abbreviate(treatment.preTreatmentNotes ?: 'N/A', 50)}">Pre-notes</td>
+                            <td th:text="${#strings.abbreviate(treatment.postTreatmentNotes ?: 'N/A', 50)}">Post-notes</td>
+                            <td th:text="${treatment.treatmentProgress != null ? treatment.treatmentProgress + '%' : 'N/A'}">Progress</td>
+                            <td th:text="${#strings.abbreviate(treatment.customerFeedback ?: 'N/A', 30)}">Feedback</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <!-- Summary Statistics -->
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 th:text="${treatments.size()}">0</h5>
+                                <p class="mb-0">Total Treatments</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 th:text="${treatments.stream().map(t -> t.appointment.customer).distinct().count()}">0</h5>
+                                <p class="mb-0">Unique Customers</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h5 th:text="${treatments.stream().filter(t -> t.treatmentProgress != null && t.treatmentProgress >= 80).count()}">0</h5>
+                                <p class="mb-0">High Progress (â‰¥80%)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center py-3">
+    <div class="container">
+        <span class="text-muted">Â© 2025 SpaZone. All rights reserved.</span>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">    </script>
+
+
+<!-- Footer -->
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<!-- Scripts -->
+<div th:replace="~{fragments/footer :: scripts}"></div>
+
+</body>
+</html>

@@ -1,0 +1,338 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/header :: head}" th:with="pageTitle='Treatment History'">
+    <meta charset="UTF-8">
+    <title>Treatment History</title>
+</head>
+
+<!-- Page-specific styles --><style>
+        body {
+            background: linear-gradient(120deg, #fff0f6 0%, #ffe4ec 60%, #fdfbfb 100%);
+            min-height: 100vh;
+            font-family: 'Poppins', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            animation: gradientShift 16s infinite alternate;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        .navbar {
+            background: rgba(255,255,255,0.85) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #ffb3c6;
+            box-shadow: 0 2px 8px rgba(255,182,193,0.08);
+        }
+        .navbar-brand {
+            color: #ff6b9d !important;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        h1, h2, h3 {
+            font-weight: bold;
+            color: #ff6b9d;
+            letter-spacing: 1px;
+        }
+        .glass-card, .card {
+            border-radius: 22px;
+            box-shadow: 0 16px 32px rgba(255, 107, 157, 0.13);
+            border: none;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: scale(1.025) translateY(-4px);
+            box-shadow: 0 20px 48px rgba(255,182,193,0.22);
+        }
+        .card-header {
+            background: linear-gradient(90deg, #ffb6c1, #ffe4ec);
+            color: #ff6b9d;
+            border-radius: 22px 22px 0 0 !important;
+            border: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .btn-gradient, .btn-primary {
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+            color: #fff !important;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.2s;
+            padding: 0.5rem 1.3rem;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-gradient:hover, .btn-primary:hover {
+            box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+            transform: translateY(-2px) scale(1.03);
+            color: #fff;
+        }
+        .btn-outline-primary {
+            border-color: #ff8fab;
+            color: #ff6b9d;
+            border-radius: 14px;
+            font-weight: 600;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-outline-primary:hover {
+            background-color: #ff8fab;
+            color: white;
+        }
+        .search-form {
+            background: rgba(255,255,255,0.8);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #ffb6c1;
+        }
+        .form-control:focus {
+            border-color: #ff8fab;
+            box-shadow: 0 0 0 0.2rem rgba(255, 139, 171, 0.25);
+        }
+        .treatment-card {
+            border-left: 4px solid #ff6b9d;
+            margin-bottom: 1rem;
+        }
+        .treatment-images {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .treatment-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #ffb6c1;
+        }
+        .progress-bar {
+            background-color: #ff6b9d;
+        }
+        .pagination .page-link {
+            color: #ff6b9d;
+            border-color: #ffb6c1;
+            border-radius: 10px;
+            margin: 0 2px;
+        }
+        .pagination .page-link:hover {
+            background-color: #ffe4ec;
+            border-color: #ff8fab;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #ff6b9d;
+            border-color: #ff6b9d;
+        }
+        footer {
+            margin-top: auto;
+            background-color: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            border-top: 1.5px solid rgba(255,182,193,0.18);
+            padding: 1.2rem 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<!-- Floating Bubbles -->
+<div th:replace="~{fragments/header :: bubbles}"></div>
+
+<!-- Header Navigation -->
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/dashboard}">
+            <i class="fas fa-spa me-2"></i>SpaZone
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarContent" aria-controls="navbarContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item me-2">
+                    <a th:href="@{/technician/dashboard}" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-box-arrow-right me-1"></i> ÄÄƒng xuáº¥t
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main content -->
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">
+                <i class="fas fa-notes-medical me-3"></i>Treatment History
+            </h1>
+            <p class="text-muted">Search and manage your treatment records</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a th:href="@{/technician/treatments/export}" class="btn btn-gradient">
+                <i class="fas fa-download me-2"></i>Export Reports
+            </a>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="search-form">
+        <form method="get" th:action="@{/technician/treatments/history}" class="row g-3">
+            <div class="col-md-3">
+                <label for="search" class="form-label">Search in Notes</label>
+                <input type="text" class="form-control" id="search" name="search" th:value="${search}" 
+                       placeholder="Search in treatment notes...">
+            </div>
+            <div class="col-md-3">
+                <label for="customerName" class="form-label">Customer Name</label>
+                <input type="text" class="form-control" id="customerName" name="customerName" th:value="${customerName}" 
+                       placeholder="Customer name...">
+            </div>
+            <div class="col-md-2">
+                <label for="startDate" class="form-label">Start Date</label>
+                <input type="date" class="form-control" id="startDate" name="startDate" th:value="${startDate}">
+            </div>
+            <div class="col-md-2">
+                <label for="endDate" class="form-label">End Date</label>
+                <input type="date" class="form-control" id="endDate" name="endDate" th:value="${endDate}">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-gradient w-100">
+                    <i class="bi bi-search me-2"></i>Search
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Treatment History Results -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-history me-2"></i>Treatment Records 
+                <span class="badge bg-secondary ms-2" th:text="${treatmentHistory.totalElements}">0</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(treatmentHistory.content)}" class="text-center py-4">
+                <i class="fas fa-notes-medical fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No treatment records found matching your search criteria.</p>
+            </div>
+            
+            <div th:each="treatment : ${treatmentHistory.content}" class="treatment-card card mb-3">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 class="card-title mb-2">
+                                <i class="fas fa-user me-2"></i>
+                                <span th:text="${treatment.appointment.customer.fullName}">Customer Name</span>
+                            </h6>
+                            <p class="mb-2">
+                                <i class="fas fa-calendar me-2"></i>
+                                <span th:text="${#temporals.format(treatment.treatmentDate, 'dd/MM/yyyy HH:mm')}">Treatment Date</span>
+                            </p>
+                            
+                            <div th:if="${treatment.preTreatmentNotes}" class="mb-2">
+                                <strong>Pre-treatment:</strong>
+                                <p class="text-muted small mb-1" th:text="${#strings.abbreviate(treatment.preTreatmentNotes, 100)}">Notes</p>
+                            </div>
+                            
+                            <div th:if="${treatment.postTreatmentNotes}" class="mb-2">
+                                <strong>Post-treatment:</strong>
+                                <p class="text-muted small mb-1" th:text="${#strings.abbreviate(treatment.postTreatmentNotes, 100)}">Notes</p>
+                            </div>
+                            
+                            <div th:if="${treatment.treatmentProgress != null}" class="mb-2">
+                                <strong>Progress:</strong>
+                                <div class="progress" style="height: 15px; width: 200px;">
+                                    <div class="progress-bar" role="progressbar" 
+                                         th:style="'width: ' + ${treatment.treatmentProgress} + '%'"
+                                         th:text="${treatment.treatmentProgress} + '%'">0%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="treatment-images mb-2" th:if="${(treatment.beforeImageUrl != null and !#strings.isEmpty(treatment.beforeImageUrl)) or (treatment.afterImageUrl != null and !#strings.isEmpty(treatment.afterImageUrl))}">
+                                <div th:if="${treatment.beforeImageUrl != null and !#strings.isEmpty(treatment.beforeImageUrl)}">
+                                    <p class="small mb-1">Before:</p>
+                                    <img th:src="${treatment.beforeImageUrl}" alt="Before" class="treatment-image">
+                                </div>
+                                <div th:if="${treatment.afterImageUrl != null and !#strings.isEmpty(treatment.afterImageUrl)}">
+                                    <p class="small mb-1">After:</p>
+                                    <img th:src="${treatment.afterImageUrl}" alt="After" class="treatment-image">
+                                </div>
+                            </div>
+                            
+                            <div class="text-end">
+                                <a th:href="@{/technician/treatments/view/{id}(id=${treatment.recordId})}" 
+                                   class="btn btn-sm btn-outline-primary me-2">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </a>
+                                <a th:href="@{/technician/treatments/edit/{id}(id=${treatment.recordId})}" 
+                                   class="btn btn-sm btn-gradient">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${treatmentHistory.totalPages > 1}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${treatmentHistory.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{/technician/treatments/history(page=${treatmentHistory.number - 1}, search=${search}, customerName=${customerName}, startDate=${startDate}, endDate=${endDate})}">Previous</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, treatmentHistory.totalPages - 1)}"
+                        th:classappend="${i == treatmentHistory.number} ? 'active'">
+                        <a class="page-link" th:href="@{/technician/treatments/history(page=${i}, search=${search}, customerName=${customerName}, startDate=${startDate}, endDate=${endDate})}" th:text="${i + 1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${treatmentHistory.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{/technician/treatments/history(page=${treatmentHistory.number + 1}, search=${search}, customerName=${customerName}, startDate=${startDate}, endDate=${endDate})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center py-3">
+    <div class="container">
+        <span class="text-muted">Â© 2025 SpaZone. All rights reserved.</span>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">    </script>
+
+
+<!-- Footer -->
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<!-- Scripts -->
+<div th:replace="~{fragments/footer :: scripts}"></div>
+
+</body>
+</html>

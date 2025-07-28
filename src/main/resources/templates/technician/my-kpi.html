@@ -1,0 +1,540 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/header :: head}" th:with="pageTitle='KPI cá»§a tÃ´i - SpaZone'">
+    <meta charset="UTF-8">
+    <title>KPI cá»§a tÃ´i - SpaZone</title>
+</head>
+
+<!-- Page-specific styles --><!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        html, body { height: 100%; }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(120deg, #fdfbfb 0%, #ffe4ec 40%, #fff0f6 100%);
+            background-size: 400% 400%;
+            animation: gradientMove 18s ease-in-out infinite;
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        @keyframes gradientMove {
+            0%,100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        /* Floating Bubbles */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 55%, rgba(255,182,193,0.25), rgba(255,182,193,0.08) 40%, rgba(255,105,180,0.13) 60%, rgba(255,20,147,0.07));
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0) scale(1); opacity: 0.7;}
+            50% { transform: translateY(-40px) scale(1.12); opacity: 0.9;}
+        }
+        /* Glassmorphism Navbar */
+        .navbar {
+            background: rgba(255,255,255,0.2) !important;
+            backdrop-filter: blur(18px);
+            border-bottom: 1.5px solid rgba(255,182,193,0.18);
+            box-shadow: 0 8px 32px rgba(255,105,180,0.08);
+            z-index: 1000;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: #ff69b4 !important;
+            text-shadow: 0 2px 4px rgba(255, 105, 180, 0.14);
+            letter-spacing: 1px;
+        }
+        /* Card Glassmorphism */
+        .card, .glass-card {
+            background: rgba(255,255,255,0.22);
+            backdrop-filter: blur(16px);
+            border-radius: 22px;
+            box-shadow: 0 18px 40px rgba(255, 105, 180, 0.13);
+            border: 1px solid rgba(255,255,255,0.21);
+            transition: all 0.3s cubic-bezier(.4,1.3,.5,1);
+            animation: gentle-float 4s ease-in-out infinite;
+            position: relative;
+            z-index: 10;
+        }
+        .card:hover, .glass-card:hover {
+            transform: translateY(-10px) scale(1.025);
+            box-shadow: 0 30px 60px rgba(255, 105, 180, 0.18);
+            background: rgba(255,255,255,0.33);
+        }
+        @keyframes gentle-float {
+            0%,100% { transform: translateY(0);}
+            50% { transform: translateY(-10px);}
+        }
+        /* Headings */
+        h1, h2, h3, h4, h5 {
+            font-weight: 700;
+            color: #ff6b9d;
+            text-shadow: 0 4px 8px rgba(255, 105, 180, 0.11);
+        }
+        /* Button Animations */
+        .btn-success, .btn-gradient, .btn-primary {
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+            color: #fff !important;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.2s;
+        }
+        .btn-success:hover, .btn-gradient:hover, .btn-primary:hover {
+            background: linear-gradient(90deg, #ffe4ec 0%, #ffb6c1 100%);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,182,193,0.3);
+            color: #ff6b9d;
+            border-radius: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,182,193,0.2);
+            border-color: #ff8fab;
+            color: #ff4080;
+            transform: translateY(-2px);
+        }
+        /* Form Controls */
+        .form-control, .form-select {
+            border-radius: 12px;
+            border: 1px solid rgba(255,182,193,0.3);
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            color: #444;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #ff8fab;
+            box-shadow: 0 0 0 0.25rem rgba(255, 182, 193, 0.25);
+            background: rgba(255,255,255,0.25);
+        }
+        /* Stats Card Styling */
+        .stats-card {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .stats-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            background: rgba(255,255,255,0.35);
+        }
+        .stats-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ff6b9d;
+            margin-bottom: 0.5rem;
+        }
+        .stats-label {
+            color: #888;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        /* Badge Styling */
+        .badge {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 0.5rem 0.75rem;
+        }
+        .badge.bg-success {
+            background: linear-gradient(90deg, #90EE90 0%, #98FB98 100%) !important;
+            color: #2d5a2d;
+        }
+        .badge.bg-warning {
+            background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%) !important;
+            color: #8B4513;
+        }
+        .badge.bg-danger {
+            background: linear-gradient(90deg, #FF6B6B 0%, #FF8E53 100%) !important;
+            color: #8B0000;
+        }
+        .badge.bg-info {
+            background: linear-gradient(90deg, #87CEEB 0%, #87CEFA 100%) !important;
+            color: #1e3a8a;
+        }
+        /* Chart Container */
+        .chart-container {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        /* Icon Animations */
+        .icon-bounce { animation: iconBounce 2s ease-in-out infinite;}
+        @keyframes iconBounce {
+            0%,20%,50%,80%,100% { transform: translateY(0);}
+            40% { transform: translateY(-10px);}
+            60% { transform: translateY(-5px);}
+        }
+        /* Animation Classes */
+        .slide-in-up { animation: slideInUp 0.8s cubic-bezier(.68,-0.55,.27,1.55);}
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(50px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        /* History Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .timeline:before {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #ff8fab 0%, #ffb6c1 100%);
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 1.5rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff6b9d;
+            border: 3px solid white;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .bubble { display: none; }
+            .card { margin: 1rem 0.5rem; }
+            .stats-number { font-size: 2rem; }
+            .stats-icon { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+<!-- Floating Bubbles -->
+<div th:replace="~{fragments/header :: bubbles}"></div>
+
+<!-- Header Navigation -->
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/dashboard}">
+            <i class="fas fa-spa me-2 icon-bounce"></i>SpaZone
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" th:href="@{/dashboard}">
+                <i class="fas fa-home me-1"></i>Dashboard
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4 slide-in-up">
+                <h2><i class="fas fa-chart-line me-2"></i>KPI cá»§a tÃ´i</h2>
+                <div class="text-muted">
+                    <i class="fas fa-user me-2"></i><span th:text="${currentTechnician.fullName}"></span>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="card mb-4 slide-in-up">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Xem theo thÃ¡ng</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="/technician/kpi" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="month" class="form-label">ThÃ¡ng</label>
+                            <select name="month" id="month" class="form-select">
+                                <option th:each="i : ${#numbers.sequence(1, 12)}"
+                                        th:value="${i}"
+                                        th:text="${i}"
+                                        th:selected="${i == selectedMonth}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="year" class="form-label">NÄƒm</label>
+                            <select name="year" id="year" class="form-select">
+                                <option th:each="i : ${#numbers.sequence(2023, 2030)}"
+                                        th:value="${i}"
+                                        th:text="${i}"
+                                        th:selected="${i == selectedYear}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Xem KPI
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Current KPI Overview -->
+            <div th:if="${currentKPI != null}" class="row mb-4">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="stats-card slide-in-up">
+                        <i class="fas fa-calendar-alt stats-icon text-info"></i>
+                        <div class="stats-label">Thá»i gian</div>
+                        <div class="stats-number" th:text="${currentKPI.month + '/' + currentKPI.year}"></div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="stats-card slide-in-up">
+                        <i class="fas fa-bullseye stats-icon text-warning"></i>
+                        <div class="stats-label">Má»¥c tiÃªu</div>
+                        <div class="stats-number" th:text="${currentKPI.targetAppointments}"></div>
+                        <small class="text-muted">lá»‹ch háº¹n</small>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="stats-card slide-in-up">
+                        <i class="fas fa-chart-bar stats-icon text-success"></i>
+                        <div class="stats-label">Thá»±c táº¿</div>
+                        <div class="stats-number" th:text="${currentKPI.actualAppointments}"></div>
+                        <small class="text-muted">lá»‹ch háº¹n</small>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="stats-card slide-in-up">
+                        <i class="fas fa-percentage stats-icon text-primary"></i>
+                        <div class="stats-label">Tá»· lá»‡ hoÃ n thÃ nh</div>
+                        <div class="stats-number" th:text="${#numbers.formatDecimal(currentKPI.completionPercentage, 1, 1)} + '%'"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No KPI Message -->
+            <div th:if="${currentKPI == null}" class="card slide-in-up mb-4">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">ChÆ°a cÃ³ KPI cho thÃ¡ng nÃ y</h4>
+                    <p class="text-muted">Báº¡n chÆ°a cÃ³ KPI Ä‘Æ°á»£c thiáº¿t láº­p cho thÃ¡ng <span th:text="${selectedMonth}"></span>/<span th:text="${selectedYear}"></span></p>
+                </div>
+            </div>
+
+            <!-- Current Performance Progress -->
+            <div th:if="${currentKPI != null}" class="row mb-4">
+                <div class="col-lg-8">
+                    <div class="card slide-in-up">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>Tiáº¿n Ä‘á»™ hoÃ n thÃ nh KPI
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="fw-bold">Tá»· lá»‡ hoÃ n thÃ nh</span>
+                                            <span class="fw-bold" th:text="${#numbers.formatDecimal(currentKPI.completionPercentage, 1, 1)} + '%'"></span>
+                                        </div>
+                                        <div class="progress" style="height: 30px;">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                                 th:classappend="${currentKPI.completionPercentage >= 100} ? 'bg-success' : (${currentKPI.completionPercentage >= 80} ? 'bg-warning' : 'bg-danger')"
+                                                 th:style="'width: ' + ${currentKPI.completionPercentage} + '%'"
+                                                 th:text="${#numbers.formatDecimal(currentKPI.completionPercentage, 1, 1)} + '%'">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row text-center">
+                                        <div class="col-4">
+                                            <div class="fw-bold text-primary" th:text="${currentKPI.actualAppointments}"></div>
+                                            <small class="text-muted">ÄÃ£ hoÃ n thÃ nh</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="fw-bold text-warning" th:text="${currentKPI.targetAppointments - currentKPI.actualAppointments}"></div>
+                                            <small class="text-muted">CÃ²n láº¡i</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="fw-bold text-success" th:text="${currentKPI.targetAppointments}"></div>
+                                            <small class="text-muted">Tá»•ng má»¥c tiÃªu</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="chart-container">
+                                        <canvas id="kpiChart" width="200" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card slide-in-up">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Tráº¡ng thÃ¡i
+                            </h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <span class="badge fs-6"
+                                      th:classappend="${currentKPI.completionPercentage >= 100} ? 'bg-success' : (${currentKPI.completionPercentage >= 80} ? 'bg-warning' : 'bg-danger')"
+                                      th:text="${currentKPI.completionPercentage >= 100} ? 'HoÃ n thÃ nh xuáº¥t sáº¯c' : (${currentKPI.completionPercentage >= 80} ? 'Äang tiáº¿n bá»™ tá»‘t' : 'Cáº§n cá»‘ gáº¯ng thÃªm')">
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Manager:</strong><br>
+                                <span th:text="${currentKPI.manager.fullName}"></span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>NgÃ y táº¡o:</strong><br>
+                                <span th:text="${#temporals.format(currentKPI.createdAt, 'dd/MM/yyyy')}"></span>
+                            </div>
+                            <div class="alert alert-info" th:if="${currentKPI.completionPercentage >= 100}">
+                                <i class="fas fa-trophy me-2"></i>
+                                <strong>ChÃºc má»«ng!</strong><br>
+                                Báº¡n Ä‘Ã£ hoÃ n thÃ nh xuáº¥t sáº¯c!
+                            </div>
+                            <div class="alert alert-warning" th:if="${currentKPI.completionPercentage < 50}">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Cáº§n cá»‘ gáº¯ng!</strong><br>
+                                HÃ£y ná»— lá»±c thÃªm Ä‘á»ƒ Ä‘áº¡t má»¥c tiÃªu.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI History -->
+            <div th:if="${!#lists.isEmpty(kpiHistory)}" class="card slide-in-up">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Lá»‹ch sá»­ KPI gáº§n Ä‘Ã¢y
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div th:each="kpi : ${kpiHistory}" class="timeline-item">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    <h6 class="mb-1" th:text="'ThÃ¡ng ' + ${kpi.month} + '/' + ${kpi.year}"></h6>
+                                    <small class="text-muted" th:text="${#temporals.format(kpi.createdAt, 'dd/MM/yyyy')}"></small>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="progress mb-1" style="height: 20px;">
+                                        <div class="progress-bar"
+                                             th:classappend="${kpi.completionPercentage >= 100} ? 'bg-success' : (${kpi.completionPercentage >= 80} ? 'bg-warning' : 'bg-danger')"
+                                             th:style="'width: ' + ${kpi.completionPercentage} + '%'"
+                                             th:text="${#numbers.formatDecimal(kpi.completionPercentage, 1, 1)} + '%'">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted" th:text="${kpi.actualAppointments} + '/' + ${kpi.targetAppointments} + ' lá»‹ch háº¹n'"></small>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <a th:href="@{/technician/kpi/detail/{id}(id=${kpi.kpiId})}" class="btn btn-secondary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>Chi tiáº¿t
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:if="${currentKPI != null}">
+    // KPI Doughnut Chart
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('kpiChart').getContext('2d');
+        const completionRate = [[${currentKPI.completionPercentage}]];
+        const remaining = Math.max(0, 100 - completionRate);
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['HoÃ n thÃ nh', 'CÃ²n láº¡i'],
+                datasets: [{
+                    data: [completionRate, remaining],
+                    backgroundColor: [
+                        completionRate >= 100 ? '#28a745' :
+                        completionRate >= 80 ? '#ffc107' : '#dc3545',
+                        'rgba(255, 255, 255, 0.3)'
+                    ],
+                    borderWidth: 0,
+                    cutout: '70%'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Add percentage text in center
+        const centerText = completionRate.toFixed(1) + '%';
+        const centerTextElement = document.createElement('div');
+        centerTextElement.style.position = 'absolute';
+        centerTextElement.style.top = '50%';
+        centerTextElement.style.left = '50%';
+        centerTextElement.style.transform = 'translate(-50%, -50%)';
+        centerTextElement.style.fontSize = '1.2rem';
+        centerTextElement.style.fontWeight = 'bold';
+        centerTextElement.style.color = '#ff6b9d';
+        centerTextElement.textContent = centerText;
+
+        ctx.canvas.parentElement.style.position = 'relative';
+        ctx.canvas.parentElement.appendChild(centerTextElement);
+    });
+</script>
+
+<!-- Footer -->
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<!-- Scripts -->
+<div th:replace="~{fragments/footer :: scripts}"></div>
+
+</body>
+</html>
+

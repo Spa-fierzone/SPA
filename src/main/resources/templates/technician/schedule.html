@@ -1,0 +1,401 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/header :: head}" th:with="pageTitle='Lá»‹ch trÃ¬nh dá»‹ch vá»¥'">
+    <meta charset="UTF-8">
+    <title>Lá»‹ch trÃ¬nh dá»‹ch vá»¥</title>
+</head>
+
+<!-- Page-specific styles --><style>
+        body {
+            background: linear-gradient(120deg, #fff0f6 0%, #ffe4ec 60%, #fdfbfb 100%);
+            min-height: 100vh;
+            font-family: 'Poppins', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            animation: gradientShift 16s infinite alternate;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        /* Floating Bubbles */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,182,193,0.13);
+            animation: float 8s infinite ease-in-out;
+            z-index: 0;
+        }
+        @keyframes float {
+            0%,100% { transform: translateY(0);}
+            50% { transform: translateY(-32px);}
+        }
+        .navbar {
+            background: rgba(255,255,255,0.85) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #ffb3c6;
+            box-shadow: 0 2px 8px rgba(255,182,193,0.08);
+        }
+        .navbar-brand {
+            color: #ff6b9d !important;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        h2 {
+            font-weight: bold;
+            color: #ff6b9d;
+            letter-spacing: 1px;
+            background: rgba(255,255,255,0.5);
+            padding: 0.6rem 1.5rem;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(255,182,193,0.12);
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+        .glass-card, .card {
+            border-radius: 22px;
+            box-shadow: 0 16px 32px rgba(255, 107, 157, 0.13);
+            border: none;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(10px);
+            animation: floatCard 4s infinite ease-in-out;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: scale(1.025) translateY(-4px);
+            box-shadow: 0 20px 48px rgba(255,182,193,0.22);
+        }
+        .card-header {
+            background: linear-gradient(90deg, #ffb6c1, #ffe4ec);
+            color: #ff6b9d;
+            border-radius: 22px 22px 0 0 !important;
+            border: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .card-title {
+            color: #ff6b9d;
+            font-weight: 700;
+            font-size: 1.18rem;
+        }
+        .btn-gradient, .btn-success {
+            background: linear-gradient(90deg, #ffb6c1 0%, #ffe4ec 100%);
+            color: #fff !important;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(255,182,193,0.12);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.2s;
+            padding: 0.5rem 1.3rem;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-gradient:before, .btn-success:before {
+            content: '';
+            position: absolute;
+            left: -60%;
+            top: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(120deg,rgba(255,255,255,0.3),rgba(255,255,255,0));
+            transform: skewX(-25deg);
+            transition: left 0.5s;
+        }
+        .btn-gradient:hover, .btn-success:hover {
+            box-shadow: 0 8px 24px rgba(255,182,193,0.20);
+            transform: translateY(-2px) scale(1.03);
+            color: #fff;
+        }
+        .btn-gradient:hover:before, .btn-success:hover:before {
+            left: 120%;
+        }
+        .btn-outline-primary {
+            border-color: #ff8fab;
+            color: #ff6b9d;
+            border-radius: 14px;
+            font-weight: 600;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-outline-primary:hover {
+            background-color: #ff8fab;
+            color: white;
+        }
+        .fw-bold { font-weight: 700 !important; }
+        .text-success.fw-bold { color: #28a745 !important; }
+        .text-secondary { color: #b48a9b !important; }
+        footer {
+            margin-top: auto;
+            background-color: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            border-top: 1.5px solid rgba(255,182,193,0.18);
+            padding: 1.2rem 0;
+            text-align: center;
+        }
+        /* Flash Message Styles */
+        .alert {
+            border-radius: 15px;
+            border: none;
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.5s ease-out;
+        }
+        .alert-success {
+            background: rgba(40, 167, 69, 0.15);
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.15);
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @media (max-width: 576px) {
+            .glass-card, .card { padding: 1.2rem 0.5rem 1.2rem 0.5rem;}
+            h2 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+<!-- Floating Bubbles -->
+<div th:replace="~{fragments/header :: bubbles}"></div>
+
+<!-- Header Navigation -->
+<nav th:replace="~{fragments/header :: navbar}"></nav>
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/dashboard}">
+            <i class="fas fa-spa me-2"></i>SpaZone
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarContent" aria-controls="navbarContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <!-- Náº¿u Ä‘Ã£ Ä‘Äƒng nháº­p -->
+                <li class="nav-item me-2" sec:authorize="isAuthenticated()">
+                    <a th:href="@{/profile}" class="btn btn-outline-primary">
+                        <i class="bi bi-person-circle me-1"></i> Há»“ sÆ¡
+                    </a>
+                </li>
+                <li class="nav-item dropdown me-2" sec:authorize="hasRole('ADMIN')">
+                    <a class="btn btn-outline-primary dropdown-toggle" href="#" id="adminMenu" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear-fill me-1"></i> Quáº£n lÃ½
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="adminMenu">
+                        <li><a class="dropdown-item" th:href="@{/admin/users}"><i class="bi bi-people me-2"></i>NgÆ°á»i dÃ¹ng</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/branches}"><i class="bi bi-building me-2"></i>Chi nhÃ¡nh</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/services}"><i class="bi bi-scissors me-2"></i>Dá»‹ch vá»¥</a></li>
+                        <li><a class="dropdown-item" th:href="@{/salary/calculate}"><i class="bi bi-cash me-2"></i>Quáº£n LÃ­ LÆ°Æ¡ng</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item me-2" sec:authorize="hasRole('CUSTOMER')">
+                    <a th:href="@{/appointments/my}" class="btn btn-outline-primary">
+                        <i class="bi bi-calendar-check me-1"></i> Lá»‹ch háº¹n cá»§a tÃ´i
+                    </a>
+                </li>
+                <li class="nav-item me-2" sec:authorize="hasRole('CUSTOMER')">
+                    <a th:href="@{/invoices/my}" class="btn btn-outline-primary">
+                        <i class="bi bi-receipt me-1"></i> HÃ³a Ä‘Æ¡n cá»§a tÃ´i
+                    </a>
+                </li>
+                <li class="nav-item me-2" sec:authorize="hasAnyRole('TECHNICIAN', 'MANAGER')">
+                    <a th:href="@{/attendance}" class="btn btn-outline-primary">
+                        <i class="bi bi-receipt me-1"></i> Cháº¥m cÃ´ng
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-box-arrow-right me-1"></i> ÄÄƒng xuáº¥t
+                        </button>
+                    </form>
+                </li>
+                <!-- Náº¿u chÆ°a Ä‘Äƒng nháº­p -->
+                <li class="nav-item me-2" sec:authorize="isAnonymous()">
+                    <a th:href="@{/auth/login}" class="btn btn-outline-primary">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> ÄÄƒng nháº­p
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAnonymous()">
+                    <a th:href="@{/auth/register}" class="btn btn-outline-success">
+                        <i class="bi bi-person-plus me-1"></i> ÄÄƒng kÃ½
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- Main content -->
+<div class="container py-5">
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mb-3">
+        <a href="/dashboard" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Quay láº¡i Dashboard
+        </a>
+    </div>
+
+    <!-- Search & Filter Form -->
+    <div class="container mt-4 mb-3">
+        <form class="row g-3 align-items-end" method="get" th:action="@{/technician/schedule}">
+            <div class="col-md-4">
+                <label for="serviceName" class="form-label">TÃªn dá»‹ch vá»¥</label>
+                <input type="text" class="form-control" id="serviceName" name="serviceName" th:value="${serviceName}">
+            </div>
+            <div class="col-md-3">
+                <label for="branchId" class="form-label">Chi nhÃ¡nh</label>
+                <select class="form-select" id="branchId" name="branchId">
+                    <option th:value="''" th:selected="${branchId == null}">Táº¥t cáº£</option>
+                    <option th:each="branch : ${branches}"
+                            th:value="${branch.branchId}"
+                            th:text="${branch.name}"
+                            th:selected="${branchId != null} ? (${branchId} == ${branch.branchId}) : false">
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="active" class="form-label">Tráº¡ng thÃ¡i</label>
+                <select class="form-select" id="active" name="active">
+                    <option th:value="''" th:selected="${active == null}">Táº¥t cáº£</option>
+                    <option th:value="true" th:selected="${active == true}">Äang hoáº¡t Ä‘á»™ng</option>
+                    <option th:value="false" th:selected="${active == false}">KhÃ´ng hoáº¡t Ä‘á»™ng</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-gradient w-100"><i class="bi bi-search"></i> TÃ¬m kiáº¿m</button>
+            </div>
+        </form>
+    </div>
+    <!-- Schedule List -->
+    <div class="container py-3">
+        <h2 class="text-center">Lá»‹ch trÃ¬nh dá»‹ch vá»¥ cá»§a báº¡n</h2>
+        <div class="row g-4">
+            <div class="col-md-4" th:each="dto : ${schedulesPage.content}">
+                <div class="glass-card h-100 d-flex flex-column">
+                    <div class="card-header">
+                        <i class="fa fa-spa me-1"></i>
+                        <span th:text="${dto.schedule.service.name}">Dá»‹ch vá»¥</span>
+                    </div>
+                    <div class="card-body">
+                        <p><i class="fa fa-building me-1"></i><strong>Chi nhÃ¡nh:</strong> <span th:text="${dto.schedule.branch.name}">Chi nhÃ¡nh</span></p>
+                        <p><i class="fa fa-clock me-1"></i><strong>Giá» báº¯t Ä‘áº§u:</strong> <span th:text="${#temporals.format(dto.schedule.startTime, 'HH:mm')}"></span></p>
+                        <p><i class="fa fa-clock me-1"></i><strong>Giá» káº¿t thÃºc:</strong> <span th:text="${#temporals.format(dto.schedule.endTime, 'HH:mm')}">Giá» káº¿t thÃºc</span></p>
+
+                        <!-- Appointment Details -->
+                        <div th:if="${dto.appointment != null}" class="border-top pt-2 mt-2">
+                            <h6 class="text-primary"><i class="fas fa-calendar-check me-1"></i>Chi tiáº¿t lá»‹ch háº¹n:</h6>
+                            <p class="mb-1"><i class="fas fa-user me-1"></i><strong>KhÃ¡ch hÃ ng:</strong> <span th:text="${dto.appointment.customer.fullName}"></span></p>
+                        </div>
+
+                        <!-- Treatment Details -->
+                        <div th:if="${dto.treatmentRecord != null}" class="border-top pt-2 mt-2">
+                            <h6 class="text-success"><i class="fas fa-notes-medical me-1"></i>Chi tiáº¿t Ä‘iá»u trá»‹:</h6>
+                            <p class="mb-1"><i class="fas fa-calendar me-1"></i><strong>NgÃ y Ä‘iá»u trá»‹:</strong> <span th:text="${#temporals.format(dto.treatmentRecord.treatmentDate, 'dd/MM/yyyy')}"></span></p>
+                        </div>
+
+                        <p class="mt-2">
+                            <i class="fa fa-info-circle me-1"></i>
+                            <strong>Tráº¡ng thÃ¡i:</strong>
+                            <span th:class="${dto.schedule.active ? 'text-success fw-bold' : 'text-secondary'}"
+                                  th:text="${dto.schedule.active ? 'Äang hoáº¡t Ä‘á»™ng' : 'KhÃ´ng hoáº¡t Ä‘á»™ng'}">Tráº¡ng thÃ¡i</span>
+                        </p>
+                        <a th:if="${dto.treatmentRecord != null}"
+                           th:href="@{/technician/treatments/view/{id}(id=${dto.treatmentRecord.recordId})}"
+                           class="btn btn-outline-primary w-100 mb-2">
+                            <i class="bi bi-eye me-1"></i> Xem Ä‘iá»u trá»‹
+                        </a>
+                        <a th:if="${dto.treatmentRecord == null and dto.appointment != null}"
+                           th:href="@{/technician/treatments/new/{id}(id=${dto.appointment.appointmentId})}"
+                           class="btn btn-gradient w-100">
+                            <i class="bi bi-journal-plus me-1"></i> Ghi nháº­n Ä‘iá»u trá»‹
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Pagination Controls -->
+        <nav th:if="${schedulesPage.totalPages > 1}" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${schedulesPage.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/technician/schedule(page=${schedulesPage.number - 1}, serviceName=${serviceName}, branchId=${branchId}, active=${active})}">TrÆ°á»›c</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, schedulesPage.totalPages - 1)}"
+                    th:classappend="${i == schedulesPage.number} ? 'active'">
+                    <a class="page-link" th:href="@{/technician/schedule(page=${i}, serviceName=${serviceName}, branchId=${branchId}, active=${active})}" th:text="${i + 1}"></a>
+                </li>
+                <li class="page-item" th:classappend="${schedulesPage.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/technician/schedule(page=${schedulesPage.number + 1}, serviceName=${serviceName}, branchId=${branchId}, active=${active})}">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+<!-- Footer -->
+<footer class="text-center py-3">
+    <div class="container">
+        <span class="text-muted">Â© 2025 SpaZone. All rights reserved.</span>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Floating Bubbles
+    function createBubbles() {
+        const container = document.createElement('div');
+        container.id = 'bubbles';
+        document.body.appendChild(container);
+        for (let i = 0; i < 10; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 35 + 20;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.top = `${Math.random() * 100}%`;
+            bubble.style.animationDelay = `${Math.random() * 8}s`;
+            container.appendChild(bubble);
+        }
+    }
+    createBubbles();
+</script>
+
+<!-- Footer -->
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<!-- Scripts -->
+<div th:replace="~{fragments/footer :: scripts}"></div>
+
+</body>
+</html>
+
